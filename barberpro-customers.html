@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Müşteri Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<style>
+/* ── Purple Theme Overrides ── */
+:root, [data-theme="dark"] {
+  --teal-50: #f5f3ff;
+  --teal-100: #ede9fe;
+  --teal-200: #ddd6fe;
+  --teal-300: #c4b5fd;
+  --teal-400: #a78bfa;
+  --teal-500: #8b5cf6;
+  --teal-600: #7c3aed;
+  --teal-700: #6d28d9;
+  --teal-800: #5b21b6;
+  --teal-900: #4c1d95;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --shadow-glow: rgba(139,92,246,0.25);
+}
+[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+
+/* ── Layout ── */
+.dashboard { display:flex; min-height:100vh; }
+.sidebar {
+  width:260px; background:var(--bg-card); border-right:1px solid var(--border-color);
+  display:flex; flex-direction:column; position:fixed; inset:0 auto 0 0; z-index:100;
+  transition:transform var(--duration-slow) var(--ease-out);
+}
+.sidebar.collapsed { transform:translateX(-100%); }
+.sidebar-header { padding:var(--space-5); border-bottom:1px solid var(--border-color); }
+.sidebar-logo { display:flex; align-items:center; gap:var(--space-3); }
+.sidebar-logo .logo-icon {
+  width:40px; height:40px; background:linear-gradient(135deg,var(--teal-500),var(--teal-700));
+  border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700; color:white;
+}
+.sidebar-logo h2 { font-size:var(--text-base); font-weight:700; letter-spacing:-0.02em; }
+.sidebar-logo p { font-size:var(--text-xs); color:var(--text-muted); }
+.sidebar-nav { flex:1; overflow-y:auto; padding:var(--space-3); }
+.nav-group { margin-bottom:var(--space-4); }
+.nav-label {
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;
+  color:var(--text-muted); padding:0 var(--space-3) var(--space-2);
+}
+.nav-item {
+  display:flex; align-items:center; gap:var(--space-3); padding:10px var(--space-3);
+  border-radius:var(--radius-md); cursor:pointer; transition:all var(--duration-fast);
+  color:var(--text-secondary); font-size:var(--text-sm); font-weight:500; margin-bottom:2px;
+}
+.nav-item:hover { background:var(--bg-secondary); color:var(--text-primary); }
+.nav-item.active {
+  background:rgba(139,92,246,0.12); color:var(--teal-400);
+  box-shadow: inset 0 0 0 1px rgba(139,92,246,0.2);
+}
+.nav-item svg { flex-shrink:0; }
+.nav-badge {
+  margin-left:auto; background:var(--bg-tertiary); color:var(--text-secondary);
+  font-size:var(--text-xs); font-weight:600; padding:2px 8px; border-radius:9999px;
+}
+.nav-item.active .nav-badge { background:var(--teal-500); color:white; }
+.sidebar-footer { padding:var(--space-4); border-top:1px solid var(--border-color); }
+.sidebar-user { display:flex; align-items:center; gap:var(--space-3); }
+.sidebar-user-info { flex:1; }
+.sidebar-user-info p { font-size:var(--text-sm); font-weight:600; }
+.sidebar-user-info span { font-size:var(--text-xs); color:var(--text-muted); }
+
+.main { flex:1; margin-left:260px; display:flex; flex-direction:column; min-height:100vh; transition:margin-left var(--duration-slow); }
+.sidebar.collapsed ~ .main { margin-left:0; }
+
+.header {
+  height:64px; background:var(--bg-card); border-bottom:1px solid var(--border-color);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 var(--space-6); position:sticky; top:0; z-index:50;
+  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.85);
+}
+.header-left { display:flex; align-items:center; gap:var(--space-4); }
+.menu-btn {
+  width:36px; height:36px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;
+  background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-secondary);
+  cursor:pointer; transition:all var(--duration-fast);
+}
+.menu-btn:hover { color:var(--teal-500); border-color:var(--teal-500); }
+.page-title { font-size:20px; font-weight:800; letter-spacing:-0.03em; }
+.header-right { display:flex; align-items:center; gap:var(--space-3); }
+.header-btn {
+  width:38px; height:38px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center;
+  background:var(--bg-secondary); border:1px solid var(--border-color); color:var(--text-secondary);
+  cursor:pointer; transition:all var(--duration-fast); position:relative;
+}
+.header-btn:hover { color:var(--teal-500); border-color:var(--teal-500); }
+.badge-count {
+  position:absolute; top:6px; right:6px;
+  width:16px; height:16px; border-radius:50%; background:var(--error-500);
+  color:white; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 2px var(--bg-card);
+}
+.content { padding:var(--space-6); flex:1; }
+
+/* ── KPI Cards ── */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-5); margin-bottom:var(--space-6); }
+.kpi-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:var(--space-5); transition:all var(--duration-normal);
+}
+.kpi-card:hover { border-color:rgba(139,92,246,0.3); }
+.kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:var(--space-3); }
+.kpi-icon {
+  width:40px; height:40px; border-radius:var(--radius-md);
+  display:flex; align-items:center; justify-content:center; font-size:var(--text-lg);
+}
+.kpi-trend {
+  display:inline-flex; align-items:center; gap:4px; font-size:var(--text-xs); font-weight:600;
+  padding:2px 8px; border-radius:9999px;
+}
+.kpi-trend.up { background:rgba(16,185,129,0.12); color:var(--success-500); }
+.kpi-trend.down { background:rgba(244,63,94,0.12); color:var(--error-500); }
+.kpi-value { font-size:var(--text-3xl); font-weight:700; letter-spacing:-0.02em; }
+.kpi-label { font-size:var(--text-sm); color:var(--text-muted); margin-top:2px; }
+
+/* ── Filters ── */
+.filter-bar {
+  display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; margin-bottom:var(--space-6);
+}
+.filter-bar .search-input { max-width:280px; flex:1; }
+.filter-group { display:flex; gap:var(--space-2); align-items:center; }
+
+/* ── Table ── */
+.table-wrap { overflow-x:auto; border-radius:var(--radius-lg); border:1px solid var(--border-color); }
+.table { width:100%; border-collapse:collapse; font-size:var(--text-sm); }
+.table thead th {
+  background:var(--bg-secondary);
+  padding:var(--space-3) var(--space-4);
+  text-align:left; font-weight:600; font-size:var(--text-xs);
+  text-transform:uppercase; letter-spacing:0.05em;
+  color:var(--text-muted); white-space:nowrap; position:sticky; top:0; z-index:5;
+}
+.table tbody tr { border-bottom:1px solid var(--border-color); transition:background var(--duration-fast); }
+.table tbody tr:last-child { border-bottom:none; }
+.table tbody tr:hover { background:var(--bg-secondary); }
+.table tbody td { padding:var(--space-3) var(--space-4); color:var(--text-primary); vertical-align:middle; }
+
+/* ── Membership Badges ── */
+.badge-bronze { background:linear-gradient(135deg,#cd7f32,#b87333); color:white; }
+.badge-silver { background:linear-gradient(135deg,#c0c0c0,#a0a0a0); color:white; }
+.badge-gold { background:linear-gradient(135deg,#ffd700,#daa520); color:#1a1a1a; }
+.badge-platinum { background:linear-gradient(135deg,#e5e4e2,#b0b0b0); color:#1a1a1a; }
+
+/* ── Birthday Badge ── */
+.bday-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:2px 8px; border-radius:9999px; font-size:var(--text-xs); font-weight:600;
+  background:rgba(245,158,11,0.15); color:var(--amber-500);
+}
+
+/* ── Action Buttons ── */
+.action-btns { display:flex; gap:var(--space-1); }
+.action-btn {
+  width:28px; height:28px; border-radius:var(--radius-sm);
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg-tertiary); color:var(--text-secondary);
+  border:none; cursor:pointer; transition:all var(--duration-fast); font-size:var(--text-xs);
+}
+.action-btn:hover { background:var(--teal-500); color:white; }
+.action-btn.danger:hover { background:var(--error-500); color:white; }
+
+/* ── Modals ── */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+  display:flex; align-items:center; justify-content:center;
+  padding:var(--space-4); opacity:0; visibility:hidden;
+  transition:opacity var(--duration-normal), visibility var(--duration-normal);
+}
+.modal-overlay.active { opacity:1; visibility:visible; }
+.modal {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:var(--radius-xl); width:100%; max-width:560px;
+  max-height:90vh; overflow:auto;
+  transform:scale(0.95) translateY(20px); opacity:0;
+  transition:transform var(--duration-slow) var(--ease-spring), opacity var(--duration-slow);
+  box-shadow:var(--shadow-xl);
+}
+.modal-overlay.active .modal { transform:scale(1) translateY(0); opacity:1; }
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:var(--space-5) var(--space-6); border-bottom:1px solid var(--border-color);
+  position:sticky; top:0; background:var(--bg-card); z-index:5;
+}
+.modal-title { font-size:var(--text-lg); font-weight:700; }
+.modal-close {
+  width:32px; height:32px; border-radius:var(--radius-md);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-muted); transition:all var(--duration-fast);
+  background:var(--bg-secondary); border:none; cursor:pointer;
+}
+.modal-close:hover { background:var(--error-100); color:var(--error-500); }
+.modal-body { padding:var(--space-6); }
+.modal-footer {
+  display:flex; align-items:center; justify-content:flex-end; gap:var(--space-3);
+  padding:var(--space-4) var(--space-6); border-top:1px solid var(--border-color);
+  background:var(--bg-secondary); border-radius:0 0 var(--radius-xl) var(--radius-xl);
+}
+.modal-lg { max-width:720px; }
+
+/* ── Detail Modal ── */
+.detail-section { margin-bottom:var(--space-5); }
+.detail-section-title {
+  font-size:var(--text-sm); font-weight:700; color:var(--text-primary);
+  text-transform:uppercase; letter-spacing:0.05em; margin-bottom:var(--space-3);
+  display:flex; align-items:center; gap:var(--space-2);
+}
+.detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border-color); font-size:var(--text-sm); }
+.detail-row:last-child { border-bottom:none; }
+.detail-row .label { color:var(--text-muted); }
+.detail-row .value { font-weight:600; }
+.visit-list { display:flex; flex-direction:column; gap:var(--space-2); }
+.visit-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:var(--space-3); background:var(--bg-secondary); border-radius:var(--radius-md);
+  font-size:var(--text-sm);
+}
+
+/* ── Toast ── */
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1);}to{opacity:0;transform:translateY(-20px) scale(0.95);}}
+@keyframes progressBar{from{width:100%;}to{width:0;}}
+
+/* ── Footer ── */
+.page-footer {
+  border-top:1px solid var(--border-color); padding:var(--space-6);
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:var(--space-4);
+}
+.footer-links { display:flex; gap:var(--space-4); }
+.footer-links a { font-size:var(--text-sm); color:var(--text-muted); transition:color var(--duration-fast); }
+.footer-links a:hover { color:var(--teal-400); }
+
+/* ── Responsive ── */
+@media (max-width:1024px) {
+  .sidebar { transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .kpi-row { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:768px) {
+  .kpi-row { grid-template-columns:1fr; }
+  .content { padding:var(--space-4); }
+  .filter-bar { flex-direction:column; align-items:stretch; }
+  .filter-bar .search-input { max-width:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar Overlay -->
+<div class="modal-overlay" id="sidebarOverlay" style="z-index:99;" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">B</div>
+      <div>
+        <h2>BarberPro</h2>
+        <p>Salon Yönetimi</p>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-label">Ana Menü</div>
+      <a class="nav-item" href="dashboard.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="barberpro-bookings.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Randevular
+        <span class="nav-badge">38</span>
+      </a>
+      <a class="nav-item active" href="barberpro-customers.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Müşteriler
+        <span class="nav-badge">32</span>
+      </a>
+      <a class="nav-item" href="barberpro-services.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Hizmetler
+      </a>
+      <a class="nav-item" href="barberpro-inventory.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Stok
+      </a>
+      <a class="nav-item" href="barberpro-loyalty.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Sadakat
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Yönetim</div>
+      <a class="nav-item" href="barberpro-reports.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+        Raporlar
+      </a>
+      <a class="nav-item" href="barberpro-staff.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Personel
+      </a>
+      <a class="nav-item" href="barberpro-settings.html">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Ayarlar
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar avatar-sm">MK</div>
+      <div class="sidebar-user-info">
+        <p>Mehmet Kaya</p>
+        <span>Salon Sahibi</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="menu-btn" id="menuBtn" title="Menü" onclick="toggleSidebar()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <h1 class="page-title">Müşteri Yönetimi</h1>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="showToast('Bildirimler yükleniyor...','info')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="badge-count">5</span>
+      </button>
+      <button class="header-btn" onclick="showToast('Profil menüsü','info')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      </button>
+      <div class="avatar avatar-sm" style="cursor:pointer;">MK</div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content">
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(139,92,246,0.12);color:var(--teal-500);">👥</div>
+          <div class="kpi-trend up">+4 bu ay</div>
+        </div>
+        <div class="kpi-value">32</div>
+        <div class="kpi-label">Toplam Müşteri</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(16,185,129,0.12);color:var(--success-500);">⭐</div>
+          <div class="kpi-trend up">+2</div>
+        </div>
+        <div class="kpi-value">8</div>
+        <div class="kpi-label">Gold Üye</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(245,158,11,0.12);color:var(--amber-500);">🎂</div>
+          <div class="kpi-trend up">Bugün</div>
+        </div>
+        <div class="kpi-value">3</div>
+        <div class="kpi-label">Doğum Günü</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:rgba(244,63,94,0.12);color:var(--error-500);">↩</div>
+          <div class="kpi-trend down">-3%</div>
+        </div>
+        <div class="kpi-value">12%</div>
+        <div class="kpi-label">Ayrılma Oranı</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-bar">
+      <div class="search-input" style="max-width:300px;">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="form-input" id="customerSearch" placeholder="Müşteri ara..." style="padding-left:36px;" onkeyup="filterCustomers()">
+      </div>
+      <div class="filter-group">
+        <select class="form-select" id="tierFilter" onchange="filterCustomers()" style="width:150px;">
+          <option value="">Tüm Üyelikler</option>
+          <option value="Bronze">Bronze</option>
+          <option value="Silver">Silver</option>
+          <option value="Gold">Gold</option>
+          <option value="Platinum">Platinum</option>
+        </select>
+        <select class="form-select" id="visitFilter" onchange="filterCustomers()" style="width:150px;">
+          <option value="">Tüm Ziyaretler</option>
+          <option value="1-5">1-5 ziyaret</option>
+          <option value="6-15">6-15 ziyaret</option>
+          <option value="16+">16+ ziyaret</option>
+        </select>
+        <button class="btn btn-primary" onclick="openModal('addModal')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Yeni Müşteri
+        </button>
+        <button class="btn btn-secondary" onclick="showToast('Müşteri listesi dışa aktarıldı','success')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Dışa Aktar
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table class="table" id="customerTable">
+        <thead>
+          <tr>
+            <th>Ad Soyad</th>
+            <th>Telefon</th>
+            <th>Son Ziyaret</th>
+            <th>Toplam Ziyaret</th>
+            <th>Sadakat Puanı</th>
+            <th>Üyelik</th>
+            <th>Notlar</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="customerTableBody">
+          <tr data-tier="Platinum" data-visits="28">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm">JD</div><div><div style="font-weight:600;">Jean Dupont</div><div style="font-size:var(--text-xs);color:var(--text-muted);">jean.dupont@email.be</div></div></div></td>
+            <td>+32 470 12 34 56</td>
+            <td>14 May 2026</td>
+            <td>28</td>
+            <td><strong>3,420</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td><span class="bday-badge">🎂 22 May</span> Hassas saçlı, organik ürün tercih</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(0)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(0)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(0)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="18">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);">MD</div><div><div style="font-weight:600;">Marie Dubois</div><div style="font-size:var(--text-xs);color:var(--text-muted);">marie.dubois@hotmail.be</div></div></div></td>
+            <td>+32 479 87 65 43</td>
+            <td>13 May 2026</td>
+            <td>18</td>
+            <td><strong>2,150</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Keratin bakımı her 6 hafta, boya alerjisi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(1)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(1)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(1)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Platinum" data-visits="35">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">PV</div><div><div style="font-weight:600;">Pierre Van den Berghe</div><div style="font-size:var(--text-xs);color:var(--text-muted);">pierre.vdb@telenet.be</div></div></div></td>
+            <td>+32 486 23 45 67</td>
+            <td>12 May 2026</td>
+            <td>35</td>
+            <td><strong>4,680</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td><span class="bday-badge">🎂 Bugün!</span> Her hafta cuma gelir, klasik traş</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(2)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(2)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(2)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="22">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#10b981,#059669);">SL</div><div><div style="font-weight:600;">Sophie Laurent</div><div style="font-size:var(--text-xs);color:var(--text-muted);">sophie.l@proximus.be</div></div></div></td>
+            <td>+32 495 11 22 33</td>
+            <td>10 May 2026</td>
+            <td>22</td>
+            <td><strong>2,890</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Ombre uzmanı tercih, doku uygulaması</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(3)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(3)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(3)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="12">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);">TJ</div><div><div style="font-weight:600;">Thomas Janssens</div><div style="font-size:var(--text-xs);color:var(--text-muted);">thomas.j@skynet.be</div></div></div></td>
+            <td>+32 471 44 55 66</td>
+            <td>9 May 2026</td>
+            <td>12</td>
+            <td><strong>980</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Sakal şekillendirme, yeni müşteri</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(4)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(4)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(4)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="9">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">LV</div><div><div style="font-weight:600;">Luc Vermeulen</div><div style="font-size:var(--text-xs);color:var(--text-muted);">luc.vermeulen@gmail.com</div></div></div></td>
+            <td>+32 472 77 88 99</td>
+            <td>8 May 2026</td>
+            <td>9</td>
+            <td><strong>720</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Sadece Salı-Çarşamba gelir</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(5)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(5)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(5)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="3">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f97316,#ea580c);">EL</div><div><div style="font-weight:600;">Emma Leclercq</div><div style="font-size:var(--text-xs);color:var(--text-muted);">emma.leclercq@outlook.be</div></div></div></td>
+            <td>+32 473 00 11 22</td>
+            <td>5 May 2026</td>
+            <td>3</td>
+            <td><strong>180</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td><span class="bday-badge">🎂 18 May</span> İlk ziyaretinde balaydı, keten tozu alerjisi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(6)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(6)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(6)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="19">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">WM</div><div><div style="font-weight:600;">Willem Maes</div><div style="font-size:var(--text-xs);color:var(--text-muted);">willem.maes@telenet.be</div></div></div></td>
+            <td>+32 474 33 44 55</td>
+            <td>7 May 2026</td>
+            <td>19</td>
+            <td><strong>2,340</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Gri kapatma, ayda 2 kez düzenli</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(7)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(7)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(7)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Platinum" data-visits="31">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ec4899,#db2777);">CM</div><div><div style="font-weight:600;">Charlotte Martens</div><div style="font-size:var(--text-xs);color:var(--text-muted);">charlotte.m@proximus.be</div></div></div></td>
+            <td>+32 475 66 77 88</td>
+            <td>11 May 2026</td>
+            <td>31</td>
+            <td><strong>3,980</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td>VIP paket, evde bakım ürünleri alır</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(8)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(8)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(8)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="11">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#84cc16,#65a30d);">NP</div><div><div style="font-weight:600;">Nicolas Peeters</div><div style="font-size:var(--text-xs);color:var(--text-muted);">nicolas.peeters@skynet.be</div></div></div></td>
+            <td>+32 476 99 00 11</td>
+            <td>6 May 2026</td>
+            <td>11</td>
+            <td><strong>850</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Saç dökülmesi problemi, PRP önerildi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(9)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(9)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(9)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="2">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#a855f7,#9333ea);">LD</div><div><div style="font-weight:600;">Lena De Smet</div><div style="font-size:var(--text-xs);color:var(--text-muted);">lena.desmet@gmail.com</div></div></div></td>
+            <td>+32 477 22 33 44</td>
+            <td>1 May 2026</td>
+            <td>2</td>
+            <td><strong>120</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>Yeni müşteri, arkadaş tavsiyesi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(10)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(10)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(10)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="20">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">JM</div><div><div style="font-weight:600;">Jan Martens</div><div style="font-size:var(--text-xs);color:var(--text-muted);">jan.martens@telenet.be</div></div></div></td>
+            <td>+32 478 55 66 77</td>
+            <td>4 May 2026</td>
+            <td>20</td>
+            <td><strong>2,560</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>2 şube kullanıcısı, Antwerp & Brüksel</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(11)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(11)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(11)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="14">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);">FB</div><div><div style="font-weight:600;">Françoise比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">francoise.b@proximus.be</div></div></div></td>
+            <td>+32 479 88 99 00</td>
+            <td>3 May 2026</td>
+            <td>14</td>
+            <td><strong>1,120</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td><span class="bday-badge">🎂 25 May</span> Manikür + pedikür paketi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(12)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(12)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(12)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="4">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">HB</div><div><div style="font-weight:600;">Hugo比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">hugo.b@skynet.be</div></div></div></td>
+            <td>+32 480 11 22 33</td>
+            <td>2 May 2026</td>
+            <td>4</td>
+            <td><strong>240</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>Öğrenci indirimi, Gent Üniversitesi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(13)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(13)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(13)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Platinum" data-visits="40">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);">AP</div><div><div style="font-weight:600;">Anna Peeters</div><div style="font-size:var(--text-xs);color:var(--text-muted);">anna.peeters@gmail.com</div></div></div></td>
+            <td>+32 481 44 55 66</td>
+            <td>15 May 2026</td>
+            <td>40</td>
+            <td><strong>5,200</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td>Salonun en eski müşterisi, 2019'dan beri</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(14)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(14)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(14)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="10">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#10b981,#059669);">DV</div><div><div style="font-weight:600;">David比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">david.v@telenet.be</div></div></div></td>
+            <td>+32 482 77 88 99</td>
+            <td>30 Nis 2026</td>
+            <td>10</td>
+            <td><strong>760</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Sporcu saç modeli, fade tercihi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(15)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(15)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(15)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="17">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">CL</div><div><div style="font-weight:600;">Claire比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">claire.l@proximus.be</div></div></div></td>
+            <td>+32 483 00 11 22</td>
+            <td>29 Nis 2026</td>
+            <td>17</td>
+            <td><strong>1,980</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Düğün hazırlığı, saç uzatma programı</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(16)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(16)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(16)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="1">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f97316,#ea580c);">MK</div><div><div style="font-weight:600;">Mathieu比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">mathieu.k@skynet.be</div></div></div></td>
+            <td>+32 484 33 44 55</td>
+            <td>28 Nis 2026</td>
+            <td>1</td>
+            <td><strong>60</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>İlk ziyaret, randevu internetten alındı</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(17)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(17)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(17)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="13">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">SW</div><div><div style="font-weight:600;">Sara Wouters</div><div style="font-size:var(--text-xs);color:var(--text-muted);">sara.w@telenet.be</div></div></div></td>
+            <td>+32 485 66 77 88</td>
+            <td>27 Nis 2026</td>
+            <td>13</td>
+            <td><strong>1,040</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Hamile bakım paketi, masaj tercihi</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(18)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(18)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(18)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="21">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ec4899,#db2777);">GD</div><div><div style="font-weight:600;">Gilles比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">gilles.d@proximus.be</div></div></div></td>
+            <td>+32 486 99 00 11</td>
+            <td>26 Nis 2026</td>
+            <td>21</td>
+            <td><strong>2,720</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Full beard specialist, 30 günde bir gelir</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(19)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(19)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(19)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="5">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#84cc16,#65a30d);">LR</div><div><div style="font-weight:600;">Laura比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">laura.r@gmail.com</div></div></div></td>
+            <td>+32 487 22 33 44</td>
+            <td>25 Nis 2026</td>
+            <td>5</td>
+            <td><strong>300</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>Yeni müşteri, Google'dan buldu</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(20)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(20)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(20)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Platinum" data-visits="33">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">BD</div><div><div style="font-weight:600;">Björn比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">bjorn.d@skynet.be</div></div></div></td>
+            <td>+32 488 55 66 77</td>
+            <td>24 Nis 2026</td>
+            <td>33</td>
+            <td><strong>4,100</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td>CEO, ofis yakınında, öğle arası gelir</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(21)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(21)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(21)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="8">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#a855f7,#9333ea);">IL</div><div><div style="font-weight:600;">Inge比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">inge.l@telenet.be</div></div></div></td>
+            <td>+32 489 88 99 00</td>
+            <td>23 Nis 2026</td>
+            <td>8</td>
+            <td><strong>640</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Renk değişimi, pastel tonlar dener</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(22)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(22)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(22)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="16">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f59e0b,#d97706);">RV</div><div><div style="font-weight:600;">Raf比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">raf.v@proximus.be</div></div></div></td>
+            <td>+32 490 11 22 33</td>
+            <td>22 Nis 2026</td>
+            <td>16</td>
+            <td><strong>1,860</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>DJ, hafta sonu gece gelir, hızlı servis</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(23)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(23)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(23)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="3">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">JM2</div><div><div style="font-weight:600;">Joke比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">joke.m@skynet.be</div></div></div></td>
+            <td>+32 491 44 55 66</td>
+            <td>21 Nis 2026</td>
+            <td>3</td>
+            <td><strong>160</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>Yeni müşteri, oğlu tavsiye etti</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(24)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(24)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(24)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="15">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);">SV</div><div><div style="font-weight:600;">Stefan比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">stefan.v@telenet.be</div></div></div></td>
+            <td>+32 492 77 88 99</td>
+            <td>20 Nis 2026</td>
+            <td>15</td>
+            <td><strong>1,200</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Emekli, sabah 9'da gelir, kahve sever</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(25)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(25)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(25)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Gold" data-visits="24">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#10b981,#059669);">CB</div><div><div style="font-weight:600;">Camille比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">camille.b@proximus.be</div></div></div></td>
+            <td>+32 493 00 11 22</td>
+            <td>19 Nis 2026</td>
+            <td>24</td>
+            <td><strong>3,080</strong></td>
+            <td><span class="badge badge-gold">Gold</span></td>
+            <td>Moda blogger, Instagram'da etiketler</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(26)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(26)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(26)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Platinum" data-visits="29">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">MW</div><div><div style="font-weight:600;">Michiel比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">michiel.w@skynet.be</div></div></div></td>
+            <td>+32 494 33 44 55</td>
+            <td>18 Nis 2026</td>
+            <td>29</td>
+            <td><strong>3,760</strong></td>
+            <td><span class="badge badge-platinum">Platinum</span></td>
+            <td><span class="bday-badge">🎂 30 May</span> Aile paketi, 3 kişi gelir</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(27)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(27)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(27)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Bronze" data-visits="6">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f97316,#ea580c);">NS</div><div><div style="font-weight:600;">Nathalie比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">nathalie.s@telenet.be</div></div></div></td>
+            <td>+32 495 66 77 88</td>
+            <td>17 Nis 2026</td>
+            <td>6</td>
+            <td><strong>420</strong></td>
+            <td><span class="badge badge-bronze">Bronze</span></td>
+            <td>Organik boya, ppd alerjisi var</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(28)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(28)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(28)" title="Sil">🗑</button></div></td>
+          </tr>
+          <tr data-tier="Silver" data-visits="7">
+            <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">FD</div><div><div style="font-weight:600;">Filip比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">filip.d@proximus.be</div></div></div></td>
+            <td>+32 496 99 00 11</td>
+            <td>16 Nis 2026</td>
+            <td>7</td>
+            <td><strong>540</strong></td>
+            <td><span class="badge badge-silver">Silver</span></td>
+            <td>Yeni müşteri, LinkedIn'den buldu</td>
+            <td><div class="action-btns"><button class="action-btn" onclick="openDetailModal(29)" title="Detay">👁</button><button class="action-btn" onclick="openEditModal(29)" title="Düzenle">✎</button><button class="action-btn danger" onclick="deleteCustomer(29)" title="Sil">🗑</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div style="display:flex; justify-content:center; margin-top:var(--space-6);">
+      <div class="pagination">
+        <button class="page-btn" disabled>‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <div class="footer-links">
+        <a href="https://cleanfix-demo.vercel.app" target="_blank">🧹 CleanFix</a>
+        <a href="https://buildpro-demo.vercel.app" target="_blank">🏗️ BuildPro</a>
+      </div>
+      <div style="font-size:var(--text-sm);color:var(--text-muted);">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal('addModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Yeni Müşteri Ekle</div>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Ad</label>
+          <input type="text" class="form-input" placeholder="örn. Jean">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Soyad</label>
+          <input type="text" class="form-input" placeholder="örn. Dupont">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-posta</label>
+        <input type="email" class="form-input" placeholder="musteri@email.be">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input type="tel" class="form-input" placeholder="+32 470 12 34 56">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Doğum Günü</label>
+          <input type="date" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Üyelik</label>
+          <select class="form-select">
+            <option>Bronze</option>
+            <option>Silver</option>
+            <option>Gold</option>
+            <option>Platinum</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alerjiler / Özel Notlar</label>
+        <textarea class="form-textarea" rows="3" placeholder="Hassas cilt, alerjiler, tercihler..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addModal')">İptal</button>
+      <button class="btn btn-primary" onclick="closeModal('addModal');showToast('Müşteri başarıyla eklendi','success')">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Customer Modal -->
+<div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeModal('editModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Müşteri Düzenle</div>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Ad</label>
+          <input type="text" class="form-input" value="Jean" id="editFirstName">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Soyad</label>
+          <input type="text" class="form-input" value="Dupont" id="editLastName">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-posta</label>
+        <input type="email" class="form-input" value="jean.dupont@email.be" id="editEmail">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input type="tel" class="form-input" value="+32 470 12 34 56" id="editPhone">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4);">
+        <div class="form-group">
+          <label class="form-label">Doğum Günü</label>
+          <input type="date" class="form-input" value="1985-05-22">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Üyelik</label>
+          <select class="form-select" id="editTier">
+            <option>Bronze</option>
+            <option>Silver</option>
+            <option selected>Gold</option>
+            <option>Platinum</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alerjiler / Özel Notlar</label>
+        <textarea class="form-textarea" rows="3" id="editNotes">Hassas saçlı, organik ürün tercih</textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">İptal</button>
+      <button class="btn btn-primary" onclick="closeModal('editModal');showToast('Müşteri bilgileri güncellendi','success')">Güncelle</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Müşteri Detayı — Jean Dupont</div>
+      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:var(--space-5); margin-bottom:var(--space-6);">
+        <div class="avatar avatar-xl">JD</div>
+        <div>
+          <div style="font-size:var(--text-xl);font-weight:700;">Jean Dupont</div>
+          <div style="color:var(--text-muted);margin-top:4px;">jean.dupont@email.be · +32 470 12 34 56</div>
+          <div style="margin-top:8px;"><span class="badge badge-platinum">Platinum</span> <span class="bday-badge">🎂 22 Mayıs</span></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📊 Genel Bilgiler</div>
+        <div class="detail-row"><span class="label">Toplam Ziyaret</span><span class="value">28</span></div>
+        <div class="detail-row"><span class="label">Sadakat Puanı</span><span class="value">3,420 pts</span></div>
+        <div class="detail-row"><span class="label">Son Ziyaret</span><span class="value">14 Mayıs 2026</span></div>
+        <div class="detail-row"><span class="label">İlk Ziyaret</span><span class="value">3 Mart 2024</span></div>
+        <div class="detail-row"><span class="label">Ortalama Harcama</span><span class="value">€42 / ziyaret</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">🎯 Favori Hizmetler</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="badge badge-neutral">Premium Saç Kesimi</span>
+          <span class="badge badge-neutral">Sakal Düzeltme</span>
+          <span class="badge badge-neutral">Saç Bakım Maskesi</span>
+          <span class="badge badge-neutral">Klasik Traş</span>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📝 Alerjiler & Tercihler</div>
+        <div style="background:var(--bg-secondary);padding:var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);">
+          <p>• Hassas saçlı — agresif şampuanlardan kaçının</p>
+          <p>• Organik ürün tercih eder</p>
+          <p>• Sıcak havlu traşı sevmez</p>
+          <p>• Mehmet K.'yi tercih eder</p>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📅 Son Ziyaretler</div>
+        <div class="visit-list">
+          <div class="visit-item"><span><strong>14 May 2026</strong> — Premium Saç Kesimi + Sakal</span><span>€45</span></div>
+          <div class="visit-item"><span><strong>7 May 2026</strong> — Saç Bakım Maskesi</span><span>€35</span></div>
+          <div class="visit-item"><span><strong>30 Nis 2026</strong> — Klasik Traş</span><span>€25</span></div>
+          <div class="visit-item"><span><strong>23 Nis 2026</strong> — Premium Saç Kesimi</span><span>€30</span></div>
+          <div class="visit-item"><span><strong>16 Nis 2026</strong> — Sakal Şekillendirme</span><span>€20</span></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💎 Puan Geçmişi</div>
+        <div class="visit-list">
+          <div class="visit-item"><span><strong>+45 pts</strong> — 14 May 2026 ziyareti</span><span>14 May</span></div>
+          <div class="visit-item"><span><strong>+35 pts</strong> — 7 May 2026 ziyareti</span><span>7 May</span></div>
+          <div class="visit-item"><span><strong>-500 pts</strong> — Ücretsiz saç bakımı redeem</span><span>1 May</span></div>
+          <div class="visit-item"><span><strong>+100 pts</strong> — Doğum günü bonusu</span><span>22 May 2025</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('detailModal')">Kapat</button>
+      <button class="btn btn-primary" onclick="closeModal('detailModal');openModal('editModal')">Düzenle</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Sidebar ── */
+function toggleSidebar(){
+  const s=document.getElementById('sidebar');
+  const o=document.getElementById('sidebarOverlay');
+  s.classList.toggle('open');
+  o.classList.toggle('active');
+}
+
+/* ── Modal ── */
+function openModal(id){
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow='';
+}
+function openDetailModal(idx){
+  openModal('detailModal');
+}
+function openEditModal(idx){
+  openModal('editModal');
+}
+function deleteCustomer(idx){
+  if(confirm('Bu müşteriyi silmek istediğinize emin misiniz?')){
+    showToast('Müşteri silindi','success');
+  }
+}
+
+/* ── Toast ── */
+function showToast(msg,type='success',dur=3000){
+  const c=document.createElement('div');
+  c.style.cssText='position:fixed;top:80px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:12px;pointer-events:none;max-width:360px;';
+  const t=document.createElement('div');
+  const colors={success:'var(--success-500)',error:'var(--error-500)',warning:'var(--warning-500)',info:'var(--info-500)'};
+  const icons={success:'✓',error:'✕',warning:'!',info:'ℹ'};
+  t.style.cssText=`pointer-events:all;background:var(--bg-card);border:1px solid ${colors[type]};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow-lg);animation:toastIn 0.3s ease-out;position:relative;overflow:hidden;`;
+  t.innerHTML=`<span style="flex-shrink:0;margin-top:2px;width:20px;height:20px;border-radius:50%;background:${colors[type]};color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${icons[type]}</span><div style="flex:1;"><div style="font-weight:600;font-size:var(--text-sm);">${type==='success'?'Başarılı':type==='error'?'Hata':'Bilgi'}</div><div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:2px;">${msg}</div></div><span style="flex-shrink:0;color:var(--text-muted);cursor:pointer;font-size:14px;" onclick="this.parentElement.remove()">✕</span><div style="position:absolute;bottom:0;left:0;height:2px;background:${colors[type]};animation:progressBar ${dur}ms linear forwards;width:100%;"></div>`;
+  c.appendChild(t);document.body.appendChild(c);
+  setTimeout(()=>{t.style.animation='toastOut 0.3s ease-in forwards';setTimeout(()=>c.remove(),300);},dur);
+}
+
+/* ── Filter ── */
+function filterCustomers(){
+  const search=document.getElementById('customerSearch').value.toLowerCase();
+  const tier=document.getElementById('tierFilter').value;
+  const visits=document.getElementById('visitFilter').value;
+  const rows=document.querySelectorAll('#customerTableBody tr');
+  rows.forEach(row=>{
+    const text=row.textContent.toLowerCase();
+    const rowTier=row.dataset.tier;
+    const rowVisits=parseInt(row.dataset.visits);
+    let show=text.includes(search);
+    if(tier && rowTier!==tier) show=false;
+    if(visits){
+      if(visits==='1-5' && rowVisits>5) show=false;
+      if(visits==='6-15' && (rowVisits<6 || rowVisits>15)) show=false;
+      if(visits==='16+' && rowVisits<16) show=false;
+    }
+    row.style.display=show?'':'none';
+  });
+}
+</script>
+
+</body>
+</html>

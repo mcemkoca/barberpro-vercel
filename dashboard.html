@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro Dashboard — Salon Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ── Purple Theme Overrides ── */
+:root, [data-theme="dark"] {
+  --teal-50: #f5f3ff; --teal-100: #ede9fe; --teal-200: #ddd6fe; --teal-300: #c4b5fd;
+  --teal-400: #a78bfa; --teal-500: #8b5cf6; --teal-600: #7c3aed; --teal-700: #6d28d9;
+  --teal-800: #5b21b6; --teal-900: #4c1d95;
+  --amber-500: #f59e0b; --amber-600: #d97706;
+  --shadow-glow: rgba(139,92,246,0.25);
+}
+[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+
+/* Sidebar brand */
+.sidebar-brand-icon {
+  background:linear-gradient(135deg,var(--teal-500),var(--teal-700)) !important;
+}
+.sidebar-link.active {
+  background:linear-gradient(135deg,var(--teal-500),var(--teal-600)) !important;
+}
+
+/* Stat icons override */
+.stat-card .stat-icon { background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)) !important; color:var(--teal-400) !important; }
+
+/* Quick actions */
+.quick-action:hover { background:linear-gradient(135deg,var(--teal-500),var(--teal-600)) !important; }
+
+/* Staff performance */
+.staff-card { display:flex; align-items:center; gap:12px; padding:14px; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); transition:all var(--duration-fast); }
+.staff-card:hover { border-color:rgba(139,92,246,0.3); }
+.staff-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--teal-400),var(--teal-600)); display:flex; align-items:center; justify-content:center; color:white; font-weight:600; font-size:0.875rem; flex-shrink:0; }
+.staff-info { flex:1; min-width:0; }
+.staff-name { font-size:0.875rem; font-weight:600; color:var(--text-primary); }
+.staff-role { font-size:0.75rem; color:var(--text-muted); }
+.staff-stats { display:flex; gap:8px; }
+.staff-stat { text-align:center; }
+.staff-stat-value { font-size:0.75rem; font-weight:700; color:var(--teal-400); }
+.staff-stat-label { font-size:0.65rem; color:var(--text-muted); }
+.staff-bar { width:60px; height:4px; background:var(--bg-tertiary); border-radius:999px; overflow:hidden; margin-top:4px; }
+.staff-bar-fill { height:100%; background:linear-gradient(90deg,var(--teal-500),var(--teal-400)); border-radius:999px; }
+
+/* Status badges */
+.badge-bekliyor { background:rgba(59,130,246,0.15); color:#3b82f6; }
+.badge-islemde { background:rgba(139,92,246,0.15); color:var(--teal-400); }
+.badge-tamamlandi { background:rgba(16,185,129,0.15); color:var(--success-500); }
+.badge-iptal { background:rgba(244,63,94,0.15); color:var(--error-500); }
+
+/* Chair/station column */
+.station-cell { display:flex; align-items:center; gap:6px; font-size:0.8125rem; color:var(--text-secondary); }
+.station-dot { width:8px; height:8px; border-radius:50%; }
+.station-dot.aktif { background:var(--success-500); }
+.station-dot.bosta { background:var(--text-muted); }
+
+/* Today's schedule timeline feel */
+.schedule-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-color); transition:background var(--duration-fast); }
+.schedule-row:hover { background:var(--bg-secondary); border-radius:var(--radius-md); padding-left:8px; padding-right:8px; margin:0 -8px; }
+.schedule-time { font-size:0.8125rem; font-weight:700; color:var(--text-primary); width:48px; text-align:right; flex-shrink:0; }
+.schedule-timeline { width:2px; height:36px; background:var(--border-color); border-radius:999px; position:relative; flex-shrink:0; }
+.schedule-timeline::after { content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:8px; height:8px; border-radius:50%; background:var(--teal-500); }
+.schedule-content { flex:1; min-width:0; }
+.schedule-customer { font-size:0.875rem; font-weight:600; color:var(--text-primary); }
+.schedule-service { font-size:0.75rem; color:var(--text-muted); }
+.schedule-staff { font-size:0.75rem; color:var(--text-secondary); }
+.schedule-price { font-size:0.8125rem; font-weight:600; color:var(--teal-400); flex-shrink:0; text-align:right; min-width:48px; }
+
+/* Loyalty tier badges */
+.tier-badge { padding:2px 8px; border-radius:999px; font-size:0.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
+.tier-bronze { background:linear-gradient(135deg,#cd7f32,#b87333); color:white; }
+.tier-silver { background:linear-gradient(135deg,#c0c0c0,#a8a8a8); color:#1e293b; }
+.tier-gold { background:linear-gradient(135deg,#ffd700,#daa520); color:#1e293b; }
+.tier-platinum { background:linear-gradient(135deg,#e5e4e2,#b0b0b0); color:#1e293b; }
+
+/* Modal form extras */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:640px) { .form-row { grid-template-columns:1fr; } }
+
+/* Revenue glow on stat cards */
+.stat-revenue .stat-value { background:linear-gradient(135deg,var(--teal-400),var(--teal-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">B</div>
+    <span class="sidebar-brand-text">BarberPro</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Ana Menü</div>
+      <a class="sidebar-link active" href="dashboard.html">
+        <span class="icon">📊</span>
+        <span class="sidebar-text">Dashboard</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📅</span>
+        <span class="sidebar-text">Randevular</span>
+        <span class="badge badge-error">3</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">✂️</span>
+        <span class="sidebar-text">Hizmetler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">👥</span>
+        <span class="sidebar-text">Personel</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operasyon</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">🧑‍🤝‍🧑</span>
+        <span class="sidebar-text">Müşteriler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📦</span>
+        <span class="sidebar-text">Stok</span>
+        <span class="badge badge-warning">2</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">💎</span>
+        <span class="sidebar-text">Sadakat</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">💶</span>
+        <span class="sidebar-text">Finans</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Raporlar</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📈</span>
+        <span class="sidebar-text">Raporlar</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">⚙️</span>
+        <span class="sidebar-text">Portal Ayarları</span>
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="card" style="padding:12px; border:none; background:var(--bg-secondary);">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--teal-500),var(--teal-700));">A</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);">Ahmet Yılmaz</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Sahip — Le Barbier Royal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn mobile-visible" onclick="toggleMobileSidebar()">☰</button>
+      <div>
+        <div class="header-title">Dashboard</div>
+        <div class="header-breadcrumb">Le Barbier Royal › Brüksel › 15 Mayıs 2026, Perşembe</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input type="text" placeholder="Müşteri, randevu veya personel ara...">
+      </div>
+      <button class="header-btn" onclick="showNotifications()" title="Bildirimler">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <button class="header-btn" onclick="toggleTheme()" title="Tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notifications Panel -->
+  <div class="notifications-panel" id="notificationsPanel">
+    <div class="notifications-header">
+      <span style="font-weight:600; font-size:0.9375rem;">Bildirimler</span>
+      <button class="btn btn-ghost btn-sm" onclick="showNotifications()">Kapat</button>
+    </div>
+    <div class="notifications-list">
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📅</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Yeni randevu: Jean Dupont</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">15:30 — Saç Kesimi + Sakal</div>
+        </div>
+      </div>
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📦</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Düşük stok uyarısı</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Wella Koleston 6/1 — 3 adet kaldı</div>
+        </div>
+      </div>
+      <div class="notifications-item">
+        <div class="avatar avatar-sm">💎</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Gold üye yükseldi</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Sophie Laurent → Platinum</div>
+        </div>
+      </div>
+      <div class="notifications-item">
+        <div class="avatar avatar-sm">✅</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Randevu tamamlandı</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Marc Dubois — Keratin Bakım (€85)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Günün Özeti</h1>
+        <p class="page-subtitle">15 Mayıs 2026, Perşembe — Le Barbier Royal, Rue de la Loi 42, Brüksel</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary" onclick="openModal('randevuModal')">
+          <span>📅</span> Yeni Randevu
+        </button>
+        <button class="btn btn-secondary" onclick="openModal('musteriModal')">
+          <span>🧑‍🤝‍🧑</span> Yeni Müşteri
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="widget-grid widget-grid-6" style="grid-template-columns:repeat(6,1fr);">
+      <div class="card stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Bugünkü Randevu</div>
+        <div class="stat-change up">↑ 12% dün</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">🪑</div>
+        <div class="stat-value">6</div>
+        <div class="stat-label">Boş Slot</div>
+        <div class="stat-change up">↓ 2 iptal</div>
+      </div>
+      <div class="card stat-card stat-revenue">
+        <div class="stat-icon">💶</div>
+        <div class="stat-value">€1,245</div>
+        <div class="stat-label">Aylık Gelir</div>
+        <div class="stat-change up">↑ 8% geçen ay</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">🧑‍🤝‍🧑</div>
+        <div class="stat-value">342</div>
+        <div class="stat-label">Aktif Müşteri</div>
+        <div class="stat-change up">↑ 5 yeni</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">💎</div>
+        <div class="stat-value">89</div>
+        <div class="stat-label">Sadakat Üye</div>
+        <div class="stat-change up">↑ 3 bugün</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">🆕</div>
+        <div class="stat-value">24</div>
+        <div class="stat-label">Bu Ay Yeni</div>
+        <div class="stat-change up">↑ 18% geçen ay</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <div class="quick-action" onclick="openModal('randevuModal')">
+        <span class="icon">📅</span> Yeni Randevu
+      </div>
+      <div class="quick-action" onclick="openModal('musteriModal')">
+        <span class="icon">🧑‍🤝‍🧑</span> Yeni Müşteri
+      </div>
+      <div class="quick-action" onclick="openModal('satisModal')">
+        <span class="icon">🛒</span> Hızlı Satış
+      </div>
+      <div class="quick-action" onclick="showToast('Gün kapatma başlatıldı','warning')">
+        <span class="icon">🔒</span> Günü Kapat
+      </div>
+      <div class="quick-action" onclick="showToast('SMS hatırlatmaları gönderildi','success')">
+        <span class="icon">📩</span> Hatırlatma Gönder
+      </div>
+      <div class="quick-action" onclick="showToast('Boş slotlar müşteri portalında yayınlandı','success')">
+        <span class="icon">🌐</span> Boş Slotları Yayınla
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="widget-grid widget-grid-3" style="margin-bottom:24px;">
+      <div class="card chart-widget">
+        <div class="chart-header">
+          <div class="chart-title">Günlük Randevu Hacmi</div>
+          <div class="chart-subtitle">Son 14 gün — Brüksel şubesi</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="appointmentChart"></canvas>
+        </div>
+      </div>
+      <div class="card chart-widget">
+        <div class="chart-header">
+          <div class="chart-title">Gelir Eğilimi</div>
+          <div class="chart-subtitle">Günlük gelir — Mayıs 2026</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="card chart-widget">
+        <div class="chart-header">
+          <div class="chart-title">Hizmet Popülerliği</div>
+          <div class="chart-subtitle">Bu ay yapılan hizmetler</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="serviceChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Row: Appointments + Staff -->
+    <div class="widget-grid widget-grid-2">
+      <!-- Today's Appointments -->
+      <div class="card" style="min-height:520px;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">📅 Bugünkü Randevular</div>
+            <div class="card-subtitle">15 Mayıs 2026, Perşembe</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-ghost" onclick="filterAppointments('all')">Tümü</button>
+            <button class="btn btn-sm btn-ghost" onclick="filterAppointments('bekliyor')">Bekliyor</button>
+            <button class="btn btn-sm btn-ghost" onclick="filterAppointments('tamamlandi')">Tamamlandı</button>
+          </div>
+        </div>
+        <div id="appointmentsList" style="max-height:420px; overflow-y:auto; padding-right:4px;">
+          <!-- Appointments injected by JS -->
+        </div>
+      </div>
+
+      <!-- Staff Performance -->
+      <div class="card" style="min-height:520px;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">👥 Personel Performansı</div>
+            <div class="card-subtitle">Bugünkü randevu ve gelir</div>
+          </div>
+          <button class="btn btn-sm btn-ghost">Tümü →</button>
+        </div>
+        <div id="staffList" style="display:flex; flex-direction:column; gap:8px;">
+          <!-- Staff cards injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Revenue / Top Services Mini -->
+    <div class="widget-grid widget-grid-2" style="margin-top:24px;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🏆 En Çok Tercih Edilen Hizmetler</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)); display:flex; align-items:center; justify-content:center; font-size:1.25rem;">✂️</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Saç Kesimi</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">124 randevu — €3,100</div>
+            </div>
+            <div style="font-size:0.875rem; font-weight:700; color:var(--teal-400);">#1</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)); display:flex; align-items:center; justify-content:center; font-size:1.25rem;">🎨</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Saç Boyama</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">67 randevu — €4,695</div>
+            </div>
+            <div style="font-size:0.875rem; font-weight:700; color:var(--teal-400);">#2</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)); display:flex; align-items:center; justify-content:center; font-size:1.25rem;">🪒</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Traş & Sakal</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">89 randevu — €1,335</div>
+            </div>
+            <div style="font-size:0.875rem; font-weight:700; color:var(--teal-400);">#3</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; border-radius:var(--radius-md); background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)); display:flex; align-items:center; justify-content:center; font-size:1.25rem;">💆‍♀️</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Keratin Bakım</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">23 randevu — €1,955</div>
+            </div>
+            <div style="font-size:0.875rem; font-weight:700; color:var(--teal-400);">#4</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">💎 Sadakat Programı Özeti</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#cd7f32,#b87333); display:flex; align-items:center; justify-content:center; font-weight:700; color:white; font-size:0.75rem;">B</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Bronze Üyeler</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">142 üye — Ort. €45/ay</div>
+            </div>
+            <span class="tier-badge tier-bronze">Bronze</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#c0c0c0,#a8a8a8); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;">S</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Silver Üyeler</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">98 üye — Ort. €78/ay</div>
+            </div>
+            <span class="tier-badge tier-silver">Silver</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#ffd700,#daa520); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;">G</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Gold Üyeler</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">67 üye — Ort. €120/ay</div>
+            </div>
+            <span class="tier-badge tier-gold">Gold</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#e5e4e2,#b0b0b0); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;">P</div>
+            <div style="flex:1;">
+              <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);">Platinum Üyeler</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">35 üye — Ort. €195/ay</div>
+            </div>
+            <span class="tier-badge tier-platinum">Platinum</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ========== MODALS ========== -->
+
+<!-- New Appointment Modal -->
+<div class="modal-overlay" id="randevuModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">📅 Yeni Randevu</div>
+      <button class="modal-close" onclick="closeModal('randevuModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Müşteri</label>
+          <select class="form-select" id="rMusteri">
+            <option>Jean Dupont</option>
+            <option>Sophie Laurent</option>
+            <option>Marc Dubois</option>
+            <option>Emma Vermeulen</option>
+            <option>Lucas Peeters</option>
+            <option>+ Yeni Müşteri Ekle</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hizmet</label>
+          <select class="form-select" id="rHizmet">
+            <option>Saç Kesimi — €25 (30 dk)</option>
+            <option>Saç Boyama — €70 (90 dk)</option>
+            <option>Fön — €20 (30 dk)</option>
+            <option>Traş — €18 (20 dk)</option>
+            <option>Sakal Düzeltme — €15 (15 dk)</option>
+            <option>Manikür — €22 (45 dk)</option>
+            <option>Pedikür — €28 (45 dk)</option>
+            <option>Cilt Bakımı — €35 (60 dk)</option>
+            <option>Keratin — €85 (120 dk)</option>
+            <option>Ombre — €95 (150 dk)</option>
+            <option>Perma — €55 (90 dk)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Personel</label>
+          <select class="form-select" id="rPersonel">
+            <option>Mehmet K. (Usta Berber)</option>
+            <option>Ayşe D. (Kuaför)</option>
+            <option>Can B. (Colorist)</option>
+            <option>Selin Y. (Asistan)</option>
+            <option>Burak T. (Usta Berber)</option>
+            <option>Zeynep A. (Kuaför)</option>
+            <option>Kemal S. (Colorist)</option>
+            <option>Damla R. (Asistan)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tarih & Saat</label>
+          <input type="datetime-local" class="form-input" id="rTarih" value="2026-05-15T14:30">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">İstasyon / Koltuk</label>
+          <select class="form-select" id="rIstasyon">
+            <option>İstasyon 1</option>
+            <option>İstasyon 2</option>
+            <option>İstasyon 3</option>
+            <option>İstasyon 4</option>
+            <option>İstasyon 5</option>
+            <option>İstasyon 6</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hatırlatma</label>
+          <div style="display:flex; gap:12px; margin-top:6px;">
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-label">SMS</span></label>
+            <label class="toggle"><input type="checkbox"><span class="toggle-track"></span><span class="toggle-label">WhatsApp</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Not</label>
+        <textarea class="form-textarea" rows="2" placeholder="Müşteri için özel not..." id="rNot"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('randevuModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveAppointment()">Randevu Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Customer Modal -->
+<div class="modal-overlay" id="musteriModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🧑‍🤝‍🧑 Yeni Müşteri</div>
+      <button class="modal-close" onclick="closeModal('musteriModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ad</label>
+          <input type="text" class="form-input" placeholder="Ad" id="mAd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Soyad</label>
+          <input type="text" class="form-input" placeholder="Soyad" id="mSoyad">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Telefon</label>
+          <input type="tel" class="form-input" placeholder="+32 470 12 34 56" id="mTel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-posta</label>
+          <input type="email" class="form-input" placeholder="ornek@email.com" id="mEmail">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Doğum Günü</label>
+          <input type="date" class="form-input" id="mDogum">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sadakat Katmanı</label>
+          <select class="form-select" id="mTier">
+            <option value="bronze">Bronze</option>
+            <option value="silver">Silver</option>
+            <option value="gold">Gold</option>
+            <option value="platinum">Platinum</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adres</label>
+        <textarea class="form-textarea" rows="2" placeholder="Adres" id="mAdres"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notlar</label>
+        <textarea class="form-textarea" rows="2" placeholder="Saç tipi, alerji, tercihler..." id="mNot"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('musteriModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Müşteri Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Sale Modal -->
+<div class="modal-overlay" id="satisModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">🛒 Hızlı Satış</div>
+      <button class="modal-close" onclick="closeModal('satisModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Müşteri (Opsiyonel)</label>
+          <select class="form-select" id="sMusteri">
+            <option>Jean Dupont</option>
+            <option>Sophie Laurent</option>
+            <option>Marc Dubois</option>
+            <option>Yeni Müşteri</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Satış Tipi</label>
+          <select class="form-select" id="sTip">
+            <option>Ürün Satışı</option>
+            <option>Hizmet + Ürün</option>
+            <option>Sadece Hizmet</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ürünler</label>
+        <div style="display:flex; flex-direction:column; gap:6px;">
+          <label style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); font-size:0.875rem; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox"> Wella Şampuan (€18) — Stok: 12
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); font-size:0.875rem; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox"> Schwarzkopf Jöle (€12) — Stok: 8
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); font-size:0.875rem; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox"> American Crew Wax (€22) — Stok: 5
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); font-size:0.875rem; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox"> Koleston Boya 6/1 (€14) — Stok: 3 ⚠️
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; padding:8px; background:var(--bg-secondary); border-radius:var(--radius-md); font-size:0.875rem; color:var(--text-primary); cursor:pointer;">
+            <input type="checkbox"> Keratin Serum (€35) — Stok: 7
+          </label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ödeme Yöntemi</label>
+          <select class="form-select" id="sOdeme">
+            <option>Nakit</option>
+            <option>Kredi Kartı</option>
+            <option>Banka Kartı</option>
+            <option>Payconiq</option>
+            <option>Banka Transferi</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">İndirim</label>
+          <input type="text" class="form-input" placeholder="€0 veya %" id="sIndirim">
+        </div>
+      </div>
+      <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius-md); text-align:right;">
+        <div style="font-size:0.875rem; color:var(--text-muted);">Ara Toplam: €101</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--teal-400);">Toplam: €101</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('satisModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSale()">Satışı Tamamla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const appointments = [
+  { time: "09:00", customer: "Jean Dupont", service: "Saç Kesimi", staff: "Mehmet K.", station: 1, price: 25, status: "tamamlandi", tier: "gold" },
+  { time: "09:00", customer: "Marie Dubois", service: "Fön", staff: "Ayşe D.", station: 2, price: 20, status: "tamamlandi", tier: "silver" },
+  { time: "09:30", customer: "Pierre Van den Berghe", service: "Traş", staff: "Burak T.", station: 3, price: 18, status: "tamamlandi", tier: "bronze" },
+  { time: "10:00", customer: "Sophie Laurent", service: "Saç Boyama + Fön", staff: "Can B.", station: 4, price: 90, status: "tamamlandi", tier: "platinum" },
+  { time: "10:00", customer: "Lucas Peeters", service: "Saç Kesimi + Sakal", staff: "Mehmet K.", station: 1, price: 40, status: "tamamlandi", tier: "gold" },
+  { time: "10:30", customer: "Emma Vermeulen", service: "Manikür", staff: "Zeynep A.", station: 5, price: 22, status: "tamamlandi", tier: "silver" },
+  { time: "11:00", customer: "Jan Martens", service: "Saç Kesimi", staff: "Burak T.", station: 3, price: 25, status: "islemde", tier: "bronze" },
+  { time: "11:00", customer: "Claire Dubois", service: "Keratin Bakım", staff: "Ayşe D.", station: 2, price: 85, status: "islemde", tier: "gold" },
+  { time: "11:30", customer: "Thomas Janssens", service: "Perma", staff: "Kemal S.", station: 6, price: 55, status: "bekliyor", tier: "silver" },
+  { time: "12:00", customer: "Anaïs Lefebvre", service: "Ombre", staff: "Can B.", station: 4, price: 95, status: "bekliyor", tier: "platinum" },
+  { time: "12:00", customer: "Björn De Vos", service: "Saç Kesimi", staff: "Mehmet K.", station: 1, price: 25, status: "bekliyor", tier: "bronze" },
+  { time: "13:00", customer: "Charlotte Peeters", service: "Pedikür", staff: "Damla R.", station: 5, price: 28, status: "bekliyor", tier: "silver" },
+  { time: "14:00", customer: "Willem Jacobs", service: "Saç Kesimi + Sakal", staff: "Burak T.", station: 3, price: 40, status: "bekliyor", tier: "gold" },
+  { time: "14:30", customer: "Elise Van Damme", service: "Cilt Bakımı", staff: "Zeynep A.", station: 2, price: 35, status: "bekliyor", tier: "silver" },
+  { time: "15:00", customer: "Dieter Claes", service: "Traş", staff: "Mehmet K.", station: 1, price: 18, status: "bekliyor", tier: "bronze" },
+  { time: "15:30", customer: "Fiona Brouwers", service: "Saç Boyama", staff: "Can B.", station: 4, price: 70, status: "iptal", tier: "gold" },
+  { time: "16:00", customer: "Gert Vermeiren", service: "Fön", staff: "Ayşe D.", station: 2, price: 20, status: "bekliyor", tier: "bronze" },
+  { time: "16:30", customer: "Isabelle De Smet", service: "Manikür + Pedikür", staff: "Damla R.", station: 5, price: 48, status: "bekliyor", tier: "platinum" },
+];
+
+const staffData = [
+  { name: "Mehmet K.", role: "Usta Berber", initials: "MK", today: 6, revenue: 168, target: 8, targetPct: 75 },
+  { name: "Ayşe D.", role: "Kuaför", initials: "AD", today: 4, revenue: 160, target: 6, targetPct: 67 },
+  { name: "Can B.", role: "Colorist", initials: "CB", today: 5, revenue: 350, target: 5, targetPct: 100 },
+  { name: "Burak T.", role: "Usta Berber", initials: "BT", today: 4, revenue: 108, target: 7, targetPct: 57 },
+  { name: "Zeynep A.", role: "Kuaför", initials: "ZA", today: 3, revenue: 77, target: 5, targetPct: 60 },
+  { name: "Kemal S.", role: "Colorist", initials: "KS", today: 1, revenue: 55, target: 4, targetPct: 25 },
+  { name: "Selin Y.", role: "Asistan", initials: "SY", today: 2, revenue: 0, target: 3, targetPct: 67 },
+  { name: "Damla R.", role: "Asistan", initials: "DR", today: 3, revenue: 0, target: 4, targetPct: 75 },
+];
+
+// ===== MODAL UTILS =====
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close on overlay click / ESC
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) overlay.classList.remove('active');
+  });
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+});
+
+// ===== TOAST =====
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+    <div class="toast-content">
+      <div class="toast-message">${message}</div>
+    </div>
+    <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+    <div class="toast-progress"></div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('exit');
+    setTimeout(() => toast.remove(), 350);
+  }, 4000);
+}
+
+// ===== SIDEBAR =====
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+// ===== NOTIFICATIONS =====
+function showNotifications() {
+  document.getElementById('notificationsPanel').classList.toggle('open');
+}
+
+// ===== THEME =====
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ===== SAVE HANDLERS =====
+function saveAppointment() {
+  const musteri = document.getElementById('rMusteri').value;
+  const hizmet = document.getElementById('rHizmet').value;
+  closeModal('randevuModal');
+  showToast(`Randevu oluşturuldu: ${musteri} — ${hizmet.split('—')[0].trim()}`, 'success');
+}
+function saveCustomer() {
+  const ad = document.getElementById('mAd').value || 'Yeni';
+  const soyad = document.getElementById('mSoyad').value || 'Müşteri';
+  closeModal('musteriModal');
+  showToast(`Müşteri kaydedildi: ${ad} ${soyad}`, 'success');
+}
+function saveSale() {
+  closeModal('satisModal');
+  showToast('Satış tamamlandı: €101', 'success');
+}
+
+// ===== RENDER APPOINTMENTS =====
+function renderAppointments(filter = 'all') {
+  const container = document.getElementById('appointmentsList');
+  const filtered = filter === 'all' ? appointments : appointments.filter(a => a.status === filter);
+
+  container.innerHTML = filtered.map(a => {
+    const statusMap = { bekiyor: 'Bekliyor', islemde: 'İşlemde', tamamlandi: 'Tamamlandı', iptal: 'İptal' };
+    const badgeMap = { bekiyor: 'badge-bekliyor', islemde: 'badge-islemde', tamamlandi: 'badge-tamamlandi', iptal: 'badge-iptal' };
+    const tierBadge = a.tier === 'platinum' ? 'tier-platinum' : a.tier === 'gold' ? 'tier-gold' : a.tier === 'silver' ? 'tier-silver' : 'tier-bronze';
+
+    return `
+      <div class="schedule-row" data-status="${a.status}">
+        <div class="schedule-time">${a.time}</div>
+        <div class="schedule-timeline"></div>
+        <div class="schedule-content">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span class="schedule-customer">${a.customer}</span>
+            <span class="tier-badge ${tierBadge}" style="font-size:0.6rem; padding:1px 6px;">${a.tier}</span>
+          </div>
+          <div class="schedule-service">${a.service}</div>
+          <div class="schedule-staff">${a.staff} — İstasyon ${a.station}</div>
+        </div>
+        <div class="schedule-price">€${a.price}</div>
+        <div>
+          <span class="badge ${badgeMap[a.status]}">${statusMap[a.status]}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterAppointments(status) {
+  renderAppointments(status);
+}
+
+// ===== RENDER STAFF =====
+function renderStaff() {
+  const container = document.getElementById('staffList');
+  container.innerHTML = staffData.map(s => `
+    <div class="staff-card">
+      <div class="staff-avatar">${s.initials}</div>
+      <div class="staff-info">
+        <div class="staff-name">${s.name}</div>
+        <div class="staff-role">${s.role}</div>
+        <div class="staff-bar"><div class="staff-bar-fill" style="width:${s.targetPct}%"></div></div>
+      </div>
+      <div class="staff-stats">
+        <div class="staff-stat">
+          <div class="staff-stat-value">${s.today}</div>
+          <div class="staff-stat-label">Bugün</div>
+        </div>
+        <div class="staff-stat">
+          <div class="staff-stat-value">€${s.revenue}</div>
+          <div class="staff-stat-label">Gelir</div>
+        </div>
+        <div class="staff-stat">
+          <div class="staff-stat-value">${s.targetPct}%</div>
+          <div class="staff-stat-label">Hedef</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== CHARTS =====
+function initCharts() {
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: 'rgba(148,163,184,0.08)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+      y: { grid: { color: 'rgba(148,163,184,0.08)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+    }
+  };
+
+  // Appointment volume
+  new Chart(document.getElementById('appointmentChart'), {
+    type: 'bar',
+    data: {
+      labels: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14'],
+      datasets: [{
+        label: 'Randevu',
+        data: [12,15,14,18,16,20,22,14,17,19,21,18,16,18],
+        backgroundColor: 'rgba(139,92,246,0.6)',
+        borderColor: '#8b5cf6',
+        borderWidth: 1,
+        borderRadius: 4,
+        hoverBackgroundColor: '#8b5cf6'
+      }]
+    },
+    options: { ...commonOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.raw} randevu` } } } }
+  });
+
+  // Revenue trend
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15'],
+      datasets: [{
+        label: 'Gelir (€)',
+        data: [420,380,450,520,410,610,580,390,480,550,620,590,440,510,1245],
+        borderColor: '#a78bfa',
+        backgroundColor: 'rgba(167,139,250,0.1)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#8b5cf6',
+        pointBorderColor: '#a78bfa',
+        pointRadius: 3
+      }]
+    },
+    options: { ...commonOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `€${ctx.raw}` } } } }
+  });
+
+  // Service popularity
+  new Chart(document.getElementById('serviceChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Saç Kesimi','Saç Boyama','Traş & Sakal','Keratin','Diğer'],
+      datasets: [{
+        data: [124,67,89,23,42],
+        backgroundColor: ['#8b5cf6','#a78bfa','#c4b5fd','#7c3aed','#ddd6fe'],
+        borderColor: '#111827',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10 } }
+      }
+    }
+  });
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderAppointments();
+  renderStaff();
+  initCharts();
+});
+</script>
+
+</body>
+</html>

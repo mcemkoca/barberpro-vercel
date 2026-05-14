@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Hizmet Kataloğu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/barberpro.css">
+<style>
+/* Category selector */
+.cat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:var(--space-3); margin-bottom:var(--space-6); }
+.cat-card { padding:var(--space-4); text-align:center; border-radius:var(--radius-lg); border:2px solid var(--border-color); background:var(--bg-card); cursor:pointer; transition:all var(--duration-normal); }
+.cat-card:hover { border-color:#8b5cf6; transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.cat-card.active { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+.cat-icon { width:48px; height:48px; border-radius:var(--radius-lg); display:flex; align-items:center; justify-content:center; font-size:var(--text-2xl); margin:0 auto var(--space-2); }
+.cat-count { font-size:var(--text-xs); color:var(--text-muted); margin-top:2px; }
+/* Service table enhancements */
+.svc-popular { display:inline-block; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.05em; margin-left:6px; }
+.svc-staff-req { display:inline-flex; align-items:center; gap:4px; font-size:var(--text-xs); color:var(--text-muted); background:var(--bg-tertiary); padding:2px 8px; border-radius:9999px; }
+/* Price highlight */
+.price-tag { font-weight:700; font-size:var(--text-base); color:var(--violet-400); }
+/* Package section */
+.pkg-section { border:2px dashed var(--border-color); border-radius:var(--radius-lg); padding:var(--space-6); }
+.pkg-section.active { border-color:#8b5cf6; background:rgba(139,92,246,0.04); }
+.pkg-selected-list { display:flex; flex-direction:column; gap:var(--space-2); margin-top:var(--space-3); }
+.pkg-selected-item { display:flex; align-items:center; justify-content:space-between; padding:var(--space-3); background:var(--bg-secondary); border-radius:var(--radius-md); border:1.5px solid var(--border-color); }
+.pkg-total-bar { display:flex; align-items:center; justify-content:space-between; padding:var(--space-4); background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(147,51,234,0.1)); border-radius:var(--radius-md); margin-top:var(--space-4); border:1.5px solid rgba(139,92,246,0.3); }
+/* Duration input */
+.dur-input { display:flex; align-items:center; gap:var(--space-2); }
+.dur-input input { width:80px; text-align:center; }
+.dur-input span { font-size:var(--text-sm); color:var(--text-muted); }
+/* Duration badge in table */
+.dur-badge { display:inline-flex; align-items:center; gap:4px; font-size:var(--text-xs); font-weight:600; color:var(--text-muted); background:var(--bg-tertiary); padding:2px 8px; border-radius:9999px; }
+/* Modal category icons */
+.modal-cat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-3); }
+.modal-cat-opt { padding:var(--space-3); text-align:center; border:1.5px solid var(--border-color); border-radius:var(--radius-md); cursor:pointer; transition:all var(--duration-fast); }
+.modal-cat-opt:hover { border-color:#8b5cf6; }
+.modal-cat-opt.selected { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+.modal-cat-opt .icon { font-size:var(--text-xl); margin-bottom:4px; }
+.modal-cat-opt .label { font-size:var(--text-xs); font-weight:600; }
+/* Status toggle in table */
+.status-toggle-btn { width:36px; height:20px; border-radius:9999px; position:relative; cursor:pointer; transition:all var(--duration-normal); border:none; }
+.status-toggle-btn.on { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+.status-toggle-btn.off { background:var(--bg-tertiary); }
+.status-toggle-btn::after { content:''; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:2px; left:2px; transition:transform var(--duration-normal); }
+.status-toggle-btn.on::after { transform:translateX(16px); }
+/* Category color dots */
+.cat-dot-sac { background:linear-gradient(135deg,#8b5cf6,#a78bfa); }
+.cat-dot-sakal { background:linear-gradient(135deg,#475569,#64748b); }
+.cat-dot-el { background:linear-gradient(135deg,#ec4899,#f472b6); }
+.cat-dot-cilt { background:linear-gradient(135deg,#10b981,#34d399); }
+.cat-dot-paket { background:linear-gradient(135deg,#f59e0b,#fbbf24); }
+.cat-dot-ozel { background:linear-gradient(135deg,#3b82f6,#60a5fa); }
+</style>
+</head>
+<body class="barberpro" data-theme="dark">
+<div class="dashboard">
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-brand">
+<div class="sidebar-brand-icon bp-brand">BP</div>
+<span class="sidebar-brand-text bp-brand-text">BarberPro</span>
+</div>
+<nav class="sidebar-nav">
+<div class="sidebar-section">
+<div class="sidebar-section-title">Ana Menü</div>
+<a href="barberpro-dashboard.html" class="sidebar-link"><span class="icon">📊</span><span class="sidebar-text">Dashboard</span></a>
+<a href="barberpro-appointments.html" class="sidebar-link"><span class="icon">📅</span><span class="sidebar-text">Randevular</span><span class="badge" style="margin-left:auto">28</span></a>
+<a href="barberpro-customers.html" class="sidebar-link"><span class="icon">👥</span><span class="sidebar-text">Müşteriler</span><span class="badge" style="margin-left:auto">142</span></a>
+<a href="barberpro-services.html" class="sidebar-link active"><span class="icon">✂️</span><span class="sidebar-text">Hizmetler</span></a>
+<a href="barberpro-staff.html" class="sidebar-link"><span class="icon">🧑‍💼</span><span class="sidebar-text">Personel</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">İşletme</div>
+<a href="barberpro-reports.html" class="sidebar-link"><span class="icon">📈</span><span class="sidebar-text">Raporlar</span></a>
+<a href="barberpro-inventory.html" class="sidebar-link"><span class="icon">📦</span><span class="sidebar-text">Envanter</span></a>
+<a href="barberpro-marketing.html" class="sidebar-link"><span class="icon">📣</span><span class="sidebar-text">Pazarlama</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">Sistem</div>
+<a href="barberpro-settings.html" class="sidebar-link"><span class="icon">⚙️</span><span class="sidebar-text">Ayarlar</span></a>
+<a href="barberpro-help.html" class="sidebar-link"><span class="icon">❓</span><span class="sidebar-text">Yardım</span></a>
+</div>
+</nav>
+<div class="sidebar-footer">
+<div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);">
+<div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+<div style="overflow:hidden;">
+<div style="font-size:var(--text-sm);font-weight:600;white-space:nowrap;">Ahmet Demir</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);white-space:nowrap;">Salon Yöneticisi</div>
+</div>
+</div>
+</div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<main class="main" id="main">
+
+<header class="header">
+<div class="header-left">
+<button class="header-btn mobile-visible" id="menuToggle" onclick="toggleSidebar()" aria-label="Menü">☰</button>
+<div>
+<div class="header-title">Hizmet Kataloğu</div>
+<div class="header-breadcrumb">BarberPro / Hizmetler</div>
+</div>
+</div>
+<div class="header-search" style="position:relative;width:280px;">
+<svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+<input type="text" id="svcSearch" placeholder="Hizmet ara..." onkeyup="filterServices()">
+</div>
+<div class="header-right">
+<button class="header-btn" onclick="showNotifications()" aria-label="Bildirimler">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+<span class="badge-dot"></span>
+</button>
+<button class="header-btn" onclick="toggleTheme()" aria-label="Tema">🌙</button>
+<div class="header-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+</div>
+</header>
+
+<div class="page">
+
+<!-- Page Header -->
+<div class="page-header">
+<div>
+<div class="page-title">✂️ Hizmet Kataloğu</div>
+<div class="page-subtitle">21 hizmet · 6 kategori · Toplam haftalık kapasite 340 işlem</div>
+</div>
+<div class="page-actions">
+<button class="btn btn-purple" onclick="openModal('addSvcModal')">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+Yeni Hizmet
+</button>
+<button class="btn btn-secondary" onclick="openModal('pkgModal')">📦 Paket Oluştur</button>
+</div>
+</div>
+
+<!-- Quick Stats -->
+<div class="quick-stats">
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;">✂️</div>
+<div class="stat-value">21</div>
+<div class="stat-label">Toplam Hizmet</div>
+<div class="stat-change up">↑ 3 yeni bu ay</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">⭐</div>
+<div class="stat-value">8</div>
+<div class="stat-label">Popüler Hizmet</div>
+<div class="stat-change up">↑ 2 yeni popüler</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">💶</div>
+<div class="stat-value">€875</div>
+<div class="stat-label">Ort. Paket Değeri</div>
+<div class="stat-change up">↑ 5% geçen aya göre</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">📦</div>
+<div class="stat-value">2</div>
+<div class="stat-label">Aktif Paket</div>
+<div class="stat-change up">Gelin + Erkek Bakım</div>
+</div>
+</div>
+
+<!-- Category Filter -->
+<div class="cat-grid" id="catGrid">
+<div class="cat-card active" data-cat="all" onclick="filterCategory('all')">
+<div class="cat-icon" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff;">🌟</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Tümü</div>
+<div class="cat-count">21 hizmet</div>
+</div>
+<div class="cat-card" data-cat="Saç" onclick="filterCategory('Saç')">
+<div class="cat-icon cat-dot-sac" style="color:#fff;">✂️</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Saç</div>
+<div class="cat-count">7 hizmet</div>
+</div>
+<div class="cat-card" data-cat="Sakal" onclick="filterCategory('Sakal')">
+<div class="cat-icon cat-dot-sakal" style="color:#fff;">🧔</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Sakal</div>
+<div class="cat-count">3 hizmet</div>
+</div>
+<div class="cat-card" data-cat="El/Ayak" onclick="filterCategory('El/Ayak')">
+<div class="cat-icon cat-dot-el" style="color:#fff;">💅</div>
+<div style="font-weight:600;font-size:var(--text-sm);">El / Ayak</div>
+<div class="cat-count">3 hizmet</div>
+</div>
+<div class="cat-card" data-cat="Cilt" onclick="filterCategory('Cilt')">
+<div class="cat-icon cat-dot-cilt" style="color:#fff;">🧖</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Cilt</div>
+<div class="cat-count">2 hizmet</div>
+</div>
+<div class="cat-card" data-cat="Paket" onclick="filterCategory('Paket')">
+<div class="cat-icon cat-dot-paket" style="color:#fff;">📦</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Paketler</div>
+<div class="cat-count">2 hizmet</div>
+</div>
+<div class="cat-card" data-cat="Özel" onclick="filterCategory('Özel')">
+<div class="cat-icon cat-dot-ozel" style="color:#fff;">🎁</div>
+<div style="font-weight:600;font-size:var(--text-sm);">Özel</div>
+<div class="cat-count">4 hizmet</div>
+</div>
+</div>
+
+<!-- Services Table -->
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:var(--space-3);">
+<div style="font-weight:600;font-size:var(--text-base);">Hizmet Listesi</div>
+<div style="display:flex;gap:var(--space-2);align-items:center;">
+<span style="font-size:var(--text-xs);color:var(--text-muted);">Sırala:</span>
+<button class="btn btn-sm btn-ghost" onclick="sortServices('name')">İsim ↕</button>
+<button class="btn btn-sm btn-ghost" onclick="sortServices('price')">Fiyat ↕</button>
+<button class="btn btn-sm btn-ghost" onclick="sortServices('duration')">Süre ↕</button>
+</div>
+</div>
+<div class="table-wrap">
+<table class="table" id="svcTable">
+<thead><tr>
+<th>Hizmet</th><th>Kategori</th><th>Süre</th><th>Fiyat</th><th>Personel Tipi</th><th>Popülerlik</th><th>Durum</th><th>İşlemler</th>
+</tr></thead>
+<tbody>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">✂️</span><div><strong>Saç Kesim</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 30 dk</span></td><td><span class="price-tag">€25</span></td><td><span class="svc-staff-req">👤 Usta / Kuaför</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:92%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">92%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Saç Kesim')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Saç Kesim')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🎨</span><div><strong>Saç Boyama</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 90 dk</span></td><td><span class="price-tag">€60</span></td><td><span class="svc-staff-req">👤 Colorist</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:85%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">85%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Saç Boyama')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Saç Boyama')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">💨</span><div><strong>Fön</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 20 dk</span></td><td><span class="price-tag">€20</span></td><td><span class="svc-staff-req">👤 Kuaför</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:88%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">88%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Fön')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Fön')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">✨</span><div><strong>Keratin Bakım</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 120 dk</span></td><td><span class="price-tag">€120</span></td><td><span class="svc-staff-req">👤 Colorist</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:72%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">72%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Keratin Bakım')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Keratin Bakım')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🎨</span><div><strong>Ombre</strong></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 120 dk</span></td><td><span class="price-tag">€85</span></td><td><span class="svc-staff-req">👤 Colorist</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:68%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">68%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Ombre')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Ombre')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🌀</span><div><strong>Perma</strong></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 90 dk</span></td><td><span class="price-tag">€70</span></td><td><span class="svc-staff-req">👤 Colorist</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:55%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">55%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Perma')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Perma')">🗑️</button></td></tr>
+<tr data-cat="Saç"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">💧</span><div><strong>Saç Yıkama</strong></div></div></td><td><span class="badge badge-info">Saç</span></td><td><span class="dur-badge">⏱️ 15 dk</span></td><td><span class="price-tag">€10</span></td><td><span class="svc-staff-req">👤 Tüm Personel</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:90%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">90%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Saç Yıkama')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Saç Yıkama')">🗑️</button></td></tr>
+<tr data-cat="Sakal"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧔</span><div><strong>Sakal Traş</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-neutral">Sakal</span></td><td><span class="dur-badge">⏱️ 20 dk</span></td><td><span class="price-tag">€15</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:86%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">86%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Sakal Traş')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Sakal Traş')">🗑️</button></td></tr>
+<tr data-cat="Sakal"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">✏️</span><div><strong>Sakal Düzeltme</strong></div></div></td><td><span class="badge badge-neutral">Sakal</span></td><td><span class="dur-badge">⏱️ 15 dk</span></td><td><span class="price-tag">€10</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:60%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">60%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Sakal Düzeltme')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Sakal Düzeltme')">🗑️</button></td></tr>
+<tr data-cat="Sakal"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧴</span><div><strong>Sakal Bakım</strong></div></div></td><td><span class="badge badge-neutral">Sakal</span></td><td><span class="dur-badge">⏱️ 25 dk</span></td><td><span class="price-tag">€20</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:74%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">74%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Sakal Bakım')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Sakal Bakım')">🗑️</button></td></tr>
+<tr data-cat="El/Ayak"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">💅</span><div><strong>Manikür</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-info" style="background:rgba(236,72,153,0.15);color:#ec4899;">El/Ayak</span></td><td><span class="dur-badge">⏱️ 30 dk</span></td><td><span class="price-tag">€25</span></td><td><span class="svc-staff-req">👤 Manikürcü</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:80%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">80%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Manikür')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Manikür')">🗑️</button></td></tr>
+<tr data-cat="El/Ayak"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🦶</span><div><strong>Pedikür</strong></div></div></td><td><span class="badge badge-info" style="background:rgba(236,72,153,0.15);color:#ec4899;">El/Ayak</span></td><td><span class="dur-badge">⏱️ 45 dk</span></td><td><span class="price-tag">€30</span></td><td><span class="svc-staff-req">👤 Manikürcü</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:65%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">65%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Pedikür')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Pedikür')">🗑️</button></td></tr>
+<tr data-cat="El/Ayak"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">💎</span><div><strong>Jel Tırnak</strong></div></div></td><td><span class="badge badge-info" style="background:rgba(236,72,153,0.15);color:#ec4899;">El/Ayak</span></td><td><span class="dur-badge">⏱️ 60 dk</span></td><td><span class="price-tag">€40</span></td><td><span class="svc-staff-req">👤 Manikürcü</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:70%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">70%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Jel Tırnak')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Jel Tırnak')">🗑️</button></td></tr>
+<tr data-cat="Cilt"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧖</span><div><strong>Yüz Bakımı</strong></div></div></td><td><span class="badge badge-info" style="background:rgba(16,185,129,0.15);color:#10b981;">Cilt</span></td><td><span class="dur-badge">⏱️ 60 dk</span></td><td><span class="price-tag">€45</span></td><td><span class="svc-staff-req">👤 Cilt Uzmanı</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:62%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">62%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Yüz Bakımı')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Yüz Bakımı')">🗑️</button></td></tr>
+<tr data-cat="Cilt"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧴</span><div><strong>Maske</strong></div></div></td><td><span class="badge badge-info" style="background:rgba(16,185,129,0.15);color:#10b981;">Cilt</span></td><td><span class="dur-badge">⏱️ 30 dk</span></td><td><span class="price-tag">€20</span></td><td><span class="svc-staff-req">👤 Cilt Uzmanı</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:58%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">58%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Maske')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Maske')">🗑️</button></td></tr>
+<tr data-cat="Paket"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">👰</span><div><strong>Gelin Paketi</strong><span class="svc-popular">VİP</span></div></div></td><td><span class="badge badge-warning">Paket</span></td><td><span class="dur-badge">⏱️ 240 dk</span></td><td><span class="price-tag">€200</span></td><td><span class="svc-staff-req">👤 Tüm Ekip</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:95%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">95%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Gelin Paketi')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Gelin Paketi')">🗑️</button></td></tr>
+<tr data-cat="Paket"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🎩</span><div><strong>Erkek Bakım Paketi</strong><span class="svc-popular">POPÜLER</span></div></div></td><td><span class="badge badge-warning">Paket</span></td><td><span class="dur-badge">⏱️ 60 dk</span></td><td><span class="price-tag">€50</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:89%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">89%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Erkek Bakım Paketi')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Erkek Bakım Paketi')">🗑️</button></td></tr>
+<tr data-cat="Özel"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧴</span><div><strong>Hot Towel Shave</strong></div></div></td><td><span class="badge badge-neutral">Özel</span></td><td><span class="dur-badge">⏱️ 35 dk</span></td><td><span class="price-tag">€35</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:78%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">78%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Hot Towel Shave')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Hot Towel Shave')">🗑️</button></td></tr>
+<tr data-cat="Özel"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">👶</span><div><strong>Çocuk Saç Kesimi</strong></div></div></td><td><span class="badge badge-neutral">Özel</span></td><td><span class="dur-badge">⏱️ 20 dk</span></td><td><span class="price-tag">€15</span></td><td><span class="svc-staff-req">👤 Kuaför</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:76%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">76%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Çocuk Saç Kesimi')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Çocuk Saç Kesimi')">🗑️</button></td></tr>
+<tr data-cat="Özel"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">👤</span><div><strong>Kaş Düzeltme</strong></div></div></td><td><span class="badge badge-neutral">Özel</span></td><td><span class="dur-badge">⏱️ 15 dk</span></td><td><span class="price-tag">€12</span></td><td><span class="svc-staff-req">👤 Kuaför</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:82%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">82%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Kaş Düzeltme')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Kaş Düzeltme')">🗑️</button></td></tr>
+<tr data-cat="Özel"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🎨</span><div><strong>Saç Ekşitme</strong></div></div></td><td><span class="badge badge-neutral">Özel</span></td><td><span class="dur-badge">⏱️ 45 dk</span></td><td><span class="price-tag">€55</span></td><td><span class="svc-staff-req">👤 Colorist</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:50%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">50%</span></div></td><td><button class="status-toggle-btn on" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Saç Ekşitme')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Saç Ekşitme')">🗑️</button></td></tr>
+<tr data-cat="Özel"><td><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:var(--text-lg);">🧴</span><div><strong>Kulak / Burun Tüyü</strong></div></div></td><td><span class="badge badge-neutral">Özel</span></td><td><span class="dur-badge">⏱️ 10 dk</span></td><td><span class="price-tag">€8</span></td><td><span class="svc-staff-req">👤 Usta Berber</span></td><td><div style="display:flex;align-items:center;gap:6px;"><div class="progress-bar" style="width:80px;height:6px;"><div class="progress-bar-fill bp-progress-fill" style="width:64%;"></div></div><span style="font-size:var(--text-xs);color:var(--text-muted);">64%</span></div></td><td><button class="status-toggle-btn off" onclick="toggleSvcStatus(this)"></button></td><td><button class="btn btn-sm btn-ghost" onclick="editService('Kulak Burun')">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteService('Kulak Burun')">🗑️</button></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Popular Services Section -->
+<div class="card" style="margin-top:var(--space-6);">
+<div class="card-header">
+<div>
+<div class="card-title">🔥 Popüler Hizmetler</div>
+<div class="card-subtitle">Son 30 günün en çok talep gören hizmetleri</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-4);">
+<div style="padding:var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid var(--border-color);">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);">
+<span style="font-size:var(--text-2xl);">✂️</span>
+<div>
+<div style="font-weight:600;">Saç Kesim</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);">312 randevu · €7,800</div>
+</div>
+</div>
+<div class="progress-bar"><div class="progress-bar-fill bp-progress-fill" style="width:100%;"></div></div>
+</div>
+<div style="padding:var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid var(--border-color);">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);">
+<span style="font-size:var(--text-2xl);">💨</span>
+<div>
+<div style="font-weight:600;">Fön</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);">198 randevu · €3,960</div>
+</div>
+</div>
+<div class="progress-bar"><div class="progress-bar-fill bp-progress-fill" style="width:78%;"></div></div>
+</div>
+<div style="padding:var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid var(--border-color);">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);">
+<span style="font-size:var(--text-2xl);">🧔</span>
+<div>
+<div style="font-weight:600;">Sakal Traş</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);">176 randevu · €2,640</div>
+</div>
+</div>
+<div class="progress-bar"><div class="progress-bar-fill bp-progress-fill" style="width:65%;"></div></div>
+</div>
+<div style="padding:var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-lg);border:1.5px solid var(--border-color);">
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:var(--space-2);">
+<span style="font-size:var(--text-2xl);">🎨</span>
+<div>
+<div style="font-weight:600;">Saç Boyama</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);">89 randevu · €5,340</div>
+</div>
+</div>
+<div class="progress-bar"><div class="progress-bar-fill bp-progress-fill" style="width:45%;"></div></div>
+</div>
+</div>
+</div>
+
+</div><!-- /page -->
+
+<!-- ===== FOOTER ===== -->
+<div class="bp-footer">
+<div class="bp-footer-grid">
+<div>
+<div class="bp-footer-brand bp-brand-text">BarberPro</div>
+<div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:var(--space-2);">Profesyonel berber ve kuaför salonu yönetimi.</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-1);">Bruxelles, Belçika</div>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Platform</div>
+<a href="barberpro-dashboard.html" class="bp-footer-link">Dashboard</a>
+<a href="barberpro-appointments.html" class="bp-footer-link">Randevular</a>
+<a href="barberpro-services.html" class="bp-footer-link">Hizmetler</a>
+<a href="barberpro-staff.html" class="bp-footer-link">Personel</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Diğer Ürünler</div>
+<a href="cleanfix-dashboard.html" class="bp-footer-link">🧹 CleanFix — Temizlik</a>
+<a href="buildpro-dashboard.html" class="bp-footer-link">🏗️ BuildPro — İnşaat</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Destek</div>
+<a href="barberpro-help.html" class="bp-footer-link">Yardım Merkezi</a>
+<a href="barberpro-settings.html" class="bp-footer-link">Ayarlar</a>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-3);">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+</div>
+</div>
+</div>
+
+</main>
+</div><!-- /dashboard -->
+
+<!-- ========== ADD SERVICE MODAL ========== -->
+<div class="modal-overlay" id="addSvcModal" onclick="closeModalOnOverlay(event,'addSvcModal')"><div class="modal" onclick="event.stopPropagation()">
+<div class="modal-header"><div class="modal-title">✂️ Yeni Hizmet Ekle</div><button class="modal-close" onclick="closeModal('addSvcModal')">✕</button></div>
+<div class="modal-body">
+<div class="form-group"><label class="form-label">Hizmet Adı *</label><input type="text" class="form-input bp-focus" placeholder="Örn: Saç Kesim"></div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Kategori *</label>
+<div class="modal-cat-grid">
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-sac" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">✂️</div><div class="label">Saç</div></div>
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-sakal" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">🧔</div><div class="label">Sakal</div></div>
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-el" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">💅</div><div class="label">El/Ayak</div></div>
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-cilt" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">🧖</div><div class="label">Cilt</div></div>
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-paket" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">📦</div><div class="label">Paket</div></div>
+<div class="modal-cat-opt" onclick="selectCat(this)"><div class="icon cat-dot-ozel" style="width:40px;height:40px;border-radius:var(--radius-md);margin:0 auto;color:#fff;display:flex;align-items:center;justify-content:center;">🎁</div><div class="label">Özel</div></div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-top:var(--space-4);">
+<div class="form-group"><label class="form-label">Süre (dk) *</label><div class="dur-input"><input type="number" class="form-input bp-focus" placeholder="30" min="5" max="300"><span>dk</span></div></div>
+<div class="form-group"><label class="form-label">Fiyat (€) *</label><input type="number" class="form-input bp-focus" placeholder="25" min="1"></div>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Personel Gereksinimi *</label>
+<select class="form-select bp-focus">
+<option>Usta Berber</option><option>Kuaför</option><option>Colorist</option><option>Manikürcü</option><option>Cilt Uzmanı</option><option>Tüm Personel</option>
+</select>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Açıklama</label><textarea class="form-textarea bp-focus" rows="2" placeholder="Hizmet açıklaması..."></textarea></div>
+<div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-4);">
+<label class="toggle"><input type="checkbox" id="svcPopular"><span class="toggle-track"></span><span class="toggle-label">Popüler olarak işaretle</span></label>
+<label class="toggle"><input type="checkbox" id="svcActive" checked><span class="toggle-track"></span><span class="toggle-label">Aktif</span></label>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addSvcModal')">İptal</button><button class="btn btn-purple" onclick="saveService()">💾 Kaydet</button></div>
+</div></div>
+
+<!-- ========== PACKAGE BUILDER MODAL ========== -->
+<div class="modal-overlay" id="pkgModal" onclick="closeModalOnOverlay(event,'pkgModal')"><div class="modal modal-lg" onclick="event.stopPropagation()">
+<div class="modal-header"><div class="modal-title">📦 Paket Oluştur</div><button class="modal-close" onclick="closeModal('pkgModal')">✕</button></div>
+<div class="modal-body">
+<div class="form-group"><label class="form-label">Paket Adı *</label><input type="text" class="form-input bp-focus" placeholder="Örn: Yılbaşı Özel Paketi" id="pkgName"></div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Hizmetleri Seç</label>
+<div style="border:1.5px solid var(--border-color);border-radius:var(--radius-md);padding:var(--space-3);max-height:240px;overflow-y:auto;">
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Saç Kesim',25,30)"><div><div style="font-weight:500;">✂️ Saç Kesim</div><div style="font-size:var(--text-xs);color:var(--text-muted);">30 dk · €25</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Sakal Traş',15,20)"><div><div style="font-weight:500;">🧔 Sakal Traş</div><div style="font-size:var(--text-xs);color:var(--text-muted);">20 dk · €15</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Fön',20,20)"><div><div style="font-weight:500;">💨 Fön</div><div style="font-size:var(--text-xs);color:var(--text-muted);">20 dk · €20</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Manikür',25,30)"><div><div style="font-weight:500;">💅 Manikür</div><div style="font-size:var(--text-xs);color:var(--text-muted);">30 dk · €25</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Yüz Bakımı',45,60)"><div><div style="font-weight:500;">🧖 Yüz Bakımı</div><div style="font-size:var(--text-xs);color:var(--text-muted);">60 dk · €45</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+<div class="pkg-builder-item" onclick="togglePkgItem(this,'Saç Yıkama',10,15)"><div><div style="font-weight:500;">💧 Saç Yıkama</div><div style="font-size:var(--text-xs);color:var(--text-muted);">15 dk · €10</div></div><div class="pkg-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;">✓</div></div>
+</div>
+</div>
+<div class="pkg-total-bar"><div style="font-size:var(--text-sm);color:var(--text-secondary);">Seçilen: <strong id="pkgCount" style="color:var(--text-primary);">0</strong> hizmet · <strong id="pkgDur" style="color:var(--text-primary);">0</strong> dk</div><div style="font-size:var(--text-lg);font-weight:700;color:#a78bfa;">€<span id="pkgTotal">0</span></div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-top:var(--space-4);">
+<div class="form-group"><label class="form-label">Paket Fiyatı (€) *</label><input type="number" class="form-input bp-focus" placeholder="İndirimli fiyat" id="pkgPrice"></div>
+<div class="form-group"><label class="form-label">İndirim Oranı</label><input type="text" class="form-input bp-focus" placeholder="%15" readonly id="pkgDiscount" style="background:var(--bg-secondary);"></div>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('pkgModal')">İptal</button><button class="btn btn-purple" onclick="savePackage()">📦 Paketi Oluştur</button></div>
+</div></div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+let pkgServices = [];
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('mobile-open'); }
+function openModal(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+function closeModalOnOverlay(e,id){ if(e.target===document.getElementById(id)) closeModal(id); }
+function filterCategory(cat){
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
+  document.querySelector('[data-cat="'+cat+'"]').classList.add('active');
+  const rows = document.querySelectorAll('#svcTable tbody tr');
+  rows.forEach(row=>{ row.style.display = (cat==='all'||row.dataset.cat===cat)?'':'none'; });
+}
+function filterServices(){
+  const term = document.getElementById('svcSearch').value.toLowerCase();
+  const rows = document.querySelectorAll('#svcTable tbody tr');
+  rows.forEach(row=>{ row.style.display = row.textContent.toLowerCase().includes(term)?'':'none'; });
+}
+function sortServices(by){
+  showToast('info','Sıralama','Hizmetler '+by+' göre sıralandı (demo)');
+}
+function toggleSvcStatus(btn){
+  btn.classList.toggle('on'); btn.classList.toggle('off');
+  const status = btn.classList.contains('on')?'Aktif':'Pasif';
+  showToast('info','Durum Değişti','Hizmet '+status+' yapıldı');
+}
+function selectCat(el){
+  document.querySelectorAll('.modal-cat-opt').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function saveService(){
+  closeModal('addSvcModal');
+  showToast('success','Hizmet Eklendi','Yeni hizmet kataloğa eklendi');
+}
+function editService(name){
+  showToast('info','Düzenleme',name+' düzenleme modunda (demo)');
+  openModal('addSvcModal');
+}
+function deleteService(name){
+  if(!confirm(name+' hizmetini silmek istediğinize emin misiniz?')) return;
+  showToast('warning','Hizmet Silindi',name+' silindi');
+}
+function togglePkgItem(el,name,price,dur){
+  el.classList.toggle('selected');
+  const check = el.querySelector('.pkg-check');
+  const idx = pkgServices.findIndex(s=>s.name===name);
+  if(el.classList.contains('selected')){
+    check.style.background='linear-gradient(135deg,#8b5cf6,#7c3aed)'; check.style.borderColor='#8b5cf6'; check.style.color='#fff';
+    if(idx===-1) pkgServices.push({name,price,dur});
+  } else {
+    check.style.background=''; check.style.borderColor=''; check.style.color='transparent';
+    if(idx>-1) pkgServices.splice(idx,1);
+  }
+  updatePkgSummary();
+}
+function updatePkgSummary(){
+  const total = pkgServices.reduce((a,s)=>a+s.price,0);
+  const dur = pkgServices.reduce((a,s)=>a+s.dur,0);
+  document.getElementById('pkgCount').textContent = pkgServices.length;
+  document.getElementById('pkgDur').textContent = dur;
+  document.getElementById('pkgTotal').textContent = total;
+  const price = parseFloat(document.getElementById('pkgPrice').value)||0;
+  if(price>0&&total>0){
+    const disc = Math.round((1-price/total)*100);
+    document.getElementById('pkgDiscount').value = '%'+disc;
+  }
+}
+document.getElementById('pkgPrice').addEventListener('input',updatePkgSummary);
+function savePackage(){
+  const name = document.getElementById('pkgName').value;
+  if(!name||pkgServices.length===0){ showToast('error','Eksik Bilgi','Paket adı ve en az 1 hizmet seçin'); return; }
+  closeModal('pkgModal');
+  showToast('success','Paket Oluşturuldu',name+' paketi hazır');
+}
+function toggleTheme(){
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme')||'dark';
+  html.setAttribute('data-theme', current==='dark'?'light':'dark');
+}
+function showNotifications(){ showToast('info','Bildirimler','2 yeni bildirim (demo)'); }
+function showToast(type,title,message){
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className='toast toast-'+type;
+  const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  toast.innerHTML='<div class="toast-icon">'+icons[type]+'</div><div class="toast-content"><div class="toast-title">'+title+'</div><div class="toast-message">'+message+'</div></div><button class="toast-close" onclick="this.parentElement.remove()">✕</button><div class="toast-progress"></div>';
+  container.appendChild(toast);
+  setTimeout(()=>{ toast.classList.add('exit'); setTimeout(()=>toast.remove(),400); },4000);
+}
+// Mobile overlay
+const overlay = document.createElement('div'); overlay.className='sidebar-overlay'; overlay.onclick=()=>{ document.getElementById('sidebar').classList.remove('mobile-open'); overlay.classList.remove('active'); }; document.body.appendChild(overlay);
+const origToggle = toggleSidebar;
+toggleSidebar = function(){ document.getElementById('sidebar').classList.toggle('mobile-open'); overlay.classList.toggle('active'); };
+</script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+/* ================================================================
+   BarberPro Design System Overrides — Purple/Violet Theme
+   ================================================================ */
+
+/* ── Purple Primary Overrides ── */
+:root, [data-theme="dark"] {
+  --purple-50: #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7c3aed;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --violet-400: #a78bfa;
+  --violet-500: #8b5cf6;
+  --violet-600: #7c3aed;
+
+  --border-focus: var(--violet-500);
+  --shadow-glow: rgba(139,92,246,0.35);
+}
+
+/* Override teal theme vars to purple for BarberPro pages */
+body.barberpro {
+  --border-focus: var(--violet-500);
+  --shadow-glow: rgba(139,92,246,0.35);
+}
+body.barberpro ::selection {
+  background: var(--purple-300);
+  color: var(--purple-900);
+}
+[data-theme="dark"] body.barberpro ::selection {
+  background: var(--purple-700);
+  color: var(--purple-100);
+}
+
+/* ── BarberPro Brand ── */
+.bp-brand {
+  background: linear-gradient(135deg, var(--violet-500), var(--purple-600)) !important;
+  box-shadow: 0 4px 14px rgba(139,92,246,0.4) !important;
+}
+.bp-brand-text {
+  background: linear-gradient(135deg, var(--violet-400), var(--purple-400));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Purple Buttons ── */
+.btn-purple {
+  background: linear-gradient(135deg, var(--violet-500), var(--purple-600));
+  color: white;
+  box-shadow: 0 4px 14px rgba(139,92,246,0.4);
+}
+.btn-purple:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139,92,246,0.5), 0 0 0 3px rgba(139,92,246,0.15);
+}
+.btn-purple:active:not(:disabled) { transform: translateY(0); }
+
+.btn-outline-purple {
+  background: transparent;
+  color: var(--violet-400);
+  border: 1.5px solid var(--violet-500);
+}
+.btn-outline-purple:hover:not(:disabled) {
+  background: rgba(139,92,246,0.1);
+  border-color: var(--violet-400);
+}
+
+/* ── Purple Focus States ── */
+body.barberpro .form-input:focus,
+body.barberpro .form-select:focus,
+body.barberpro .form-textarea:focus {
+  border-color: var(--violet-500);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.25);
+}
+body.barberpro .form-group:focus-within .form-label {
+  color: var(--violet-400);
+}
+body.barberpro .page-btn:hover,
+body.barberpro .page-btn.active {
+  background: var(--violet-500);
+  border-color: var(--violet-500);
+}
+body.barberpro .sidebar-link.active {
+  background: linear-gradient(135deg, var(--violet-500), var(--purple-600));
+  box-shadow: 0 4px 14px rgba(139,92,246,0.35);
+}
+body.barberpro .tab.active {
+  color: var(--violet-400);
+  border-bottom-color: var(--violet-500);
+}
+body.barberpro .cal-day.selected {
+  background: var(--violet-500);
+}
+body.barberpro .cal-day.today {
+  box-shadow: inset 0 0 0 1.5px var(--violet-500);
+}
+
+/* ── Status Colors (BarberPro) ── */
+.status-bekliyor { background: var(--info-100); color: var(--info-500); }
+.status-sirada { background: var(--warning-100); color: var(--warning-500); }
+.status-islemde { background: var(--purple-100); color: var(--purple-600); }
+.status-tamamlandi { background: var(--success-100); color: var(--success-500); }
+.status-iptal { background: var(--error-100); color: var(--error-500); }
+.status-gelmedi { background: var(--slate-100); color: var(--slate-600); }
+
+[data-theme="dark"] .status-bekliyor { background: rgba(59,130,246,0.15); }
+[data-theme="dark"] .status-sirada { background: rgba(249,115,22,0.15); }
+[data-theme="dark"] .status-islemde { background: rgba(147,51,234,0.15); color: var(--purple-300); }
+[data-theme="dark"] .status-tamamlandi { background: rgba(16,185,129,0.15); }
+[data-theme="dark"] .status-iptal { background: rgba(244,63,94,0.15); }
+[data-theme="dark"] .status-gelmedi { background: rgba(100,116,139,0.15); }
+
+/* ── Appointment Card Status Borders ── */
+.appt-card {
+  border-left: 4px solid var(--border-color);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+.appt-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.appt-card.status-bekliyor-border { border-left-color: var(--info-500); }
+.appt-card.status-sirada-border { border-left-color: var(--warning-500); }
+.appt-card.status-islemde-border { border-left-color: var(--purple-500); }
+.appt-card.status-tamamlandi-border { border-left-color: var(--success-500); }
+.appt-card.status-iptal-border { border-left-color: var(--error-500); }
+.appt-card.status-gelmedi-border { border-left-color: var(--slate-400); }
+
+/* ── Time Slot Grid ── */
+.time-slot-grid {
+  display: grid;
+  grid-template-columns: 60px repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1px;
+  background: var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.time-label {
+  background: var(--bg-secondary);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.time-cell {
+  background: var(--bg-card);
+  padding: var(--space-2);
+  min-height: 64px;
+  position: relative;
+}
+.time-cell:hover {
+  background: var(--bg-tertiary);
+}
+.time-cell .add-appt-btn {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+  background: rgba(139,92,246,0.08);
+  cursor: pointer;
+  border: none;
+  color: var(--violet-500);
+  font-size: var(--text-xl);
+}
+.time-cell:hover .add-appt-btn { opacity: 1; }
+
+/* ── Calendar Day View ── */
+.day-view {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 1px;
+  background: var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.day-time-col {
+  background: var(--bg-secondary);
+}
+.day-time-row {
+  height: 80px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.day-content-col {
+  background: var(--bg-card);
+  position: relative;
+}
+.day-content-row {
+  height: 80px;
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+.day-appt {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  z-index: 2;
+}
+.day-appt:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+}
+
+/* ── Service Category Cards ── */
+.svc-cat-card {
+  padding: var(--space-5);
+  text-align: center;
+  transition: all var(--duration-normal);
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+.svc-cat-card:hover {
+  border-color: var(--violet-500);
+  transform: translateY(-4px);
+}
+.svc-cat-card.active {
+  border-color: var(--violet-500);
+  background: rgba(139,92,246,0.08);
+}
+.svc-cat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--violet-500), var(--purple-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xl);
+  margin: 0 auto var(--space-3);
+  color: white;
+}
+
+/* ── Popular Badge ── */
+.popular-badge {
+  background: linear-gradient(135deg, var(--amber-400), var(--amber-500));
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Staff Avatar Ring ── */
+.staff-avatar-ring {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--violet-500);
+}
+
+/* ── Commission Badge ── */
+.commission-badge {
+  background: linear-gradient(135deg, var(--purple-100), var(--purple-200));
+  color: var(--purple-700);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+[data-theme="dark"] .commission-badge {
+  background: rgba(147,51,234,0.2);
+  color: var(--purple-300);
+}
+
+/* ── Purple Progress Bar ── */
+.bp-progress-fill {
+  background: linear-gradient(90deg, var(--violet-500), var(--purple-400));
+}
+
+/* ── Walk-in vs Online Indicator ── */
+.booking-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+.booking-walkin {
+  background: var(--purple-100);
+  color: var(--purple-600);
+}
+.booking-online {
+  background: var(--info-100);
+  color: var(--info-500);
+}
+[data-theme="dark"] .booking-walkin {
+  background: rgba(147,51,234,0.15);
+  color: var(--purple-300);
+}
+[data-theme="dark"] .booking-online {
+  background: rgba(59,130,246,0.15);
+}
+
+/* ── Package Builder ── */
+.pkg-builder-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-color);
+  transition: all var(--duration-fast);
+  cursor: pointer;
+}
+.pkg-builder-item:hover {
+  border-color: var(--violet-500);
+  background: rgba(139,92,246,0.05);
+}
+.pkg-builder-item.selected {
+  border-color: var(--violet-500);
+  background: rgba(139,92,246,0.1);
+}
+
+/* ── Week View ── */
+.week-view {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.week-header-cell {
+  background: var(--bg-secondary);
+  padding: var(--space-3);
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+.week-header-cell .day-name { color: var(--text-muted); text-transform: uppercase; }
+.week-header-cell .day-num { font-size: var(--text-lg); font-weight: 700; color: var(--text-primary); }
+.week-header-cell.today {
+  background: rgba(139,92,246,0.1);
+}
+.week-header-cell.today .day-num { color: var(--violet-400); }
+
+/* ── Rating Stars ── */
+.rating-stars {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--amber-400);
+  font-size: var(--text-sm);
+}
+
+/* ── Footer Cross-links ── */
+.bp-footer {
+  border-top: 1px solid var(--border-color);
+  padding: var(--space-6);
+  background: var(--bg-secondary);
+}
+.bp-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-6);
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+.bp-footer-brand {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.bp-footer-link {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  padding: var(--space-1) 0;
+  transition: color var(--duration-fast);
+}
+.bp-footer-link:hover {
+  color: var(--violet-400);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .time-slot-grid {
+    grid-template-columns: 50px repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .day-view { grid-template-columns: 50px 1fr; }
+  .week-view { grid-template-columns: 50px repeat(7, 1fr); }
+  .week-header-cell .day-num { font-size: var(--text-base); }
+}

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Personel Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/barberpro.css">
+<style>
+/* Staff specific styles */
+.staff-card { display:flex; align-items:center; gap:var(--space-4); padding:var(--space-4); border-radius:var(--radius-lg); border:1.5px solid var(--border-color); background:var(--bg-card); transition:all var(--duration-normal); }
+.staff-card:hover { border-color:#8b5cf6; transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.staff-card .staff-avatar { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:var(--text-xl); font-weight:700; color:#fff; flex-shrink:0; }
+.staff-card .staff-info { flex:1; min-width:0; }
+.staff-card .staff-name { font-weight:600; font-size:var(--text-base); color:var(--text-primary); }
+.staff-card .staff-role { font-size:var(--text-xs); color:var(--text-muted); margin-top:2px; }
+.staff-card .staff-meta { display:flex; gap:var(--space-3); margin-top:var(--space-2); flex-wrap:wrap; }
+.staff-card .staff-meta-item { font-size:var(--text-xs); color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
+.staff-card .staff-stats { display:flex; gap:var(--space-4); text-align:center; }
+.staff-card .staff-stat { display:flex; flex-direction:column; }
+.staff-card .staff-stat-val { font-weight:700; font-size:var(--text-lg); color:var(--violet-400); }
+.staff-card .staff-stat-label { font-size:var(--text-xs); color:var(--text-muted); }
+/* Role badges */
+.role-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:9999px; font-size:var(--text-xs); font-weight:600; }
+.role-usta { background:rgba(139,92,246,0.15); color:#a78bfa; }
+.role-kuafor { background:rgba(59,130,246,0.15); color:#3b82f6; }
+.role-colorist { background:rgba(236,72,153,0.15); color:#ec4899; }
+.role-manikurcu { background:rgba(245,158,11,0.15); color:#f59e0b; }
+.role-asistan { background:rgba(16,185,129,0.15); color:#10b981; }
+.role-stajyer { background:rgba(100,116,139,0.15); color:#94a3b8; }
+.role-kasiyer { background:rgba(239,68,68,0.15); color:#ef4444; }
+/* Schedule mini */
+.schedule-mini { display:flex; gap:2px; margin-top:var(--space-2); }
+.schedule-day { width:24px; height:24px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; }
+.schedule-day.on { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; }
+.schedule-day.off { background:var(--bg-tertiary); color:var(--text-muted); }
+/* Rating */
+.rating-bar { display:flex; align-items:center; gap:6px; }
+.rating-bar .stars { color:var(--amber-400); font-size:var(--text-sm); letter-spacing:1px; }
+.rating-bar .score { font-size:var(--text-xs); font-weight:600; color:var(--text-muted); }
+/* Commission bar */
+.comm-row { display:flex; align-items:center; justify-content:space-between; padding:var(--space-3); background:var(--bg-secondary); border-radius:var(--radius-md); margin-bottom:var(--space-2); }
+/* Schedule modal grid */
+.schedule-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:var(--space-2); }
+.schedule-cell { padding:var(--space-3); border:1.5px solid var(--border-color); border-radius:var(--radius-md); text-align:center; cursor:pointer; transition:all var(--duration-fast); }
+.schedule-cell:hover { border-color:#8b5cf6; }
+.schedule-cell.active { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+.schedule-cell .day-name { font-size:var(--text-xs); font-weight:600; color:var(--text-muted); text-transform:uppercase; }
+.schedule-cell .hours { font-size:var(--text-sm); font-weight:600; color:var(--text-primary); margin-top:4px; }
+/* Staff filter */
+.role-filter { display:flex; gap:var(--space-2); flex-wrap:wrap; margin-bottom:var(--space-4); }
+.role-pill { padding:6px 14px; border-radius:9999px; font-size:var(--text-sm); font-weight:500; cursor:pointer; transition:all var(--duration-fast); border:1.5px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); }
+.role-pill:hover { border-color:#8b5cf6; color:var(--text-primary); }
+.role-pill.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:transparent; }
+/* Top performer badge */
+.top-performer { position:absolute; top:-8px; right:-8px; background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#fff; font-size:10px; font-weight:700; padding:3px 10px; border-radius:9999px; box-shadow:var(--shadow-sm); z-index:2; }
+/* Work hours input */
+.time-range { display:flex; align-items:center; gap:var(--space-2); }
+.time-range input { width:100px; text-align:center; }
+.time-range span { color:var(--text-muted); font-size:var(--text-sm); }
+/* Status toggle in table */
+.status-toggle-btn { width:36px; height:20px; border-radius:9999px; position:relative; cursor:pointer; transition:all var(--duration-normal); border:none; }
+.status-toggle-btn.on { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+.status-toggle-btn.off { background:var(--bg-tertiary); }
+.status-toggle-btn::after { content:''; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:2px; left:2px; transition:transform var(--duration-normal); }
+.status-toggle-btn.on::after { transform:translateX(16px); }
+</style>
+</head>
+<body class="barberpro" data-theme="dark">
+<div class="dashboard">
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-brand">
+<div class="sidebar-brand-icon bp-brand">BP</div>
+<span class="sidebar-brand-text bp-brand-text">BarberPro</span>
+</div>
+<nav class="sidebar-nav">
+<div class="sidebar-section">
+<div class="sidebar-section-title">Ana Menü</div>
+<a href="barberpro-dashboard.html" class="sidebar-link"><span class="icon">📊</span><span class="sidebar-text">Dashboard</span></a>
+<a href="barberpro-appointments.html" class="sidebar-link"><span class="icon">📅</span><span class="sidebar-text">Randevular</span><span class="badge" style="margin-left:auto">28</span></a>
+<a href="barberpro-customers.html" class="sidebar-link"><span class="icon">👥</span><span class="sidebar-text">Müşteriler</span><span class="badge" style="margin-left:auto">142</span></a>
+<a href="barberpro-services.html" class="sidebar-link"><span class="icon">✂️</span><span class="sidebar-text">Hizmetler</span></a>
+<a href="barberpro-staff.html" class="sidebar-link active"><span class="icon">🧑‍💼</span><span class="sidebar-text">Personel</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">İşletme</div>
+<a href="barberpro-reports.html" class="sidebar-link"><span class="icon">📈</span><span class="sidebar-text">Raporlar</span></a>
+<a href="barberpro-inventory.html" class="sidebar-link"><span class="icon">📦</span><span class="sidebar-text">Envanter</span></a>
+<a href="barberpro-marketing.html" class="sidebar-link"><span class="icon">📣</span><span class="sidebar-text">Pazarlama</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">Sistem</div>
+<a href="barberpro-settings.html" class="sidebar-link"><span class="icon">⚙️</span><span class="sidebar-text">Ayarlar</span></a>
+<a href="barberpro-help.html" class="sidebar-link"><span class="icon">❓</span><span class="sidebar-text">Yardım</span></a>
+</div>
+</nav>
+<div class="sidebar-footer">
+<div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);">
+<div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+<div style="overflow:hidden;">
+<div style="font-size:var(--text-sm);font-weight:600;white-space:nowrap;">Ahmet Demir</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);white-space:nowrap;">Salon Yöneticisi</div>
+</div>
+</div>
+</div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<main class="main" id="main">
+<header class="header">
+<div class="header-left">
+<button class="header-btn mobile-visible" id="menuToggle" onclick="toggleSidebar()" aria-label="Menü">☰</button>
+<div>
+<div class="header-title">Personel Yönetimi</div>
+<div class="header-breadcrumb">BarberPro / Personel</div>
+</div>
+</div>
+<div class="header-search" style="position:relative;width:280px;">
+<svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+<input type="text" id="staffSearch" placeholder="Personel ara..." onkeyup="filterStaff()">
+</div>
+<div class="header-right">
+<button class="header-btn" onclick="showNotifications()" aria-label="Bildirimler">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+<span class="badge-dot"></span>
+</button>
+<button class="header-btn" onclick="toggleTheme()" aria-label="Tema">🌙</button>
+<div class="header-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+</div>
+</header>
+
+<div class="page">
+
+<!-- Page Header -->
+<div class="page-header">
+<div>
+<div class="page-title">🧑‍💼 Personel Yönetimi</div>
+<div class="page-subtitle">11 personel · 7 aktif · Bu ay toplam gelir €24,680</div>
+</div>
+<div class="page-actions">
+<button class="btn btn-purple" onclick="openModal('addStaffModal')">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+Yeni Personel
+</button>
+<button class="btn btn-secondary" onclick="openModal('scheduleModal')">📅 Çalışma Takvimi</button>
+</div>
+</div>
+
+<!-- Quick Stats -->
+<div class="quick-stats">
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;">🧑‍💼</div>
+<div class="stat-value">11</div>
+<div class="stat-label">Toplam Personel</div>
+<div class="stat-change up">↑ 1 yeni bu ay</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">✅</div>
+<div class="stat-value">7</div>
+<div class="stat-label">Aktif Çalışan</div>
+<div class="stat-change up">↑ %64 aktiflik</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">⭐</div>
+<div class="stat-value">4.7</div>
+<div class="stat-label">Ort. Müşteri Puanı</div>
+<div class="stat-change up">↑ 0.3 geçen aya göre</div>
+</div>
+<div class="card stat-card">
+<div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">💶</div>
+<div class="stat-value">€2,243</div>
+<div class="stat-label">Ort. Aylık Gelir</div>
+<div class="stat-change up">↑ 8% bu ay</div>
+</div>
+</div>
+
+<!-- Role Filters -->
+<div class="role-filter">
+<div class="role-pill active" data-role="all" onclick="filterRole('all')">Tümü <span class="appt-count-badge">11</span></div>
+<div class="role-pill" data-role="Usta Berber" onclick="filterRole('Usta Berber')">Usta Berber <span class="appt-count-badge" style="background:#8b5cf6;">2</span></div>
+<div class="role-pill" data-role="Kuaför" onclick="filterRole('Kuaför')">Kuaför <span class="appt-count-badge" style="background:#3b82f6;">2</span></div>
+<div class="role-pill" data-role="Colorist" onclick="filterRole('Colorist')">Colorist <span class="appt-count-badge" style="background:#ec4899;">1</span></div>
+<div class="role-pill" data-role="Manikürcü" onclick="filterRole('Manikürcü')">Manikürcü <span class="appt-count-badge" style="background:#f59e0b;">1</span></div>
+<div class="role-pill" data-role="Asistan" onclick="filterRole('Asistan')">Asistan <span class="appt-count-badge" style="background:#10b981;">2</span></div>
+<div class="role-pill" data-role="Stajyer" onclick="filterRole('Stajyer')">Stajyer <span class="appt-count-badge" style="background:#94a3b8;">2</span></div>
+<div class="role-pill" data-role="Kasiyer" onclick="filterRole('Kasiyer')">Kasiyer <span class="appt-count-badge" style="background:#ef4444;">1</span></div>
+</div>
+
+<!-- Staff Table -->
+<div class="card" style="padding:0;overflow:hidden;">
+<div style="display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:var(--space-3);">
+<div style="font-weight:600;font-size:var(--text-base);">Personel Listesi</div>
+<div style="display:flex;gap:var(--space-2);align-items:center;">
+<span style="font-size:var(--text-xs);color:var(--text-muted);">Sırala:</span>
+<button class="btn btn-sm btn-ghost" onclick="sortStaff('revenue')">Gelir ↕</button>
+<button class="btn btn-sm btn-ghost" onclick="sortStaff('rating')">Puan ↕</button>
+<button class="btn btn-sm btn-ghost" onclick="sortStaff('appointments')">Randevu ↕</button>
+</div>
+</div>
+<div class="table-wrap">
+<table class="table" id="staffTable">
+<thead><tr>
+<th>Personel</th><th>Görev</th><th>Uzmanlık</th><th>Çalışma Günleri</th><th>Saatler</th><th>Aktif Randevu</th><th>Bu Ay Gelir</th><th>Puan</th><th>Durum</th><th>İşlemler</th>
+</tr></thead>
+<tbody>
+<tr data-role="Usta Berber"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar staff-avatar-ring" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);width:40px;height:40px;">HK</div><div><div style="font-weight:600;">Hasan Korkmaz</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 470 11 22 33</div></div></div></td>
+<td><span class="role-badge role-usta">Usta Berber</span></td>
+<td>Saç Kesim, Sakal, Klasik Traş</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 19:00</span></td>
+<td><span class="appt-count-badge">8</span></td>
+<td><span class="price-tag">€3,420</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★★</span><span class="score">4.9</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Hasan Korkmaz')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Hasan')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Hasan Korkmaz')">🗑️</button></td></tr>
+
+<tr data-role="Usta Berber"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);width:40px;height:40px;">MA</div><div><div style="font-weight:600;">Mehmet Aydın</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 471 22 33 44</div></div></div></td>
+<td><span class="role-badge role-usta">Usta Berber</span></td>
+<td>Sakal, Traş, Bakım</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 19:00</span></td>
+<td><span class="appt-count-badge">6</span></td>
+<td><span class="price-tag">€2,890</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★☆</span><span class="score">4.7</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Mehmet Aydın')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Mehmet')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Mehmet Aydın')">🗑️</button></td></tr>
+
+<tr data-role="Kuaför"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669);width:40px;height:40px;">AY</div><div><div style="font-weight:600;">Ali Yılmaz</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 472 33 44 55</div></div></div></td>
+<td><span class="role-badge role-kuafor">Kuaför</span></td>
+<td>Saç Kesim, Fön, Perma</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day on">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">10:00 — 20:00</span></td>
+<td><span class="appt-count-badge">5</span></td>
+<td><span class="price-tag">€2,560</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★★</span><span class="score">4.8</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Ali Yılmaz')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Ali')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Ali Yılmaz')">🗑️</button></td></tr>
+
+<tr data-role="Colorist"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:40px;height:40px;">SO</div><div><div style="font-weight:600;">Selin Öztürk</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 473 44 55 66</div></div></div></td>
+<td><span class="role-badge role-colorist">Colorist</span></td>
+<td>Boyama, Ombre, Keratin, Perma</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 20:00</span></td>
+<td><span class="appt-count-badge" style="background:linear-gradient(135deg,#ec4899,#be185d);">4</span></td>
+<td><span class="price-tag">€4,120</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★★</span><span class="score">4.9</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Selin Öztürk')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Selin')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Selin Öztürk')">🗑️</button></td></tr>
+
+<tr data-role="Manikürcü"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);width:40px;height:40px;">BT</div><div><div style="font-weight:600;">Burak Toprak</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 474 55 66 77</div></div></div></td>
+<td><span class="role-badge role-manikurcu">Manikürcü</span></td>
+<td>Manikür, Pedikür, Jel Tırnak, Nail Art</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day on">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 19:00</span></td>
+<td><span class="appt-count-badge" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">4</span></td>
+<td><span class="price-tag">€2,180</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★☆</span><span class="score">4.6</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Burak Toprak')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Burak')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Burak Toprak')">🗑️</button></td></tr>
+
+<tr data-role="Asistan"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);width:40px;height:40px;">CK</div><div><div style="font-weight:600;">Ceren Kaya</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 475 66 77 88</div></div></div></td>
+<td><span class="role-badge role-asistan">Asistan</span></td>
+<td>Yüz Bakımı, Maske, Cilt Analizi</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 18:00</span></td>
+<td><span class="appt-count-badge" style="background:linear-gradient(135deg,#10b981,#059669);">3</span></td>
+<td><span class="price-tag">€1,840</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★☆</span><span class="score">4.5</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Ceren Kaya')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Ceren')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Ceren Kaya')">🗑️</button></td></tr>
+
+<tr data-role="Asistan"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);width:40px;height:40px;">EU</div><div><div style="font-weight:600;">Emre Uçar</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 476 77 88 99</div></div></div></td>
+<td><span class="role-badge role-asistan">Asistan</span></td>
+<td>Saç Yıkama, Yardımcı İşlemler</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day on">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 18:00</span></td>
+<td><span class="appt-count-badge" style="background:linear-gradient(135deg,#10b981,#059669);">2</span></td>
+<td><span class="price-tag">€980</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★☆</span><span class="score">4.4</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Emre Uçar')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Emre')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Emre Uçar')">🗑️</button></td></tr>
+
+<tr data-role="Stajyer"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#94a3b8,#64748b);width:40px;height:40px;">SC</div><div><div style="font-weight:600;">Sena Çelik</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 477 88 99 00</div></div></div></td>
+<td><span class="role-badge role-stajyer">Stajyer</span></td>
+<td>Saç Yıkama, Yardımcı İşlemler</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 15:00</span></td>
+<td><span class="appt-count-badge" style="background:#94a3b8;">1</span></td>
+<td><span class="price-tag">€520</span></td>
+<td><div class="rating-bar"><span class="stars">★★★☆☆</span><span class="score">3.8</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Sena Çelik')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Sena')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Sena Çelik')">🗑️</button></td></tr>
+
+<tr data-role="Stajyer"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#64748b,#475569);width:40px;height:40px;">KB</div><div><div style="font-weight:600;">Kaan Bulut</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 478 99 00 11</div></div></div></td>
+<td><span class="role-badge role-stajyer">Stajyer</span></td>
+<td>Sakal Traş (Yardımcı), Temizlik</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day off">Ct</div><div class="schedule-day off">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 15:00</span></td>
+<td><span class="appt-count-badge" style="background:#94a3b8;">0</span></td>
+<td><span class="price-tag">€380</span></td>
+<td><div class="rating-bar"><span class="stars">★★★☆☆</span><span class="score">3.5</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Kaan Bulut')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Kaan')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Kaan Bulut')">🗑️</button></td></tr>
+
+<tr data-role="Kasiyer"><td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626);width:40px;height:40px;">NK</div><div><div style="font-weight:600;">Nazlı Kılıç</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 479 00 11 22</div></div></div></td>
+<td><span class="role-badge role-kasiyer">Kasiyer</span></td>
+<td>Rezervasyon, Ödeme, Müşteri Hizmetleri</td>
+<td><div class="schedule-mini"><div class="schedule-day on">P</div><div class="schedule-day on">S</div><div class="schedule-day on">Ç</div><div class="schedule-day on">P</div><div class="schedule-day on">C</div><div class="schedule-day on">Ct</div><div class="schedule-day on">Pz</div></div></td>
+<td><span class="dur-badge">09:00 — 21:00</span></td>
+<td><span class="appt-count-badge" style="background:linear-gradient(135deg,#ef4444,#dc2626);">—</span></td>
+<td><span class="price-tag">€1,850</span></td>
+<td><div class="rating-bar"><span class="stars">★★★★☆</span><span class="score">4.6</span></div></td>
+<td><button class="status-toggle-btn on" onclick="toggleStaffStatus(this)"></button></td>
+<td><button class="btn btn-sm btn-ghost" onclick="editStaff('Nazlı Kılıç')">✏️</button> <button class="btn btn-sm btn-ghost" onclick="openStaffSchedule('Nazlı')">📅</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteStaff('Nazlı Kılıç')">🗑️</button></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Performance Section -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:var(--space-5);margin-top:var(--space-6);">
+
+<!-- Commission Tracking -->
+<div class="card">
+<div class="card-header">
+<div>
+<div class="card-title">💰 Komisyon Takibi — Mayıs 2026</div>
+<div class="card-subtitle">Personel bazlı komisyon dağılımı (%20 standart)</div>
+</div>
+</div>
+<div class="comm-row">
+<div style="display:flex;align-items:center;gap:var(--space-3);">
+<div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);width:32px;height:32px;font-size:var(--text-xs);">HK</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Hasan Korkmaz</div><div style="font-size:var(--text-xs);color:var(--text-muted);">171 randevu · €3,420 gelir</div></div>
+</div>
+<div style="text-align:right;"><div style="font-weight:700;color:var(--violet-400);">€684</div><div style="font-size:var(--text-xs);color:var(--text-muted);">%20 komisyon</div></div>
+</div>
+<div class="comm-row">
+<div style="display:flex;align-items:center;gap:var(--space-3);">
+<div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:32px;height:32px;font-size:var(--text-xs);">SO</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Selin Öztürk</div><div style="font-size:var(--text-xs);color:var(--text-muted);">68 randevu · €4,120 gelir</div></div>
+</div>
+<div style="text-align:right;"><div style="font-weight:700;color:var(--violet-400);">€824</div><div style="font-size:var(--text-xs);color:var(--text-muted);">%20 komisyon</div></div>
+</div>
+<div class="comm-row">
+<div style="display:flex;align-items:center;gap:var(--space-3);">
+<div class="avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);width:32px;height:32px;font-size:var(--text-xs);">MA</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Mehmet Aydın</div><div style="font-size:var(--text-xs);color:var(--text-muted);">144 randevu · €2,890 gelir</div></div>
+</div>
+<div style="text-align:right;"><div style="font-weight:700;color:var(--violet-400);">€578</div><div style="font-size:var(--text-xs);color:var(--text-muted);">%20 komisyon</div></div>
+</div>
+<div class="comm-row">
+<div style="display:flex;align-items:center;gap:var(--space-3);">
+<div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669);width:32px;height:32px;font-size:var(--text-xs);">AY</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Ali Yılmaz</div><div style="font-size:var(--text-xs);color:var(--text-muted);">128 randevu · €2,560 gelir</div></div>
+</div>
+<div style="text-align:right;"><div style="font-weight:700;color:var(--violet-400);">€512</div><div style="font-size:var(--text-xs);color:var(--text-muted);">%20 komisyon</div></div>
+</div>
+<div style="margin-top:var(--space-4);padding:var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-md);display:flex;justify-content:space-between;align-items:center;">
+<div style="font-weight:600;">Toplam Komisyon Dağıtımı</div>
+<div style="font-size:var(--text-xl);font-weight:700;color:#a78bfa;">€4,936</div>
+</div>
+</div>
+
+<!-- Top Performers -->
+<div class="card">
+<div class="card-header">
+<div>
+<div class="card-title">🏆 Bu Ayın Yıldızları</div>
+<div class="card-subtitle">Müşteri puanı ve gelire göre sıralama</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:var(--space-3);">
+<div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3);background:rgba(139,92,246,0.08);border:1.5px solid rgba(139,92,246,0.3);border-radius:var(--radius-lg);position:relative;">
+<span class="top-performer">🥇 1.</span>
+<div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);width:48px;height:48px;">HK</div>
+<div style="flex:1;">
+<div style="font-weight:600;">Hasan Korkmaz</span> <span class="role-badge role-usta">Usta Berber</span></div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:2px;">171 randevu · €3,420 · 4.9 ⭐</div>
+</div>
+<div style="font-size:var(--text-2xl);font-weight:700;color:#a78bfa;">€684</div>
+</div>
+<div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3);background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.3);border-radius:var(--radius-lg);position:relative;">
+<span class="top-performer" style="background:linear-gradient(135deg,#94a3b8,#64748b);">🥈 2.</span>
+<div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:48px;height:48px;">SO</div>
+<div style="flex:1;">
+<div style="font-weight:600;">Selin Öztürk</span> <span class="role-badge role-colorist">Colorist</span></div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:2px;">68 randevu · €4,120 · 4.9 ⭐</div>
+</div>
+<div style="font-size:var(--text-2xl);font-weight:700;color:#f59e0b;">€824</div>
+</div>
+<div style="display:flex;align-items:center;gap:var(--space-4);padding:var(--space-3);background:rgba(16,185,129,0.08);border:1.5px solid rgba(16,185,129,0.3);border-radius:var(--radius-lg);position:relative;">
+<span class="top-performer" style="background:linear-gradient(135deg,#b45309,#92400e);">🥉 3.</span>
+<div class="avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);width:48px;height:48px;">MA</div>
+<div style="flex:1;">
+<div style="font-weight:600;">Mehmet Aydın</span> <span class="role-badge role-usta">Usta Berber</span></div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:2px;">144 randevu · €2,890 · 4.7 ⭐</div>
+</div>
+<div style="font-size:var(--text-2xl);font-weight:700;color:#10b981;">€578</div>
+</div>
+</div>
+</div>
+
+</div>
+
+</div><!-- /page -->
+
+<!-- ===== FOOTER ===== -->
+<div class="bp-footer">
+<div class="bp-footer-grid">
+<div>
+<div class="bp-footer-brand bp-brand-text">BarberPro</div>
+<div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:var(--space-2);">Profesyonel berber ve kuaför salonu yönetimi.</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-1);">Bruxelles, Belçika</div>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Platform</div>
+<a href="barberpro-dashboard.html" class="bp-footer-link">Dashboard</a>
+<a href="barberpro-appointments.html" class="bp-footer-link">Randevular</a>
+<a href="barberpro-services.html" class="bp-footer-link">Hizmetler</a>
+<a href="barberpro-staff.html" class="bp-footer-link">Personel</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Diğer Ürünler</div>
+<a href="cleanfix-dashboard.html" class="bp-footer-link">🧹 CleanFix — Temizlik</a>
+<a href="buildpro-dashboard.html" class="bp-footer-link">🏗️ BuildPro — İnşaat</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Destek</div>
+<a href="barberpro-help.html" class="bp-footer-link">Yardım Merkezi</a>
+<a href="barberpro-settings.html" class="bp-footer-link">Ayarlar</a>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-3);">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+</div>
+</div>
+</div>
+
+</main>
+</div><!-- /dashboard -->
+
+<!-- ========== ADD STAFF MODAL ========== -->
+<div class="modal-overlay" id="addStaffModal" onclick="closeModalOnOverlay(event,'addStaffModal')"><div class="modal" onclick="event.stopPropagation()">
+<div class="modal-header"><div class="modal-title">🧑‍💼 Yeni Personel Ekle</div><button class="modal-close" onclick="closeModal('addStaffModal')">✕</button></div>
+<div class="modal-body">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+<div class="form-group"><label class="form-label">Ad *</label><input type="text" class="form-input bp-focus" placeholder="Ad"></div>
+<div class="form-group"><label class="form-label">Soyad *</label><input type="text" class="form-input bp-focus" placeholder="Soyad"></div>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Telefon</label><input type="tel" class="form-input bp-focus" placeholder="+32 ..."></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-top:var(--space-4);">
+<div class="form-group"><label class="form-label">Görev *</label>
+<select class="form-select bp-focus"><option>Usta Berber</option><option>Kuaför</option><option>Colorist</option><option>Manikürcü</option><option>Asistan</option><option>Stajyer</option><option>Kasiyer</option></select>
+</div>
+<div class="form-group"><label class="form-label">Başlangıç Tarihi</label><input type="date" class="form-input bp-focus" value="2026-05-15"></div>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Uzmanlık Alanları</label><input type="text" class="form-input bp-focus" placeholder="Örn: Saç Kesim, Sakal, Boyama"></div>
+<div class="form-group" style="margin-top:var(--space-4);"><label class="form-label">Çalışma Saatleri</label>
+<div class="time-range"><input type="time" class="form-input bp-focus" value="09:00"><span>—</span><input type="time" class="form-input bp-focus" value="19:00"></div>
+</div>
+<div style="margin-top:var(--space-4);"><label class="form-label">Çalışma Günleri</label>
+<div class="schedule-grid" style="margin-top:var(--space-2);">
+<div class="schedule-cell active" onclick="toggleScheduleDay(this)"><div class="day-name">Pzt</div><div class="hours">09-19</div></div>
+<div class="schedule-cell active" onclick="toggleScheduleDay(this)"><div class="day-name">Sal</div><div class="hours">09-19</div></div>
+<div class="schedule-cell active" onclick="toggleScheduleDay(this)"><div class="day-name">Çar</div><div class="hours">09-19</div></div>
+<div class="schedule-cell active" onclick="toggleScheduleDay(this)"><div class="day-name">Per</div><div class="hours">09-19</div></div>
+<div class="schedule-cell active" onclick="toggleScheduleDay(this)"><div class="day-name">Cum</div><div class="hours">09-19</div></div>
+<div class="schedule-cell" onclick="toggleScheduleDay(this)"><div class="day-name">Cmt</div><div class="hours">Kapalı</div></div>
+<div class="schedule-cell" onclick="toggleScheduleDay(this)"><div class="day-name">Paz</div><div class="hours">Kapalı</div></div>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-4);">
+<label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-label">Komisyon (%20)</span></label>
+<label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span><span class="toggle-label">Aktif</span></label>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addStaffModal')">İptal</button><button class="btn btn-purple" onclick="saveStaff()">💾 Personel Ekle</button></div>
+</div></div>
+
+<!-- ========== STAFF SCHEDULE MODAL ========== -->
+<div class="modal-overlay" id="scheduleModal" onclick="closeModalOnOverlay(event,'scheduleModal')"><div class="modal modal-lg" onclick="event.stopPropagation()">
+<div class="modal-header"><div class="modal-title">📅 Çalışma Takvimi — Tüm Personel</div><button class="modal-close" onclick="closeModal('scheduleModal')">✕</button></div>
+<div class="modal-body">
+<div style="overflow-x:auto;">
+<table class="table">
+<thead><tr><th>Personel</th><th>Pzt</th><th>Sal</th><th>Çar</th><th>Per</th><th>Cum</th><th>Cmt</th><th>Paz</th></tr></thead>
+<tbody>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);width:28px;height:28px;font-size:10px;">HK</div><strong style="font-size:var(--text-sm);">Hasan K.</strong></div></td>
+<td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);width:28px;height:28px;font-size:10px;">MA</div><strong style="font-size:var(--text-sm);">Mehmet A.</strong></div></td>
+<td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669);width:28px;height:28px;font-size:10px;">AY</div><strong style="font-size:var(--text-sm);">Ali Y.</strong></div></td>
+<td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-success">10-20</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);width:28px;height:28px;font-size:10px;">SO</div><strong style="font-size:var(--text-sm);">Selin O.</strong></div></td>
+<td><span class="badge badge-success">09-20</span></td><td><span class="badge badge-success">09-20</span></td><td><span class="badge badge-success">09-20</span></td><td><span class="badge badge-success">09-20</span></td><td><span class="badge badge-success">09-20</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);width:28px;height:28px;font-size:10px;">BT</div><strong style="font-size:var(--text-sm);">Burak T.</strong></div></td>
+<td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-success">09-19</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);width:28px;height:28px;font-size:10px;">CK</div><strong style="font-size:var(--text-sm);">Ceren K.</strong></div></td>
+<td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa);width:28px;height:28px;font-size:10px;">EU</div><strong style="font-size:var(--text-sm);">Emre U.</strong></div></td>
+<td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-success">09-18</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#94a3b8,#64748b);width:28px;height:28px;font-size:10px;">SC</div><strong style="font-size:var(--text-sm);">Sena Ç.</strong></div></td>
+<td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#64748b,#475569);width:28px;height:28px;font-size:10px;">KB</div><strong style="font-size:var(--text-sm);">Kaan B.</strong></div></td>
+<td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-success">09-15</span></td><td><span class="badge badge-neutral">Kapalı</span></td><td><span class="badge badge-neutral">Kapalı</span></td></tr>
+<tr><td><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626);width:28px;height:28px;font-size:10px;">NK</div><strong style="font-size:var(--text-sm);">Nazlı K.</strong></div></td>
+<td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td><td><span class="badge badge-success">09-21</span></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('scheduleModal')">Kapat</button></div>
+</div></div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('mobile-open'); }
+function openModal(id){ document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+function closeModalOnOverlay(e,id){ if(e.target===document.getElementById(id)) closeModal(id); }
+function filterRole(role){
+  document.querySelectorAll('.role-pill').forEach(p=>p.classList.remove('active'));
+  document.querySelector('[data-role="'+role+'"]').classList.add('active');
+  const rows = document.querySelectorAll('#staffTable tbody tr');
+  rows.forEach(row=>{ row.style.display = (role==='all'||row.dataset.role===role)?'':'none'; });
+}
+function filterStaff(){
+  const term = document.getElementById('staffSearch').value.toLowerCase();
+  const rows = document.querySelectorAll('#staffTable tbody tr');
+  rows.forEach(row=>{ row.style.display = row.textContent.toLowerCase().includes(term)?'':'none'; });
+}
+function sortStaff(by){
+  showToast('info','Sıralama','Personel '+by+' göre sıralandı (demo)');
+}
+function toggleStaffStatus(btn){
+  btn.classList.toggle('on'); btn.classList.toggle('off');
+  showToast('info','Durum Değişti','Personel '+(btn.classList.contains('on')?'Aktif':'Pasif')+' yapıldı');
+}
+function toggleScheduleDay(el){
+  el.classList.toggle('active');
+  const hours = el.querySelector('.hours');
+  hours.textContent = el.classList.contains('active')?'09-19':'Kapalı';
+}
+function openStaffSchedule(name){
+  showToast('info','Takvim',name+' çalışma takvimi görüntüleniyor');
+  openModal('scheduleModal');
+}
+function editStaff(name){
+  showToast('info','Düzenleme',name+' düzenleme modunda (demo)');
+  openModal('addStaffModal');
+}
+function deleteStaff(name){
+  if(!confirm(name+' personel kaydını silmek istediğinize emin misiniz?')) return;
+  showToast('warning','Personel Silindi',name+' silindi');
+}
+function saveStaff(){
+  closeModal('addStaffModal');
+  showToast('success','Personel Eklendi','Yeni personel eklendi');
+}
+function toggleTheme(){
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme')||'dark';
+  html.setAttribute('data-theme', current==='dark'?'light':'dark');
+}
+function showNotifications(){ showToast('info','Bildirimler','1 yeni bildirim (demo)'); }
+function showToast(type,title,message){
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className='toast toast-'+type;
+  const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  toast.innerHTML='<div class="toast-icon">'+icons[type]+'</div><div class="toast-content"><div class="toast-title">'+title+'</div><div class="toast-message">'+message+'</div></div><button class="toast-close" onclick="this.parentElement.remove()">✕</button><div class="toast-progress"></div>';
+  container.appendChild(toast);
+  setTimeout(()=>{ toast.classList.add('exit'); setTimeout(()=>toast.remove(),400); },4000);
+}
+// Mobile overlay
+const overlay = document.createElement('div'); overlay.className='sidebar-overlay'; overlay.onclick=()=>{ document.getElementById('sidebar').classList.remove('mobile-open'); overlay.classList.remove('active'); }; document.body.appendChild(overlay);
+const origToggle = toggleSidebar;
+toggleSidebar = function(){ document.getElementById('sidebar').classList.toggle('mobile-open'); overlay.classList.toggle('active'); };
+</script>
+</body>
+</html>

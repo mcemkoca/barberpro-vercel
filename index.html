@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Berber ve Kuaför Salonu Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<style>
+/* ── Purple Theme Overrides ── */
+:root, [data-theme="dark"] {
+  --teal-50: #f5f3ff;
+  --teal-100: #ede9fe;
+  --teal-200: #ddd6fe;
+  --teal-300: #c4b5fd;
+  --teal-400: #a78bfa;
+  --teal-500: #8b5cf6;
+  --teal-600: #7c3aed;
+  --teal-700: #6d28d9;
+  --teal-800: #5b21b6;
+  --teal-900: #4c1d95;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --shadow-glow: rgba(139,92,246,0.25);
+}
+[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+
+/* ── Landing-specific ── */
+.landing-hero {
+  position:relative; min-height:100vh; display:flex; align-items:center;
+  overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:0;
+  background:linear-gradient(135deg,#0b1120 0%,#1e1b4b 50%,#0b1120 100%);
+  background-size:400% 400%;
+  animation:heroGradient 16s ease infinite;
+}
+.hero-bg::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(139,92,246,0.18) 0%,transparent 60%),
+             radial-gradient(ellipse at 70% 80%,rgba(167,139,250,0.12) 0%,transparent 60%);
+}
+.hero-bg::after {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%238b5cf6' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity:0.6;
+}
+.hero-glow-orb {
+  position:absolute; border-radius:50%; filter:blur(80px); z-index:1;
+}
+.orb-1 { width:400px; height:400px; top:-10%; left:-5%; background:rgba(139,92,246,0.2); animation:gradientMove 12s ease-in-out infinite; }
+.orb-2 { width:300px; height:300px; bottom:10%; right:5%; background:rgba(167,139,250,0.15); animation:gradientMove 15s ease-in-out infinite 3s; }
+.orb-3 { width:250px; height:250px; top:40%; left:60%; background:rgba(124,58,237,0.1); animation:gradientMove 18s ease-in-out infinite 6s; }
+
+.hero-content { position:relative; z-index:10; width:100%; max-width:1200px; margin:0 auto; padding:0 24px; }
+.hero-row { display:flex; align-items:center; gap:48px; }
+.hero-text { flex:1.2; }
+.hero-visual { flex:1; position:relative; }
+
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 14px; border-radius:9999px;
+  background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25);
+  color:var(--teal-400); font-size:0.875rem; font-weight:500; margin-bottom:24px;
+}
+.hero-badge .pulse-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--teal-500);
+  position:relative;
+}
+.hero-badge .pulse-dot::after {
+  content:''; position:absolute; inset:-4px; border-radius:50%;
+  background:var(--teal-500); opacity:0.4; animation:pulse 2s ease-in-out infinite;
+}
+
+.hero-title {
+  font-size:3.5rem; font-weight:800; line-height:1.1; letter-spacing:-0.03em;
+  color:#f1f5f9; margin-bottom:20px;
+}
+.hero-title .gradient-text {
+  background:linear-gradient(135deg,#a78bfa 0%,#8b5cf6 50%,#c4b5fd 100%);
+  background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation:heroGradient 6s ease infinite;
+}
+.hero-desc {
+  font-size:1.125rem; line-height:1.7; color:var(--text-secondary); max-width:540px; margin-bottom:32px;
+}
+.hero-buttons { display:flex; gap:12px; flex-wrap:wrap; }
+
+.hero-card-stack {
+  position:relative; width:100%; max-width:440px; margin-left:auto;
+}
+.hero-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-xl);
+  padding:20px; box-shadow:var(--shadow-xl); position:absolute;
+  transition:transform 0.6s var(--ease-spring);
+}
+.hero-card:nth-child(1) { top:0; right:0; width:100%; z-index:3; }
+.hero-card:nth-child(2) { top:24px; right:16px; width:92%; z-index:2; opacity:0.7; transform:scale(0.95); }
+.hero-card:nth-child(3) { top:48px; right:32px; width:84%; z-index:1; opacity:0.4; transform:scale(0.9); }
+
+.hero-card-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.hero-card-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-400),var(--teal-600));
+  display:flex; align-items:center; justify-content:center; font-weight:600; color:white; font-size:0.875rem;
+}
+.hero-card-info { flex:1; }
+.hero-card-name { font-size:0.875rem; font-weight:600; color:var(--text-primary); }
+.hero-card-time { font-size:0.75rem; color:var(--text-muted); }
+.hero-card-badge {
+  padding:3px 10px; border-radius:9999px; font-size:0.7rem; font-weight:600;
+  background:rgba(139,92,246,0.15); color:var(--teal-400);
+}
+.hero-card-body { font-size:0.8rem; color:var(--text-secondary); line-height:1.5; }
+
+.appointment-slot {
+  display:flex; align-items:center; gap:8px; padding:6px 10px;
+  background:var(--bg-secondary); border-radius:var(--radius-md); margin-top:8px; font-size:0.75rem;
+}
+.appointment-slot .time { font-weight:600; color:var(--text-primary); }
+.appointment-slot .service { color:var(--text-muted); }
+
+/* ── Navbar ── */
+.landing-nav {
+  position:fixed; top:0; left:0; right:0; z-index:1000;
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 24px; max-width:1200px; margin:0 auto;
+  transition:background var(--duration-normal), box-shadow var(--duration-normal);
+}
+.landing-nav.scrolled {
+  background:rgba(11,17,32,0.85); backdrop-filter:blur(16px);
+  box-shadow:0 4px 24px rgba(0,0,0,0.2);
+}
+.nav-brand {
+  display:flex; align-items:center; gap:10px; font-size:1.25rem; font-weight:700; color:#f1f5f9;
+}
+.nav-brand-icon {
+  width:36px; height:36px; border-radius:var(--radius-md);
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  display:flex; align-items:center; justify-content:center; color:white; font-weight:700;
+}
+.nav-links { display:flex; gap:28px; align-items:center; }
+.nav-links a { font-size:0.875rem; font-weight:500; color:var(--text-secondary); transition:color var(--duration-fast); }
+.nav-links a:hover { color:#f1f5f9; }
+.nav-cta {
+  padding:8px 18px; border-radius:var(--radius-md);
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+  font-size:0.875rem; font-weight:600; transition:all var(--duration-fast);
+}
+.nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(139,92,246,0.4); }
+.nav-toggle { display:none; background:none; border:none; color:#f1f5f9; font-size:1.5rem; cursor:pointer; }
+
+/* ── Sections ── */
+.section { padding:80px 24px; }
+.section-header { text-align:center; margin-bottom:48px; }
+.section-tag {
+  display:inline-block; padding:4px 12px; border-radius:9999px;
+  background:rgba(139,92,246,0.12); color:var(--teal-400); font-size:0.75rem; font-weight:600;
+  text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;
+}
+.section-title { font-size:2.25rem; font-weight:700; color:#f1f5f9; letter-spacing:-0.02em; margin-bottom:12px; }
+.section-desc { font-size:1rem; color:var(--text-secondary); max-width:560px; margin:0 auto; line-height:1.6; }
+
+.container-landing { width:100%; max-width:1200px; margin:0 auto; }
+
+/* ── Feature Cards ── */
+.features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.feature-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:28px; transition:all var(--duration-normal);
+}
+.feature-card:hover {
+  transform:translateY(-4px); border-color:rgba(139,92,246,0.3);
+  box-shadow:0 12px 32px rgba(0,0,0,0.2),0 0 0 1px rgba(139,92,246,0.1);
+}
+.feature-icon {
+  width:48px; height:48px; border-radius:var(--radius-md);
+  background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1));
+  display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:16px;
+  color:var(--teal-400);
+}
+.feature-title { font-size:1.125rem; font-weight:600; color:#f1f5f9; margin-bottom:8px; }
+.feature-desc { font-size:0.875rem; color:var(--text-secondary); line-height:1.6; }
+
+/* ── Sub-sectors ── */
+.sectors-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
+.sector-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:24px; text-align:center; transition:all var(--duration-normal); cursor:pointer;
+}
+.sector-card:hover {
+  transform:translateY(-4px); border-color:rgba(139,92,246,0.4);
+  box-shadow:0 8px 24px rgba(139,92,246,0.12);
+}
+.sector-icon { font-size:2rem; margin-bottom:12px; }
+.sector-name { font-size:0.9375rem; font-weight:600; color:#f1f5f9; margin-bottom:4px; }
+.sector-count { font-size:0.75rem; color:var(--text-muted); }
+
+/* ── Testimonials ── */
+.testimonials-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.testimonial-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:28px; transition:all var(--duration-normal);
+}
+.testimonial-card:hover { border-color:rgba(139,92,246,0.25); }
+.testimonial-stars { color:var(--amber-500); font-size:1rem; margin-bottom:12px; letter-spacing:2px; }
+.testimonial-text { font-size:0.9375rem; color:var(--text-secondary); line-height:1.7; margin-bottom:20px; font-style:italic; }
+.testimonial-author { display:flex; align-items:center; gap:12px; }
+.testimonial-avatar {
+  width:44px; height:44px; border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-400),var(--teal-600));
+  display:flex; align-items:center; justify-content:center; color:white; font-weight:600;
+}
+.testimonial-name { font-size:0.875rem; font-weight:600; color:#f1f5f9; }
+.testimonial-role { font-size:0.75rem; color:var(--text-muted); }
+
+/* ── Pricing ── */
+.pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; align-items:start; }
+.pricing-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-xl);
+  padding:32px; transition:all var(--duration-normal); position:relative;
+}
+.pricing-card.featured {
+  border-color:rgba(139,92,246,0.5);
+  box-shadow:0 0 40px rgba(139,92,246,0.1),0 8px 24px rgba(0,0,0,0.2);
+  transform:scale(1.03);
+}
+.pricing-card:hover { border-color:rgba(139,92,246,0.4); }
+.pricing-badge {
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  padding:4px 14px; border-radius:9999px;
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+  font-size:0.75rem; font-weight:600;
+}
+.pricing-name { font-size:1.25rem; font-weight:700; color:#f1f5f9; margin-bottom:4px; }
+.pricing-desc { font-size:0.875rem; color:var(--text-muted); margin-bottom:20px; }
+.pricing-price { font-size:2.5rem; font-weight:800; color:#f1f5f9; letter-spacing:-0.02em; }
+.pricing-price span { font-size:1rem; font-weight:500; color:var(--text-muted); }
+.pricing-features { margin:24px 0; display:flex; flex-direction:column; gap:10px; }
+.pricing-feature {
+  display:flex; align-items:center; gap:8px; font-size:0.875rem; color:var(--text-secondary);
+}
+.pricing-feature .check { color:var(--teal-500); font-weight:700; flex-shrink:0; }
+.pricing-cta {
+  width:100%; padding:12px; border-radius:var(--radius-md); font-size:0.9375rem; font-weight:600;
+  text-align:center; transition:all var(--duration-fast); border:none; cursor:pointer;
+}
+.pricing-cta-primary {
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+}
+.pricing-cta-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,92,246,0.4); }
+.pricing-cta-secondary {
+  background:var(--bg-elevated); color:var(--text-primary); border:1px solid var(--border-color);
+}
+.pricing-cta-secondary:hover { background:var(--bg-tertiary); border-color:var(--slate-600); }
+
+/* ── CTA Section ── */
+.cta-section {
+  position:relative; overflow:hidden;
+  background:linear-gradient(135deg,#1e1b4b 0%,#0b1120 100%);
+  border-radius:var(--radius-xl); padding:64px 32px; text-align:center;
+  border:1px solid rgba(139,92,246,0.2);
+}
+.cta-section::before {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(139,92,246,0.1) 0%,transparent 70%);
+}
+.cta-title { position:relative; font-size:2rem; font-weight:700; color:#f1f5f9; margin-bottom:12px; }
+.cta-desc { position:relative; font-size:1rem; color:var(--text-secondary); margin-bottom:28px; max-width:480px; margin-left:auto; margin-right:auto; }
+.cta-btn {
+  position:relative; display:inline-flex; align-items:center; gap:8px;
+  padding:14px 32px; border-radius:var(--radius-lg);
+  background:linear-gradient(135deg,#8b5cf6,#a78bfa); color:white;
+  font-size:1rem; font-weight:600; transition:all var(--duration-fast);
+}
+.cta-btn:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(139,92,246,0.4); }
+
+/* ── Footer ── */
+.landing-footer {
+  border-top:1px solid var(--border-color); padding:48px 24px 32px;
+  background:var(--bg-primary);
+}
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:32px; margin-bottom:32px; }
+.footer-brand { font-size:1.25rem; font-weight:700; color:#f1f5f9; display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.footer-brand-icon {
+  width:32px; height:32px; border-radius:var(--radius-md);
+  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.875rem;
+}
+.footer-desc { font-size:0.875rem; color:var(--text-muted); line-height:1.6; max-width:280px; }
+.footer-title { font-size:0.875rem; font-weight:600; color:#f1f5f9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em; }
+.footer-links { display:flex; flex-direction:column; gap:8px; }
+.footer-links a { font-size:0.875rem; color:var(--text-muted); transition:color var(--duration-fast); }
+.footer-links a:hover { color:var(--teal-400); }
+.footer-bottom {
+  border-top:1px solid var(--border-color); padding-top:24px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+}
+.footer-copy { font-size:0.75rem; color:var(--text-muted); }
+.footer-platforms { display:flex; gap:12px; }
+.footer-platform {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 12px; border-radius:var(--radius-md);
+  background:var(--bg-card); border:1px solid var(--border-color);
+  font-size:0.75rem; color:var(--text-secondary); transition:all var(--duration-fast);
+}
+.footer-platform:hover { border-color:var(--teal-500); color:var(--teal-400); }
+
+/* ── Responsive ── */
+@media (max-width:1024px) {
+  .hero-row { flex-direction:column; text-align:center; }
+  .hero-text { flex:none; }
+  .hero-visual { flex:none; width:100%; }
+  .hero-card-stack { margin:0 auto; margin-top:40px; }
+  .hero-desc { margin:0 auto 32px; }
+  .features-grid { grid-template-columns:repeat(2,1fr); }
+  .sectors-grid { grid-template-columns:repeat(3,1fr); }
+  .testimonials-grid { grid-template-columns:1fr; }
+  .pricing-grid { grid-template-columns:1fr; }
+  .pricing-card.featured { transform:none; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+}
+@media (max-width:768px) {
+  .hero-title { font-size:2.25rem; }
+  .section { padding:56px 16px; }
+  .section-title { font-size:1.75rem; }
+  .features-grid { grid-template-columns:1fr; }
+  .sectors-grid { grid-template-columns:repeat(2,1fr); }
+  .nav-links { display:none; }
+  .nav-toggle { display:block; }
+  .footer-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="landing-nav" id="navbar">
+  <a href="#" class="nav-brand">
+    <div class="nav-brand-icon">B</div>
+    BarberPro
+  </a>
+  <div class="nav-links">
+    <a href="#ozellikler">Özellikler</a>
+    <a href="#sektorler">Sektörler</a>
+    <a href="#fiyatlandirma">Fiyatlandırma</a>
+    <a href="#iletisim">İletişim</a>
+    <a href="dashboard.html" class="nav-cta">Demo'yu Dene</a>
+  </div>
+  <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
+</nav>
+
+<!-- Hero -->
+<section class="landing-hero" id="anasayfa">
+  <div class="hero-bg"></div>
+  <div class="hero-glow-orb orb-1"></div>
+  <div class="hero-glow-orb orb-2"></div>
+  <div class="hero-glow-orb orb-3"></div>
+
+  <div class="hero-content" style="padding-top:64px;">
+    <div class="hero-row">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          Yeni: Müşteri Portalı Artık Açık
+        </div>
+        <h1 class="hero-title">
+          BarberPro —<br>
+          <span class="gradient-text">Berber ve Kuaför<br>Salonu Yönetimi</span>
+        </h1>
+        <p class="hero-desc">
+          Randevuları, personeli, stoku ve sadakat programını tek bir platformdan yönetin.
+          Belçika'nın en modern berber ve kuaför salonlarının tercihi.
+        </p>
+        <div class="hero-buttons">
+          <a href="dashboard.html" class="btn btn-xl" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;box-shadow:0 4px 14px rgba(139,92,246,0.35);">
+            Ücretsiz Demo'yu Dene →
+          </a>
+          <a href="#ozellikler" class="btn btn-xl btn-secondary">Nasıl Çalışır?</a>
+        </div>
+        <div style="margin-top:28px; display:flex; gap:24px; color:var(--text-muted); font-size:0.875rem;">
+          <div>✓ 14 günlük ücretsiz deneme</div>
+          <div>✓ Kredi kartı gerekmez</div>
+          <div>✓ 2 dakikada kurulum</div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-card-stack">
+          <div class="hero-card" style="position:relative;">
+            <div class="hero-card-header">
+              <div class="hero-card-avatar">JD</div>
+              <div class="hero-card-info">
+                <div class="hero-card-name">Jean Dupont</div>
+                <div class="hero-card-time">14:30 — Saç Kesimi</div>
+              </div>
+              <div class="hero-card-badge">Bekliyor</div>
+            </div>
+            <div class="hero-card-body">
+              <div style="display:flex; gap:8px; margin-bottom:8px;">
+                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);">Usta Berber: Mehmet K.</span>
+                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);">İstasyon 3</span>
+              </div>
+              <div class="appointment-slot">
+                <span class="time">14:30</span>
+                <span class="service">Saç Kesimi — €25</span>
+              </div>
+              <div class="appointment-slot">
+                <span class="time">15:00</span>
+                <span class="service">Sakal Düzeltme — €15</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-card"></div>
+          <div class="hero-card"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="ozellikler">
+  <div class="container-landing">
+    <div class="section-header">
+      <div class="section-tag">Özellikler</div>
+      <h2 class="section-title">Salonunuzu Baştan Aşağı Dönüştürün</h2>
+      <p class="section-desc">
+        BarberPro, berber ve kuaför salonlarının günlük operasyonlarını otomatikleştirir,
+        müşteri memnuniyetini artırır ve geliri maksimize eder.
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📅</div>
+        <div class="feature-title">Online Randevu</div>
+        <div class="feature-desc">Müşterileriniz 7/24 web veya mobil üzerinden randevu alır. SMS ve WhatsApp hatırlatmaları otomatik gönderilir. Boş slotları anlık görün.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <div class="feature-title">Personel Yönetimi</div>
+        <div class="feature-desc">Usta berber, kuaför, colorist ve asistanların çalışma saatlerini, izinlerini ve performansını takip edin. Komisyon hesaplamaları otomatik.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💎</div>
+        <div class="feature-title">Sadakat Programı</div>
+        <div class="feature-desc">Bronze, Silver, Gold ve Platinum üyelik katmanları. Her işlemde puan kazanma, indirim kuponları ve özel gün hediyeleriyle müşteriyi elde tutun.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Stok Takibi</div>
+        <div class="feature-desc">Şampuan, jöle, wax, boya ve bakım ürünlerinin stok seviyelerini takip edin. Düşük stok uyarıları ve otomatik sipariş önerileri.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Finans Raporları</div>
+        <div class="feature-desc">Günlük, haftalık ve aylık gelir raporları. Hizmet bazlı karlılık analizi, personel performansına göre gelir dağılımı ve vergi hazırlık raporları.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🖥️</div>
+        <div class="feature-title">Müşteri Portalı</div>
+        <div class="feature-desc">Müşterileriniz geçmiş randevularını, puanlarını ve üyelik durumlarını görebilir. Kendi profillerini günceller ve yeni randevuları kolayca oluşturur.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sub-sectors -->
+<section class="section" style="background:var(--bg-secondary);" id="sektorler">
+  <div class="container-landing">
+    <div class="section-header">
+      <div class="section-tag">Sektörler</div>
+      <h2 class="section-title">Her Salon Tipine Uyarlanır</h2>
+      <p class="section-desc">BarberPro, farklı salon tiplerinin ihtiyaçlarına göre özelleştirilebilir modüller sunar.</p>
+    </div>
+    <div class="sectors-grid">
+      <div class="sector-card">
+        <div class="sector-icon">💈</div>
+        <div class="sector-name">Erkek Berberi</div>
+        <div class="sector-count">230+ salon</div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">💇‍♀️</div>
+        <div class="sector-name">Kadın Kuaförü</div>
+        <div class="sector-count">185+ salon</div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">✨</div>
+        <div class="sector-name">Güzellik Merkezi</div>
+        <div class="sector-count">92+ salon</div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">🏋️‍♂️</div>
+        <div class="sector-name">Spor Salonu Spa</div>
+        <div class="sector-count">47+ salon</div>
+      </div>
+      <div class="sector-card">
+        <div class="sector-icon">💅</div>
+        <div class="sector-name">Nail Art Stüdyosu</div>
+        <div class="sector-count">64+ salon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section" id="yorumlar">
+  <div class="container-landing">
+    <div class="section-header">
+      <div class="section-tag">Müşteri Yorumları</div>
+      <h2 class="section-title">Belçika'daki Salon Sahipleri Ne Diyor?</h2>
+      <p class="section-desc">Gerçek kullanıcıların deneyimleri.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">
+          "Brüksel'deki salonumuzda 4 usta berber çalışıyor. BarberPro sayesinde randevu kaçakları %80 azaldı.
+          Online rezervasyon sistemi müşterilerimizin en sevdiği özellik."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">PV</div>
+          <div>
+            <div class="testimonial-name">Pierre Van den Berghe</div>
+            <div class="testimonial-role">Sahip — Le Barbier Royal, Brüksel</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">
+          "Sadakat programı sayesinde müşteri tekrar oranımız %45'ten %72'ye çıktı.
+          Gold üyeler için özel gün indirimleri çok ilgi görüyor. Stok takibi de artık çok daha kolay."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">MD</div>
+          <div>
+            <div class="testimonial-name">Marie Dubois</div>
+            <div class="testimonial-role">Sahip — Coiffure Élégance, Gent</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">
+          "Antwerp'teki 2 şubemizi tek panelden yönetiyorum.
+          Finans raporları sayesinde hangi hizmetten ne kadar kazandığımı anlık görüyorum.
+          Personel performans takibi de ekibe motivasyon katıyor."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar">JM</div>
+          <div>
+            <div class="testimonial-name">Jan Martens</div>
+            <div class="testimonial-role">Sahip — Scheer Meester, Antwerp</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="section" style="background:var(--bg-secondary);" id="fiyatlandirma">
+  <div class="container-landing">
+    <div class="section-header">
+      <div class="section-tag">Fiyatlandırma</div>
+      <h2 class="section-title">İşletmenizin Büyüklüğüne Göre Plan Seçin</h2>
+      <p class="section-desc">Şeffaf fiyatlandırma, gizli maliyet yok. İstediğiniz zaman değiştirin veya iptal edin.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-name">Starter</div>
+        <div class="pricing-desc">Tek salon, küçük ekipler için</div>
+        <div class="pricing-price">€39<span>/ay</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> 1 salon lokasyonu</div>
+          <div class="pricing-feature"><span class="check">✓</span> 5 personele kadar</div>
+          <div class="pricing-feature"><span class="check">✓</span> Online randevu</div>
+          <div class="pricing-feature"><span class="check">✓</span> Temel raporlar</div>
+          <div class="pricing-feature"><span class="check">✓</span> E-posta desteği</div>
+          <div class="pricing-feature"><span class="check">✓</span> 100 SMS/ay</div>
+        </div>
+        <button class="pricing-cta pricing-cta-secondary">Başla</button>
+      </div>
+      <div class="pricing-card featured">
+        <div class="pricing-badge">En Popüler</div>
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-desc">Büyüyen salonlar için</div>
+        <div class="pricing-price">€89<span>/ay</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> 3 salon lokasyonu</div>
+          <div class="pricing-feature"><span class="check">✓</span> 20 personele kadar</div>
+          <div class="pricing-feature"><span class="check">✓</span> Sadakat programı</div>
+          <div class="pricing-feature"><span class="check">✓</span> Stok yönetimi</div>
+          <div class="pricing-feature"><span class="check">✓</span> Detaylı finans raporları</div>
+          <div class="pricing-feature"><span class="check">✓</span> WhatsApp entegrasyonu</div>
+          <div class="pricing-feature"><span class="check">✓</span> 500 SMS/ay</div>
+          <div class="pricing-feature"><span class="check">✓</span> Öncelikli destek</div>
+        </div>
+        <button class="pricing-cta pricing-cta-primary">Başla</button>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-name">Enterprise</div>
+        <div class="pricing-desc">Çok şubeli zincirler için</div>
+        <div class="pricing-price">€199<span>/ay</span></div>
+        <div class="pricing-features">
+          <div class="pricing-feature"><span class="check">✓</span> Sınırsız lokasyon</div>
+          <div class="pricing-feature"><span class="check">✓</span> Sınırsız personel</div>
+          <div class="pricing-feature"><span class="check">✓</span> Müşteri portalı (beyaz etiket)</div>
+          <div class="pricing-feature"><span class="check">✓</span> API erişimi</div>
+          <div class="pricing-feature"><span class="check">✓</span> Özel entegrasyonlar</div>
+          <div class="pricing-feature"><span class="check">✓</span> Sınırsız SMS</div>
+          <div class="pricing-feature"><span class="check">✓</span> 7/24 telefon desteği</div>
+          <div class="pricing-feature"><span class="check">✓</span> Özel eğitim</div>
+        </div>
+        <button class="pricing-cta pricing-cta-secondary">Satış Ekibiyle Konuş</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" id="iletisim">
+  <div class="container-landing">
+    <div class="cta-section">
+      <h2 class="cta-title">Bugün Başlayın — 14 Gün Ücretsiz</h2>
+      <p class="cta-desc">
+        Kredi kartı gerekmez. 2 dakikada hesabınızı oluşturun ve salonunuzu dijitalleştirmeye başlayın.
+      </p>
+      <a href="dashboard.html" class="cta-btn">
+        Ücretsiz Demo'yu Dene →
+      </a>
+      <p style="position:relative; margin-top:16px; font-size:0.875rem; color:var(--text-muted);">
+        Şu anda 500+ salon tarafından aktif olarak kullanılıyor
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+  <div class="container-landing">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <div class="footer-brand-icon">B</div>
+          BarberPro
+        </div>
+        <p class="footer-desc">
+          Berber ve kuaför salonlarının dijital dönüşüm ortağı.
+          Randevu, personel, stok ve sadakat — hepsi tek yerde.
+        </p>
+      </div>
+      <div>
+        <div class="footer-title">Ürün</div>
+        <div class="footer-links">
+          <a href="#ozellikler">Özellikler</a>
+          <a href="#fiyatlandirma">Fiyatlandırma</a>
+          <a href="#sektorler">Sektörler</a>
+          <a href="dashboard.html">Demo</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-title">Şirket</div>
+        <div class="footer-links">
+          <a href="#">Hakkımızda</a>
+          <a href="#">Blog</a>
+          <a href="#">Kariyer</a>
+          <a href="#">İletişim</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-title">Yasal</div>
+        <div class="footer-links">
+          <a href="#">Gizlilik Politikası</a>
+          <a href="#">Kullanım Koşulları</a>
+          <a href="#">GDPR Uyumu</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+      <div class="footer-platforms">
+        <a href="https://cleanfix-demo.vercel.app" class="footer-platform" target="_blank">
+          🧹 CleanFix
+        </a>
+        <a href="https://buildpro-demo.vercel.app" class="footer-platform" target="_blank">
+          🏗️ BuildPro
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Navbar scroll effect
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Mobile menu (simple toggle)
+function toggleMobileMenu() {
+  alert('Mobil menü: Özellikler, Fiyatlandırma, Demo bağlantıları');
+}
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.feature-card, .sector-card, .testimonial-card, .pricing-card');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+reveals.forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  observer.observe(el);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Randevu Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<link rel="stylesheet" href="css/barberpro.css">
+<style>
+/* Inline purple overrides for dynamic elements */
+.bp-active { background: linear-gradient(135deg,#8b5cf6,#7c3aed)!important; color:#fff!important; box-shadow:0 4px 14px rgba(139,92,246,0.35)!important; }
+.bp-focus:focus { border-color:#8b5cf6!important; box-shadow:0 0 0 3px rgba(139,92,246,0.25)!important; }
+.view-btn.active { background: linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; }
+/* Calendar specific */
+.cal-grid-bp { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border-color); border-radius:var(--radius-lg); overflow:hidden; }
+.cal-cell-bp { background:var(--bg-card); aspect-ratio:1; padding:var(--space-2); position:relative; cursor:pointer; transition:all var(--duration-fast); min-height:100px; }
+.cal-cell-bp:hover:not(.empty):not(.selected) { background:var(--bg-tertiary); }
+.cal-cell-bp.empty { background:var(--bg-secondary); cursor:default; }
+.cal-cell-bp.selected { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; }
+.cal-cell-bp.today { box-shadow:inset 0 0 0 2px #8b5cf6; }
+.cal-cell-bp .cal-day-num { font-size:var(--text-sm); font-weight:600; }
+.cal-cell-bp .cal-appt-dots { position:absolute; bottom:6px; left:50%; transform:translateX(-50%); display:flex; gap:3px; }
+.cal-cell-bp .cal-appt-dot { width:6px; height:6px; border-radius:50%; }
+.appt-mini-card { font-size:10px; padding:2px 6px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* Day view appointment positioning */
+.day-appt-bp { position:absolute; left:4px; right:4px; border-radius:var(--radius-md); padding:var(--space-2) var(--space-3); font-size:var(--text-xs); cursor:pointer; overflow:hidden; transition:transform var(--duration-fast),box-shadow var(--duration-fast); z-index:2; border-left:3px solid; }
+.day-appt-bp:hover { transform:scale(1.02); box-shadow:var(--shadow-lg); z-index:10; }
+.day-appt-bp .appt-title { font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.day-appt-bp .appt-meta { opacity:0.8; font-size:10px; }
+/* Mini appt in week view */
+.week-appt-mini { font-size:10px; padding:2px 4px; border-radius:4px; margin-bottom:1px; cursor:pointer; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; transition:transform var(--duration-fast); }
+.week-appt-mini:hover { transform:scale(1.03); z-index:5; }
+/* Filter bar */
+.filter-bar { display:flex; gap:var(--space-3); align-items:center; flex-wrap:wrap; margin-bottom:var(--space-4); }
+.filter-pill { display:flex; align-items:center; gap:6px; padding:6px 14px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); font-size:var(--text-sm); color:var(--text-secondary); cursor:pointer; transition:all var(--duration-fast); }
+.filter-pill:hover { border-color:var(--violet-500); color:var(--text-primary); }
+.filter-pill.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:transparent; }
+/* Quick stats row */
+.quick-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:var(--space-4); margin-bottom:var(--space-6); }
+@media(max-width:1024px){ .quick-stats { grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px){ .quick-stats { grid-template-columns:1fr; } }
+/* Staff filter chips */
+.staff-chip { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:9999px; font-size:var(--text-xs); font-weight:500; cursor:pointer; transition:all var(--duration-fast); border:1.5px solid var(--border-color); background:var(--bg-card); }
+.staff-chip:hover { border-color:#8b5cf6; }
+.staff-chip.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:transparent; }
+.staff-chip .chip-avatar { width:20px; height:20px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:600; }
+/* SMS toggle in modal */
+.sms-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:var(--space-3); background:var(--bg-secondary); border-radius:var(--radius-md); }
+/* Month view week header */
+.cal-week-header-bp { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; margin-bottom:0; }
+.cal-week-header-bp .cal-weekday { background:var(--bg-secondary); padding:var(--space-2); text-align:center; font-size:var(--text-xs); font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+/* Scroll container for day view */
+.day-scroll { max-height:600px; overflow-y:auto; }
+/* Modal form grid */
+.modal-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
+@media(max-width:600px){ .modal-form-grid { grid-template-columns:1fr; } }
+/* Payment type selector */
+.pay-type-opt { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); border:1.5px solid var(--border-color); border-radius:var(--radius-md); cursor:pointer; transition:all var(--duration-fast); }
+.pay-type-opt:hover { border-color:#8b5cf6; }
+.pay-type-opt.selected { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+/* Service multi-select */
+.svc-multi-item { display:flex; align-items:center; justify-content:space-between; padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); cursor:pointer; transition:all var(--duration-fast); border:1.5px solid transparent; }
+.svc-multi-item:hover { background:var(--bg-secondary); }
+.svc-multi-item.selected { border-color:#8b5cf6; background:rgba(139,92,246,0.08); }
+/* Appointment counter badge */
+.appt-count-badge { display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:20px; padding:0 6px; border-radius:9999px; background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; font-size:11px; font-weight:700; }
+/* Calendar nav buttons purple */
+.cal-nav-btn-bp { width:32px; height:32px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; color:var(--text-muted); background:var(--bg-secondary); border:none; cursor:pointer; transition:all var(--duration-fast); }
+.cal-nav-btn-bp:hover { color:#fff; background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+/* Time slot interval selector */
+.interval-btn { padding:4px 12px; border-radius:var(--radius-md); font-size:var(--text-xs); font-weight:600; border:1.5px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); cursor:pointer; transition:all var(--duration-fast); }
+.interval-btn:hover { border-color:#8b5cf6; }
+.interval-btn.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:#fff; border-color:transparent; }
+</style>
+</head>
+<body class="barberpro" data-theme="dark">
+<div class="dashboard">
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar" id="sidebar">
+<div class="sidebar-brand">
+<div class="sidebar-brand-icon bp-brand">BP</div>
+<span class="sidebar-brand-text bp-brand-text">BarberPro</span>
+</div>
+<nav class="sidebar-nav">
+<div class="sidebar-section">
+<div class="sidebar-section-title">Ana Menü</div>
+<a href="barberpro-dashboard.html" class="sidebar-link"><span class="icon">📊</span><span class="sidebar-text">Dashboard</span></a>
+<a href="barberpro-appointments.html" class="sidebar-link active"><span class="icon">📅</span><span class="sidebar-text">Randevular</span><span class="badge" style="margin-left:auto">28</span></a>
+<a href="barberpro-customers.html" class="sidebar-link"><span class="icon">👥</span><span class="sidebar-text">Müşteriler</span><span class="badge" style="margin-left:auto">142</span></a>
+<a href="barberpro-services.html" class="sidebar-link"><span class="icon">✂️</span><span class="sidebar-text">Hizmetler</span></a>
+<a href="barberpro-staff.html" class="sidebar-link"><span class="icon">🧑‍💼</span><span class="sidebar-text">Personel</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">İşletme</div>
+<a href="barberpro-reports.html" class="sidebar-link"><span class="icon">📈</span><span class="sidebar-text">Raporlar</span></a>
+<a href="barberpro-inventory.html" class="sidebar-link"><span class="icon">📦</span><span class="sidebar-text">Envanter</span></a>
+<a href="barberpro-marketing.html" class="sidebar-link"><span class="icon">📣</span><span class="sidebar-text">Pazarlama</span></a>
+</div>
+<div class="sidebar-section">
+<div class="sidebar-section-title">Sistem</div>
+<a href="barberpro-settings.html" class="sidebar-link"><span class="icon">⚙️</span><span class="sidebar-text">Ayarlar</span></a>
+<a href="barberpro-help.html" class="sidebar-link"><span class="icon">❓</span><span class="sidebar-text">Yardım</span></a>
+</div>
+</nav>
+<div class="sidebar-footer">
+<div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);">
+<div class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+<div style="overflow:hidden;">
+<div style="font-size:var(--text-sm);font-weight:600;white-space:nowrap;">Ahmet Demir</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);white-space:nowrap;">Salon Yöneticisi</div>
+</div>
+</div>
+</div>
+</aside>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main class="main" id="main">
+
+<!-- Header -->
+<header class="header">
+<div class="header-left">
+<button class="header-btn mobile-visible" id="menuToggle" onclick="toggleSidebar()" aria-label="Menü">☰</button>
+<div>
+<div class="header-title">Randevu Yönetimi</div>
+<div class="header-breadcrumb">BarberPro / Randevular</div>
+</div>
+</div>
+<div class="header-search" style="position:relative;width:280px;">
+<svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+<input type="text" id="globalSearch" placeholder="Müşteri, hizmet veya personel ara..." onkeyup="filterAppointments()">
+</div>
+<div class="header-right">
+<button class="header-btn" onclick="showNotifications()" aria-label="Bildirimler">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+<span class="badge-dot"></span>
+</button>
+<button class="header-btn" onclick="toggleTheme()" aria-label="Tema">🌙</button>
+<div class="header-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">AD</div>
+</div>
+</header>
+
+<!-- Page Content -->
+<div class="page">
+
+<!-- Page Header -->
+<div class="page-header">
+<div>
+<div class="page-title">📅 Randevu Yönetimi</div>
+<div class="page-subtitle">Bu hafta 28 randevu · 3 bekliyor · 2 işlemde</div>
+</div>
+<div class="page-actions">
+<button class="btn btn-purple" onclick="openModal('addModal')">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+Yeni Randevu
+</button>
+<button class="btn btn-secondary" onclick="exportAppointments()">📥 Dışa Aktar</button>
+</div>
+</div>
+
+<!-- Quick Stats -->
+<div class="quick-stats">
+<div class="card stat-card anim-fadeInUp" style="animation-delay:0.05s">
+<div class="stat-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;">📅</div>
+<div class="stat-value">28</div>
+<div class="stat-label">Bugünkü Randevu</div>
+<div class="stat-change up">↑ 12% geçen haftaya göre</div>
+</div>
+<div class="card stat-card anim-fadeInUp" style="animation-delay:0.1s">
+<div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">✅</div>
+<div class="stat-value">19</div>
+<div class="stat-label">Tamamlanan</div>
+<div class="stat-change up">↑ 8% bu ay</div>
+</div>
+<div class="card stat-card anim-fadeInUp" style="animation-delay:0.15s">
+<div class="stat-icon" style="background:rgba(249,115,22,0.15);color:#f97316;">⏰</div>
+<div class="stat-value">3</div>
+<div class="stat-label">Bekleyen</div>
+<div class="stat-change down">↑ 1 yeni</div>
+</div>
+<div class="card stat-card anim-fadeInUp" style="animation-delay:0.2s">
+<div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6;">💶</div>
+<div class="stat-value">€1,247</div>
+<div class="stat-label">Bugünkü Gelir</div>
+<div class="stat-change up">↑ 15% hedefe göre</div>
+</div>
+</div>
+
+<!-- Calendar Controls -->
+<div class="card" style="margin-bottom:var(--space-6);">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;margin-bottom:var(--space-4);">
+<div style="display:flex;align-items:center;gap:var(--space-3);">
+<button class="cal-nav-btn-bp" onclick="changeDate(-1)">◀</button>
+<div id="currentDateDisplay" style="font-weight:600;font-size:var(--text-lg);min-width:180px;text-align:center;">15 Mayıs 2026</div>
+<button class="cal-nav-btn-bp" onclick="changeDate(1)">▶</button>
+<button class="btn btn-sm btn-secondary" onclick="goToToday()" style="margin-left:var(--space-2);">Bugün</button>
+</div>
+<div style="display:flex;gap:var(--space-2);">
+<button class="view-btn active" id="btnDay" onclick="switchView('day')">Gün</button>
+<button class="view-btn" id="btnWeek" onclick="switchView('week')">Hafta</button>
+<button class="view-btn" id="btnMonth" onclick="switchView('month')">Ay</button>
+</div>
+</div>
+
+<!-- Staff Filter Chips -->
+<div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;margin-bottom:var(--space-3);">
+<span style="font-size:var(--text-xs);font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Personel:</span>
+<div class="staff-chip active" data-staff="all" onclick="filterByStaff('all')"><span>Tümü</span></div>
+<div class="staff-chip" data-staff="Hasan" onclick="filterByStaff('Hasan')"><div class="chip-avatar" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);">HK</div><span>Hasan K.</span></div>
+<div class="staff-chip" data-staff="Mehmet" onclick="filterByStaff('Mehmet')"><div class="chip-avatar" style="background:linear-gradient(135deg,#ec4899,#be185d);">MA</div><span>Mehmet A.</span></div>
+<div class="staff-chip" data-staff="Ali" onclick="filterByStaff('Ali')"><div class="chip-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">AY</div><span>Ali Y.</span></div>
+<div class="staff-chip" data-staff="Selin" onclick="filterByStaff('Selin')"><div class="chip-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">SO</div><span>Selin O.</span></div>
+<div class="staff-chip" data-staff="Burak" onclick="filterByStaff('Burak')"><div class="chip-avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">BT</div><span>Burak T.</span></div>
+</div>
+
+<!-- Status Filter -->
+<div style="display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;">
+<span style="font-size:var(--text-xs);font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Durum:</span>
+<div class="filter-pill active" data-status="all" onclick="filterByStatus('all')">Tümü <span class="appt-count-badge">28</span></div>
+<div class="filter-pill" data-status="Bekliyor" onclick="filterByStatus('Bekliyor')">Bekliyor <span class="appt-count-badge" style="background:var(--info-500);">3</span></div>
+<div class="filter-pill" data-status="Sırada" onclick="filterByStatus('Sırada')">Sırada <span class="appt-count-badge" style="background:var(--warning-500);">2</span></div>
+<div class="filter-pill" data-status="İşlemde" onclick="filterByStatus('İşlemde')">İşlemde <span class="appt-count-badge" style="background:var(--purple-500);">2</span></div>
+<div class="filter-pill" data-status="Tamamlandı" onclick="filterByStatus('Tamamlandı')">Tamamlandı <span class="appt-count-badge" style="background:var(--success-500);">19</span></div>
+<div class="filter-pill" data-status="İptal" onclick="filterByStatus('İptal')">İptal <span class="appt-count-badge" style="background:var(--error-500);">1</span></div>
+<div class="filter-pill" data-status="Gelmedi" onclick="filterByStatus('Gelmedi')">Gelmedi <span class="appt-count-badge" style="background:var(--slate-500);">1</span></div>
+</div>
+</div>
+
+<!-- ===== DAY VIEW ===== -->
+<div id="dayView" class="view-section">
+<div class="card" style="padding:0;overflow:hidden;">
+<div class="day-scroll">
+<div class="day-view" id="dayViewGrid">
+<!-- Time column -->
+<div class="day-time-col">
+<div class="day-time-row" style="height:48px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);font-weight:700;color:var(--text-primary);font-size:var(--text-sm);">Saat</div>
+<div class="day-time-row">09:00</div><div class="day-time-row">09:30</div>
+<div class="day-time-row">10:00</div><div class="day-time-row">10:30</div>
+<div class="day-time-row">11:00</div><div class="day-time-row">11:30</div>
+<div class="day-time-row">12:00</div><div class="day-time-row">12:30</div>
+<div class="day-time-row">13:00</div><div class="day-time-row">13:30</div>
+<div class="day-time-row">14:00</div><div class="day-time-row">14:30</div>
+<div class="day-time-row">15:00</div><div class="day-time-row">15:30</div>
+<div class="day-time-row">16:00</div><div class="day-time-row">16:30</div>
+<div class="day-time-row">17:00</div><div class="day-time-row">17:30</div>
+<div class="day-time-row">18:00</div><div class="day-time-row">18:30</div>
+<div class="day-time-row">19:00</div><div class="day-time-row">19:30</div>
+<div class="day-time-row">20:00</div><div class="day-time-row">20:30</div>
+</div>
+<!-- Content column -->
+<div class="day-content-col" id="dayContentCol" style="position:relative;min-height:2000px;">
+<div class="day-content-row" style="height:48px;border-bottom:1px solid var(--border-color);background:var(--bg-secondary);font-weight:700;color:var(--text-primary);font-size:var(--text-sm);display:flex;align-items:center;padding-left:var(--space-4);">
+<span>15 Mayıs 2026 Cuma</span>
+<span class="booking-walkin" style="margin-left:auto;margin-right:var(--space-4);">🚶 Walk-in: 8</span>
+<span class="booking-online" style="margin-right:var(--space-4);">💻 Online: 20</span>
+</div>
+<!-- Appointments positioned absolutely -->
+<div class="day-appt-bp status-tamamlandi-border" style="top:48px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(1)">
+<div class="appt-title">🇹🇷 Kemal Yılmaz — Saç Kesim</div>
+<div class="appt-meta">09:00-09:30 · Hasan · €25 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:88px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(2)">
+<div class="appt-title">🇧🇪 Jean Dupont — Sakal Traş</div>
+<div class="appt-meta">09:30-10:00 · Mehmet · €15 · Kart ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:128px;height:120px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(3)">
+<div class="appt-title">🇹🇷 Ayşe Kaya — Saç Boyama</div>
+<div class="appt-meta">10:00-12:00 · Selin · €60 · Online ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:128px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(4)">
+<div class="appt-title">🇧🇪 Lucas Peeters — Saç Kesim</div>
+<div class="appt-meta">10:00-10:30 · Ali · €25 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:248px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(5)">
+<div class="appt-title">🇹🇷 Fatma Şahin — Fön</div>
+<div class="appt-meta">11:00-11:30 · Selin · €20 · Kart ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:248px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(6)">
+<div class="appt-title">🇧🇪 Marie Dubois — Manikür</div>
+<div class="appt-meta">11:00-11:30 · Burak · €25 · Online ✅</div>
+</div>
+<div class="day-appt-bp status-bekliyor-border" style="top:288px;height:40px;background:rgba(59,130,246,0.12);border-left-color:var(--info-500);" onclick="editAppt(7)">
+<div class="appt-title">🇹🇷 İbrahim Çelik — Saç Kesim + Sakal</div>
+<div class="appt-meta">11:30-12:15 · Hasan · €40 · Nakit ⏳</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:288px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(8)">
+<div class="appt-title">🇧🇪 Thomas Janssens — Saç Yıkama</div>
+<div class="appt-meta">11:30-11:45 · Ali · €10 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-sirada-border" style="top:328px;height:40px;background:rgba(249,115,22,0.12);border-left-color:var(--warning-500);" onclick="editAppt(9)">
+<div class="appt-title">🇹🇷 Zeynep Arslan — Saç Kesim</div>
+<div class="appt-meta">12:00-12:30 · Hasan · €25 · Online 🔶</div>
+</div>
+<div class="day-appt-bp status-bekliyor-border" style="top:328px;height:80px;background:rgba(59,130,246,0.12);border-left-color:var(--info-500);margin-left:50%;" onclick="editAppt(10)">
+<div class="appt-title">🇧🇪 Sophie Laurent — Keratin Bakım</div>
+<div class="appt-meta">12:00-13:30 · Selin · €120 · Kart ⏳</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:368px;height:80px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(11)">
+<div class="appt-title">🇹🇷 Hüseyin Demir — Sakal Düzeltme + Bakım</div>
+<div class="appt-meta">12:30-13:30 · Mehmet · €35 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:448px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(12)">
+<div class="appt-title">🇧🇪 Emma Vermeulen — Pedikür</div>
+<div class="appt-meta">13:30-14:15 · Burak · €30 · Online ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:448px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(13)">
+<div class="appt-title">🇹🇷 Mustafa Öztürk — Saç Kesim</div>
+<div class="appt-meta">13:30-14:00 · Ali · €25 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-islemde-border" style="top:488px;height:80px;background:rgba(147,51,234,0.12);border-left-color:var(--purple-500);" onclick="editAppt(14)">
+<div class="appt-title">🇧🇪 Charlotte Bernard — Ombre</div>
+<div class="appt-meta">14:00-15:30 · Selin · €85 · Kart 💈</div>
+</div>
+<div class="day-appt-bp status-sirada-border" style="top:488px;height:40px;background:rgba(249,115,22,0.12);border-left-color:var(--warning-500);margin-left:50%;" onclick="editAppt(15)">
+<div class="appt-title">🇹🇷 Elif Yıldız — Saç Yıkama + Fön</div>
+<div class="appt-meta">14:00-14:30 · Hasan · €30 · Online 🔶</div>
+</div>
+<div class="day-appt-bp status-islemde-border" style="top:528px;height:120px;background:rgba(147,51,234,0.12);border-left-color:var(--purple-500);margin-left:50%;" onclick="editAppt(16)">
+<div class="appt-title">🇧🇪 Nicolas Martin — Perma</div>
+<div class="appt-meta">14:30-16:00 · Ali · €70 · Nakit 💈</div>
+</div>
+<div class="day-appt-bp status-bekliyor-border" style="top:568px;height:40px;background:rgba(59,130,246,0.12);border-left-color:var(--info-500);" onclick="editAppt(17)">
+<div class="appt-title">🇹🇷 Serpil Koç — Jel Tırnak</div>
+<div class="appt-meta">15:00-16:00 · Burak · €40 · Online ⏳</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:608px;height:80px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(18)">
+<div class="appt-title">🇧🇪 Julien François — Erkek Bakım Paketi</div>
+<div class="appt-meta">15:30-16:30 · Mehmet · €50 · Kart ✅</div>
+</div>
+<div class="day-appt-bp status-gelmedi-border" style="top:688px;height:40px;background:rgba(100,116,139,0.12);border-left-color:var(--slate-400);" onclick="editAppt(19)">
+<div class="appt-title">🇹🇷 Murat Aydın — Saç Kesim</div>
+<div class="appt-meta">16:30-17:00 · Hasan · €25 · ❌ Gelmedi</div>
+</div>
+<div class="day-appt-bp status-iptal-border" style="top:688px;height:40px;background:rgba(244,63,94,0.12);border-left-color:var(--error-500);margin-left:50%;" onclick="editAppt(20)">
+<div class="appt-title">🇧🇪 Amélie Petit — Yüz Bakımı</div>
+<div class="appt-meta">16:30-17:30 · Burak · €45 · ❌ İptal</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:728px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(21)">
+<div class="appt-title">🇹🇷 Cemal Korkmaz — Sakal Traş</div>
+<div class="appt-meta">17:00-17:20 · Mehmet · €15 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:728px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(22)">
+<div class="appt-title">🇧🇪 Laura Hendricks — Fön</div>
+<div class="appt-meta">17:00-17:30 · Selin · €20 · Kart ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:768px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(23)">
+<div class="appt-title">🇹🇷 Özlem Taş — Manikür</div>
+<div class="appt-meta">17:30-18:00 · Burak · €25 · Online ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:768px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(24)">
+<div class="appt-title">🇧🇪 David Claes — Saç Kesim</div>
+<div class="appt-meta">17:30-18:00 · Ali · €25 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:808px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(25)">
+<div class="appt-title">🇹🇷 Yasemin Güler — Saç Yıkama</div>
+<div class="appt-meta">18:00-18:15 · Hasan · €10 · Nakit ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:808px;height:80px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);margin-left:50%;" onclick="editAppt(26)">
+<div class="appt-title">🇧🇪 Sarah De Vries — Gelin Paketi</div>
+<div class="appt-meta">18:00-20:00 · Selin · €200 · Kart ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:848px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(27)">
+<div class="appt-title">🇹🇷 Halil İnce — Sakal Bakım</div>
+<div class="appt-meta">18:15-18:40 · Mehmet · €20 · Online ✅</div>
+</div>
+<div class="day-appt-bp status-tamamlandi-border" style="top:888px;height:40px;background:rgba(16,185,129,0.12);border-left-color:var(--success-500);" onclick="editAppt(28)">
+<div class="appt-title">🇧🇪 Pieter Jacobs — Maske</div>
+<div class="appt-meta">18:45-19:15 · Ali · €20 · Nakit ✅</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== WEEK VIEW ===== -->
+<div id="weekView" class="view-section" style="display:none;">
+<div class="card" style="padding:0;overflow:hidden;">
+<div class="week-view" id="weekViewGrid">
+<div class="week-header-cell" style="background:var(--bg-secondary);"></div>
+<div class="week-header-cell"><div class="day-name">Pzt</div><div class="day-num">12</div></div>
+<div class="week-header-cell"><div class="day-name">Sal</div><div class="day-num">13</div></div>
+<div class="week-header-cell"><div class="day-name">Çar</div><div class="day-num">14</div></div>
+<div class="week-header-cell today"><div class="day-name">Cum</div><div class="day-num" style="color:#a78bfa;">15</div></div>
+<div class="week-header-cell"><div class="day-name">Cmt</div><div class="day-num">16</div></div>
+<div class="week-header-cell"><div class="day-name">Paz</div><div class="day-num">17</div></div>
+<div class="week-header-cell"><div class="day-name">Pzt</div><div class="day-num">18</div></div>
+
+<!-- Time rows -->
+<div class="time-label" style="background:var(--bg-secondary);">09:00</div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Kemal — Kesim</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Kemal — Kesim</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Jean — Traş</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">10:00</div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Ayşe — Boyama</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Ayşe — Boyama</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Lucas — Kesim</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">11:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Fatma — Fön</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Marie — Manikür</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">12:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-sirada-border" style="background:rgba(249,115,22,0.15);border-left:3px solid var(--warning-500);">Zeynep — Kesim</div>
+<div class="week-appt-mini status-bekliyor-border" style="background:rgba(59,130,246,0.15);border-left:3px solid var(--info-500);margin-top:2px;">Sophie — Keratin</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">13:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Hüseyin — Sakal</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">14:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-islemde-border" style="background:rgba(147,51,234,0.15);border-left:3px solid var(--purple-500);">Charlotte — Ombre</div>
+<div class="week-appt-mini status-sirada-border" style="background:rgba(249,115,22,0.15);border-left:3px solid var(--warning-500);margin-top:2px;">Elif — Yıkama+Fön</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">15:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-bekliyor-border" style="background:rgba(59,130,246,0.15);border-left:3px solid var(--info-500);">Serpil — Jel Tırnak</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Julien — Bakım</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">16:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-gelmedi-border" style="background:rgba(100,116,139,0.15);border-left:3px solid var(--slate-400);">Murat — Kesim</div>
+<div class="week-appt-mini status-iptal-border" style="background:rgba(244,63,94,0.15);border-left:3px solid var(--error-500);margin-top:2px;">Amélie — Yüz</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">17:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Cemal — Traş</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Laura — Fön</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">18:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Yasemin — Yıkama</div>
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);margin-top:2px;">Sarah — Gelin</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+
+<div class="time-label" style="background:var(--bg-secondary);">19:00</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell">
+<div class="week-appt-mini status-tamamlandi-border" style="background:rgba(16,185,129,0.15);border-left:3px solid var(--success-500);">Pieter — Maske</div>
+</div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+<div class="time-cell"></div>
+</div>
+</div>
+</div>
+
+<!-- ===== MONTH VIEW ===== -->
+<div id="monthView" class="view-section" style="display:none;">
+<div class="card" style="padding:var(--space-5);">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);">
+<div style="font-weight:600;font-size:var(--text-lg);">Mayıs 2026</div>
+<div style="display:flex;gap:var(--space-1);">
+<button class="cal-nav-btn-bp" onclick="changeMonth(-1)">◀</button>
+<button class="cal-nav-btn-bp" onclick="changeMonth(1)">▶</button>
+</div>
+</div>
+<div class="cal-week-header-bp">
+<div class="cal-weekday">Pzt</div><div class="cal-weekday">Sal</div><div class="cal-weekday">Çar</div>
+<div class="cal-weekday">Cum</div><div class="cal-weekday">Cmt</div><div class="cal-weekday">Paz</div>
+</div>
+<div class="cal-grid-bp" id="monthGrid">
+<!-- Row 1 -->
+<div class="cal-cell-bp empty"></div>
+<div class="cal-cell-bp empty"></div>
+<div class="cal-cell-bp empty"></div>
+<div class="cal-cell-bp" onclick="selectDay(1)">
+<div class="cal-day-num">1</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(2)">
+<div class="cal-day-num">2</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(3)">
+<div class="cal-day-num">3</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<!-- Row 2 -->
+<div class="cal-cell-bp" onclick="selectDay(5)">
+<div class="cal-day-num">5</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--warning-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(6)">
+<div class="cal-day-num">6</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(7)">
+<div class="cal-day-num">7</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(8)">
+<div class="cal-day-num">8</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--purple-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(9)">
+<div class="cal-day-num">9</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(10)">
+<div class="cal-day-num">10</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<!-- Row 3 -->
+<div class="cal-cell-bp" onclick="selectDay(12)">
+<div class="cal-day-num">12</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--warning-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(13)">
+<div class="cal-day-num">13</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(14)">
+<div class="cal-day-num">14</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--purple-500)"></div></div>
+</div>
+<div class="cal-cell-bp today selected" onclick="selectDay(15)">
+<div class="cal-day-num">15</div>
+<div class="appt-mini-card status-tamamlandi" style="margin-top:4px;">19 Tamamlandı</div>
+<div class="appt-mini-card status-bekliyor" style="margin-top:2px;">3 Bekliyor</div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(16)">
+<div class="cal-day-num">16</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(17)">
+<div class="cal-day-num">17</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<!-- Row 4 -->
+<div class="cal-cell-bp" onclick="selectDay(19)">
+<div class="cal-day-num">19</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--warning-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(20)">
+<div class="cal-day-num">20</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--purple-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(21)">
+<div class="cal-day-num">21</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(22)">
+<div class="cal-day-num">22</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--error-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(23)">
+<div class="cal-day-num">23</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(24)">
+<div class="cal-day-num">24</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<!-- Row 5 -->
+<div class="cal-cell-bp" onclick="selectDay(26)">
+<div class="cal-day-num">26</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--info-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(27)">
+<div class="cal-day-num">27</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--warning-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(28)">
+<div class="cal-day-num">28</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--purple-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(29)">
+<div class="cal-day-num">29</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(30)">
+<div class="cal-day-num">30</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+<div class="cal-cell-bp" onclick="selectDay(31)">
+<div class="cal-day-num">31</div>
+<div class="cal-appt-dots"><div class="cal-appt-dot" style="background:var(--success-500)"></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== APPOINTMENT LIST TABLE ===== -->
+<div class="card" style="margin-top:var(--space-6);">
+<div class="card-header">
+<div>
+<div class="card-title">📋 Randevu Listesi</div>
+<div class="card-subtitle">Bugünkü tüm randevular</div>
+</div>
+<div style="display:flex;gap:var(--space-2);">
+<button class="interval-btn active">30 dk</button>
+<button class="interval-btn">15 dk</button>
+<button class="interval-btn">45 dk</button>
+<button class="interval-btn">60 dk</button>
+</div>
+</div>
+<div class="table-wrap">
+<table class="table" id="apptTable">
+<thead><tr>
+<th>Saat</th><th>Müşteri</th><th>Hizmet</th><th>Personel</th><th>Süre</th><th>Durum</th><th>Ödeme</th><th>Tip</th><th>İşlemler</th>
+</tr></thead>
+<tbody>
+<tr><td>09:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Kemal Yılmaz</strong></div></td><td>Saç Kesim</td><td>Hasan K.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(1)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(1)">🗑️</button></td></tr>
+<tr><td>09:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Jean Dupont</strong></div></td><td>Sakal Traş</td><td>Mehmet A.</td><td>20 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€15</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(2)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(2)">🗑️</button></td></tr>
+<tr><td>10:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Ayşe Kaya</strong></div></td><td>Saç Boyama</td><td>Selin O.</td><td>120 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€60</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(3)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(3)">🗑️</button></td></tr>
+<tr><td>10:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Lucas Peeters</strong></div></td><td>Saç Kesim</td><td>Ali Y.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(4)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(4)">🗑️</button></td></tr>
+<tr><td>11:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Fatma Şahin</strong></div></td><td>Fön</td><td>Selin O.</td><td>20 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€20</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(5)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(5)">🗑️</button></td></tr>
+<tr><td>11:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Marie Dubois</strong></div></td><td>Manikür</td><td>Burak T.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(6)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(6)">🗑️</button></td></tr>
+<tr><td>11:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>İbrahim Çelik</strong></div></td><td>Saç Kesim + Sakal</td><td>Hasan K.</td><td>45 dk</td><td><span class="badge badge-info">Bekliyor</span></td><td>€40</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(7)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(7)">🗑️</button></td></tr>
+<tr><td>11:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Thomas Janssens</strong></div></td><td>Saç Yıkama</td><td>Ali Y.</td><td>15 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€10</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(8)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(8)">🗑️</button></td></tr>
+<tr><td>12:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Zeynep Arslan</strong></div></td><td>Saç Kesim</td><td>Hasan K.</td><td>30 dk</td><td><span class="badge badge-warning">Sırada</span></td><td>€25</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(9)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(9)">🗑️</button></td></tr>
+<tr><td>12:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Sophie Laurent</strong></div></td><td>Keratin Bakım</td><td>Selin O.</td><td>120 dk</td><td><span class="badge badge-info">Bekliyor</span></td><td>€120</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(10)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(10)">🗑️</button></td></tr>
+<tr><td>12:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Hüseyin Demir</strong></div></td><td>Sakal Düzeltme + Bakım</td><td>Mehmet A.</td><td>60 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€35</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(11)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(11)">🗑️</button></td></tr>
+<tr><td>13:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Emma Vermeulen</strong></div></td><td>Pedikür</td><td>Burak T.</td><td>45 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€30</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(12)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(12)">🗑️</button></td></tr>
+<tr><td>13:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Mustafa Öztürk</strong></div></td><td>Saç Kesim</td><td>Ali Y.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(13)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(13)">🗑️</button></td></tr>
+<tr><td>14:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Charlotte Bernard</strong></div></td><td>Ombre</td><td>Selin O.</td><td>120 dk</td><td><span class="badge" style="background:var(--purple-100);color:var(--purple-600);">İşlemde</span></td><td>€85</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(14)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(14)">🗑️</button></td></tr>
+<tr><td>14:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Elif Yıldız</strong></div></td><td>Saç Yıkama + Fön</td><td>Hasan K.</td><td>30 dk</td><td><span class="badge badge-warning">Sırada</span></td><td>€30</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(15)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(15)">🗑️</button></td></tr>
+<tr><td>14:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Nicolas Martin</strong></div></td><td>Perma</td><td>Ali Y.</td><td>120 dk</td><td><span class="badge" style="background:var(--purple-100);color:var(--purple-600);">İşlemde</span></td><td>€70</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(16)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(16)">🗑️</button></td></tr>
+<tr><td>15:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Serpil Koç</strong></div></td><td>Jel Tırnak</td><td>Burak T.</td><td>60 dk</td><td><span class="badge badge-info">Bekliyor</span></td><td>€40</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(17)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(17)">🗑️</button></td></tr>
+<tr><td>15:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Julien François</strong></div></td><td>Erkek Bakım Paketi</td><td>Mehmet A.</td><td>60 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€50</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(18)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(18)">🗑️</button></td></tr>
+<tr><td>16:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Murat Aydın</strong></div></td><td>Saç Kesim</td><td>Hasan K.</td><td>30 dk</td><td><span class="badge badge-neutral">Gelmedi</span></td><td>€25</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(19)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(19)">🗑️</button></td></tr>
+<tr><td>16:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Amélie Petit</strong></div></td><td>Yüz Bakımı</td><td>Burak T.</td><td>60 dk</td><td><span class="badge badge-error">İptal</span></td><td>€45</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(20)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(20)">🗑️</button></td></tr>
+<tr><td>17:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Cemal Korkmaz</strong></div></td><td>Sakal Traş</td><td>Mehmet A.</td><td>20 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€15</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(21)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(21)">🗑️</button></td></tr>
+<tr><td>17:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Laura Hendricks</strong></div></td><td>Fön</td><td>Selin O.</td><td>20 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€20</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(22)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(22)">🗑️</button></td></tr>
+<tr><td>17:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Özlem Taş</strong></div></td><td>Manikür</td><td>Burak T.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(23)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(23)">🗑️</button></td></tr>
+<tr><td>17:30</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>David Claes</strong></div></td><td>Saç Kesim</td><td>Ali Y.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€25</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(24)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(24)">🗑️</button></td></tr>
+<tr><td>18:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Yasemin Güler</strong></div></td><td>Saç Yıkama</td><td>Hasan K.</td><td>15 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€10</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(25)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(25)">🗑️</button></td></tr>
+<tr><td>18:00</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Sarah De Vries</strong></div></td><td>Gelin Paketi</td><td>Selin O.</td><td>240 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€200</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(26)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(26)">🗑️</button></td></tr>
+<tr><td>18:15</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇹🇷</span><strong>Halil İnce</strong></div></td><td>Sakal Bakım</td><td>Mehmet A.</td><td>25 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€20</td><td><span class="booking-online">💻 Online</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(27)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(27)">🗑️</button></td></tr>
+<tr><td>18:45</td><td><div style="display:flex;align-items:center;gap:8px;"><span>🇧🇪</span><strong>Pieter Jacobs</strong></div></td><td>Maske</td><td>Ali Y.</td><td>30 dk</td><td><span class="badge badge-success">Tamamlandı</span></td><td>€20</td><td><span class="booking-walkin">🚶 Walk-in</span></td><td><button class="btn btn-sm btn-ghost" onclick="editAppt(28)">✏️</button> <button class="btn btn-sm btn-ghost" style="color:var(--error-500)" onclick="deleteAppt(28)">🗑️</button></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- ===== RECENT ACTIVITY ===== -->
+<div class="card" style="margin-top:var(--space-6);">
+<div class="card-header">
+<div>
+<div class="card-title">🔔 Son Aktiviteler</div>
+<div class="card-subtitle">Son 10 randevu olayı</div>
+</div>
+</div>
+<div class="activity-list">
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(16,185,129,0.15);color:var(--success-500);">✅</div><div class="activity-content"><div class="activity-text"><strong>Pieter Jacobs</strong> randevusu tamamlandı — <strong>Maske</strong> · Ali Y. · €20</div><div class="activity-meta">18:45 · 15 dakika önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(16,185,129,0.15);color:var(--success-500);">✅</div><div class="activity-content"><div class="activity-text"><strong>Sarah De Vries</strong> randevusu tamamlandı — <strong>Gelin Paketi</strong> · Selin O. · €200</div><div class="activity-meta">18:00 · 1 saat önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(147,51,234,0.15);color:var(--purple-500);">💈</div><div class="activity-content"><div class="activity-text"><strong>Nicolas Martin</strong> işleme başladı — <strong>Perma</strong> · Ali Y. · €70</div><div class="activity-meta">14:30 · 4 saat önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(147,51,234,0.15);color:var(--purple-500);">💈</div><div class="activity-content"><div class="activity-text"><strong>Charlotte Bernard</strong> işleme başladı — <strong>Ombre</strong> · Selin O. · €85</div><div class="activity-meta">14:00 · 5 saat önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(59,130,246,0.15);color:var(--info-500);">📅</div><div class="activity-content"><div class="activity-text"><strong>Serpil Koç</strong> randevusu oluşturuldu — <strong>Jel Tırnak</strong> · Burak T. · €40</div><div class="activity-meta">13:45 · 5 saat önce · Online rezervasyon</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(244,63,94,0.15);color:var(--error-500);">❌</div><div class="activity-content"><div class="activity-text"><strong>Amélie Petit</strong> randevusu iptal edildi — <strong>Yüz Bakımı</strong> · €45</div><div class="activity-meta">13:00 · 6 saat önce · Müşteri aradı</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(100,116,139,0.15);color:var(--slate-500);">🚫</div><div class="activity-content"><div class="activity-text"><strong>Murat Aydın</strong> randevuya gelmedi — <strong>Saç Kesim</strong> · €25</div><div class="activity-meta">16:30 · 2 saat önce · SMS gönderildi</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(16,185,129,0.15);color:var(--success-500);">✅</div><div class="activity-content"><div class="activity-text"><strong>Mustafa Öztürk</strong> randevusu tamamlandı — <strong>Saç Kesim</strong> · Ali Y. · €25</div><div class="activity-meta">13:30 · 6 saat önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(249,115,22,0.15);color:var(--warning-500);">⏰</div><div class="activity-content"><div class="activity-text"><strong>Zeynep Arslan</strong> sıraya alındı — <strong>Saç Kesim</strong> · Hasan K. · €25</div><div class="activity-meta">11:55 · 7 saat önce</div></div></div>
+<div class="activity-item"><div class="activity-avatar" style="background:rgba(16,185,129,0.15);color:var(--success-500);">✅</div><div class="activity-content"><div class="activity-text"><strong>Kemal Yılmaz</strong> randevusu tamamlandı — <strong>Saç Kesim</strong> · Hasan K. · €25</div><div class="activity-meta">09:00 · 10 saat önce</div></div></div>
+</div>
+</div>
+
+</div><!-- /page -->
+
+<!-- ===== FOOTER ===== -->
+<div class="bp-footer">
+<div class="bp-footer-grid">
+<div>
+<div class="bp-footer-brand bp-brand-text">BarberPro</div>
+<div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:var(--space-2);">Profesyonel berber ve kuaför salonu yönetimi.</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-1);">Bruxelles, Belçika</div>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Platform</div>
+<a href="barberpro-dashboard.html" class="bp-footer-link">Dashboard</a>
+<a href="barberpro-appointments.html" class="bp-footer-link">Randevular</a>
+<a href="barberpro-services.html" class="bp-footer-link">Hizmetler</a>
+<a href="barberpro-staff.html" class="bp-footer-link">Personel</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Diğer Ürünler</div>
+<a href="cleanfix-dashboard.html" class="bp-footer-link">🧹 CleanFix — Temizlik</a>
+<a href="buildpro-dashboard.html" class="bp-footer-link">🏗️ BuildPro — İnşaat</a>
+</div>
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-2);">Destek</div>
+<a href="barberpro-help.html" class="bp-footer-link">Yardım Merkezi</a>
+<a href="barberpro-settings.html" class="bp-footer-link">Ayarlar</a>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:var(--space-3);">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+</div>
+</div>
+</div>
+
+</main>
+</div><!-- /dashboard -->
+
+<!-- ========== ADD APPOINTMENT MODAL ========== -->
+<div class="modal-overlay" id="addModal" onclick="closeModalOnOverlay(event,'addModal')">
+<div class="modal modal-lg" onclick="event.stopPropagation()">
+<div class="modal-header">
+<div class="modal-title">📅 Yeni Randevu Oluştur</div>
+<button class="modal-close" onclick="closeModal('addModal')">✕</button>
+</div>
+<div class="modal-body">
+<div class="modal-form-grid">
+<div class="form-group">
+<label class="form-label">Müşteri *</label>
+<div style="position:relative;">
+<svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+<input type="text" class="form-input bp-focus" placeholder="Müşteri ara..." style="padding-left:38px;" id="apptCustomer" onkeyup="searchCustomers(this.value)">
+</div>
+<div id="customerResults" style="margin-top:4px;border:1px solid var(--border-color);border-radius:var(--radius-md);max-height:200px;overflow-y:auto;display:none;">
+<div style="padding:8px 12px;cursor:pointer;transition:background var(--duration-fast);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="selectCustomer('Kemal Yılmaz','+32 470 12 34 56')">🇹🇷 Kemal Yılmaz · +32 470 12 34 56</div>
+<div style="padding:8px 12px;cursor:pointer;transition:background var(--duration-fast);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="selectCustomer('Ayşe Kaya','+32 471 23 45 67')">🇹🇷 Ayşe Kaya · +32 471 23 45 67</div>
+<div style="padding:8px 12px;cursor:pointer;transition:background var(--duration-fast);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="selectCustomer('Jean Dupont','+32 472 34 56 78')">🇧🇪 Jean Dupont · +32 472 34 56 78</div>
+<div style="padding:8px 12px;cursor:pointer;transition:background var(--duration-fast);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="selectCustomer('Marie Dubois','+32 473 45 67 89')">🇧🇪 Marie Dubois · +32 473 45 67 89</div>
+<div style="padding:8px 12px;cursor:pointer;transition:background var(--duration-fast);" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background=''" onclick="selectCustomer('Zeynep Arslan','+32 474 56 78 90')">🇹🇷 Zeynep Arslan · +32 474 56 78 90</div>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Telefon</label>
+<input type="tel" class="form-input bp-focus" placeholder="+32 ..." id="apptPhone">
+</div>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);">
+<label class="form-label">Hizmetler *</label>
+<div style="border:1.5px solid var(--border-color);border-radius:var(--radius-md);padding:var(--space-2);max-height:200px;overflow-y:auto;">
+<div class="svc-multi-item" onclick="toggleSvc(this,'Saç Kesim',25,30)"><div><div style="font-weight:500;">✂️ Saç Kesim</div><div style="font-size:var(--text-xs);color:var(--text-muted);">30 dk · €25</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Sakal Traş',15,20)"><div><div style="font-weight:500;">🧔 Sakal Traş</div><div style="font-size:var(--text-xs);color:var(--text-muted);">20 dk · €15</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Saç Boyama',60,90)"><div><div style="font-weight:500;">🎨 Saç Boyama</div><div style="font-size:var(--text-xs);color:var(--text-muted);">90 dk · €60</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Fön',20,20)"><div><div style="font-weight:500;">💨 Fön</div><div style="font-size:var(--text-xs);color:var(--text-muted);">20 dk · €20</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Keratin Bakım',120,120)"><div><div style="font-weight:500;">✨ Keratin Bakım</div><div style="font-size:var(--text-xs);color:var(--text-muted);">120 dk · €120</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Manikür',25,30)"><div><div style="font-weight:500;">💅 Manikür</div><div style="font-size:var(--text-xs);color:var(--text-muted);">30 dk · €25</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Pedikür',30,45)"><div><div style="font-weight:500;">🦶 Pedikür</div><div style="font-size:var(--text-xs);color:var(--text-muted);">45 dk · €30</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+<div class="svc-multi-item" onclick="toggleSvc(this,'Yüz Bakımı',45,60)"><div><div style="font-weight:500;">🧖 Yüz Bakımı</div><div style="font-size:var(--text-xs);color:var(--text-muted);">60 dk · €45</div></div><div class="svc-check" style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all var(--duration-fast);">✓</div></div>
+</div>
+<div id="svcSummary" style="margin-top:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--text-secondary);display:none;"></div>
+</div>
+<div class="modal-form-grid" style="margin-top:var(--space-4);">
+<div class="form-group">
+<label class="form-label">Personel *</label>
+<select class="form-select bp-focus" id="apptStaff">
+<option value="">Personel seçin</option>
+<option value="Hasan">Hasan K. — Usta Berber</option>
+<option value="Mehmet">Mehmet A. — Usta Berber</option>
+<option value="Ali">Ali Y. — Kuaför</option>
+<option value="Selin">Selin O. — Colorist</option>
+<option value="Burak">Burak T. — Manikürcü</option>
+<option value="Ceren">Ceren B. — Cilt Uzmanı</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Tarih *</label>
+<input type="date" class="form-input bp-focus" id="apptDate" value="2026-05-15">
+</div>
+<div class="form-group">
+<label class="form-label">Saat *</label>
+<select class="form-select bp-focus" id="apptTime">
+<option value="">Saat seçin</option>
+<option>09:00</option><option>09:15</option><option>09:30</option><option>09:45</option>
+<option>10:00</option><option>10:15</option><option>10:30</option><option>10:45</option>
+<option>11:00</option><option>11:15</option><option>11:30</option><option>11:45</option>
+<option>12:00</option><option>12:15</option><option>12:30</option><option>12:45</option>
+<option>13:00</option><option>13:15</option><option>13:30</option><option>13:45</option>
+<option>14:00</option><option>14:15</option><option>14:30</option><option>14:45</option>
+<option>15:00</option><option>15:15</option><option>15:30</option><option>15:45</option>
+<option>16:00</option><option>16:15</option><option>16:30</option><option>16:45</option>
+<option>17:00</option><option>17:15</option><option>17:30</option><option>17:45</option>
+<option>18:00</option><option>18:15</option><option>18:30</option><option>18:45</option>
+<option>19:00</option><option>19:15</option><option>19:30</option><option>19:45</option>
+<option>20:00</option><option>20:15</option><option>20:30</option><option>20:45</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Durum</label>
+<select class="form-select bp-focus" id="apptStatus">
+<option value="Bekliyor">Bekliyor</option>
+<option value="Sırada">Sırada</option>
+<option value="İşlemde">İşlemde</option>
+<option value="Tamamlandı">Tamamlandı</option>
+<option value="İptal">İptal</option>
+<option value="Gelmedi">Gelmedi</option>
+</select>
+</div>
+</div>
+<div class="form-group" style="margin-top:var(--space-4);">
+<label class="form-label">Notlar</label>
+<textarea class="form-textarea bp-focus" rows="2" placeholder="Özel istekler, alerjiler, notlar..."></textarea>
+</div>
+<div class="modal-form-grid" style="margin-top:var(--space-4);">
+<div>
+<label class="form-label">Ödeme Tipi</label>
+<div style="display:flex;gap:var(--space-2);margin-top:var(--space-2);">
+<div class="pay-type-opt selected" onclick="selectPayType(this)" data-type="Nakit">
+<div style="font-size:var(--text-xl);">💶</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Nakit</div><div style="font-size:var(--text-xs);color:var(--text-muted);">Peşin ödeme</div></div>
+</div>
+<div class="pay-type-opt" onclick="selectPayType(this)" data-type="Kart">
+<div style="font-size:var(--text-xl);">💳</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Kart</div><div style="font-size:var(--text-xs);color:var(--text-muted);">Banka / Kredi kartı</div></div>
+</div>
+<div class="pay-type-opt" onclick="selectPayType(this)" data-type="Online">
+<div style="font-size:var(--text-xl);">📱</div>
+<div><div style="font-weight:600;font-size:var(--text-sm);">Online</div><div style="font-size:var(--text-xs);color:var(--text-muted);">Bancontact / PayPal</div></div>
+</div>
+</div>
+</div>
+<div>
+<div class="sms-toggle-row" style="margin-top:28px;">
+<div>
+<div style="font-weight:600;font-size:var(--text-sm);">📲 SMS Hatırlatma</div>
+<div style="font-size:var(--text-xs);color:var(--text-muted);margin-top:2px;">Randevudan 1 saat önce SMS gönder</div>
+</div>
+<label class="toggle">
+<input type="checkbox" checked id="smsToggle">
+<span class="toggle-track"></span>
+</label>
+</div>
+</div>
+</div>
+<div class="modal-form-grid" style="margin-top:var(--space-4);">
+<div class="form-group">
+<label class="form-label">Rezervasyon Tipi</label>
+<div style="display:flex;gap:var(--space-3);">
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:var(--space-3);border:1.5px solid #8b5cf6;border-radius:var(--radius-md);background:rgba(139,92,246,0.08);flex:1;">
+<input type="radio" name="bookingType" value="walkin" checked style="accent-color:#8b5cf6;">
+<span style="font-size:var(--text-sm);font-weight:500;">🚶 Walk-in</span>
+</label>
+<label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:var(--space-3);border:1.5px solid var(--border-color);border-radius:var(--radius-md);flex:1;">
+<input type="radio" name="bookingType" value="online" style="accent-color:#8b5cf6;">
+<span style="font-size:var(--text-sm);font-weight:500;">💻 Online</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" onclick="closeModal('addModal')">İptal</button>
+<button class="btn btn-purple" onclick="saveAppointment()">💾 Randevu Oluştur</button>
+</div>
+</div>
+</div>
+
+<!-- ========== TOAST CONTAINER ========== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+let currentView = 'day';
+let selectedServices = [];
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+}
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll('.view-section').forEach(el => el.style.display = 'none');
+  document.getElementById(view + 'View').style.display = '';
+  document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('btn' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
+}
+function changeDate(dir){
+  showToast('info','Tarih Değişimi','Tarih ' + (dir > 0 ? 'ileri' : 'geri') + ' alındı (demo mod)');
+}
+function goToToday(){
+  showToast('info','Bugün','Bugüne dönüldü');
+}
+function changeMonth(dir){
+  showToast('info','Ay Değişimi','Ay ' + (dir > 0 ? 'ileri' : 'geri') + ' alındı (demo mod)');
+}
+function selectDay(day){
+  showToast('info','Gün Seçildi', day + ' Mayıs 2026 seçildi');
+  switchView('day');
+  document.getElementById('currentDateDisplay').textContent = day + ' Mayıs 2026';
+}
+function openModal(id){
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+function closeModalOnOverlay(e,id){
+  if(e.target === document.getElementById(id)) closeModal(id);
+}
+function filterByStaff(staff){
+  document.querySelectorAll('.staff-chip').forEach(chip => chip.classList.remove('active'));
+  document.querySelector('[data-staff="' + staff + '"]').classList.add('active');
+  showToast('info','Filtre Uygulandı','Personel: ' + (staff === 'all' ? 'Tümü' : staff));
+}
+function filterByStatus(status){
+  document.querySelectorAll('[data-status]').forEach(pill => pill.classList.remove('active'));
+  document.querySelector('[data-status="' + status + '"]').classList.add('active');
+  const rows = document.querySelectorAll('#apptTable tbody tr');
+  rows.forEach(row => {
+    const badge = row.querySelector('.badge');
+    if(!badge) return;
+    const text = badge.textContent.trim();
+    if(status === 'all' || text === status){
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  showToast('info','Filtre Uygulandı','Durum: ' + (status === 'all' ? 'Tümü' : status));
+}
+function filterAppointments(){
+  const term = document.getElementById('globalSearch').value.toLowerCase();
+  const rows = document.querySelectorAll('#apptTable tbody tr');
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+  });
+}
+function searchCustomers(val){
+  const results = document.getElementById('customerResults');
+  results.style.display = val.length > 0 ? 'block' : 'none';
+}
+function selectCustomer(name,phone){
+  document.getElementById('apptCustomer').value = name;
+  document.getElementById('apptPhone').value = phone;
+  document.getElementById('customerResults').style.display = 'none';
+}
+function toggleSvc(el,name,price,dur){
+  el.classList.toggle('selected');
+  const check = el.querySelector('.svc-check');
+  const idx = selectedServices.findIndex(s => s.name === name);
+  if(el.classList.contains('selected')){
+    check.style.background = 'linear-gradient(135deg,#8b5cf6,#7c3aed)';
+    check.style.borderColor = '#8b5cf6';
+    check.style.color = '#fff';
+    if(idx === -1) selectedServices.push({name,price,dur});
+  } else {
+    check.style.background = '';
+    check.style.borderColor = '';
+    check.style.color = 'transparent';
+    if(idx > -1) selectedServices.splice(idx,1);
+  }
+  updateSvcSummary();
+}
+function updateSvcSummary(){
+  const sum = document.getElementById('svcSummary');
+  if(selectedServices.length === 0){
+    sum.style.display = 'none';
+    return;
+  }
+  const total = selectedServices.reduce((a,s) => a + s.price, 0);
+  const mins = selectedServices.reduce((a,s) => a + s.dur, 0);
+  sum.style.display = 'block';
+  sum.innerHTML = '<strong>' + selectedServices.length + '</strong> hizmet · <strong>' + mins + ' dk</strong> · Toplam: <strong style="color:#a78bfa;">€' + total + '</strong>';
+}
+function selectPayType(el){
+  document.querySelectorAll('.pay-type-opt').forEach(opt => opt.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function saveAppointment(){
+  const customer = document.getElementById('apptCustomer').value;
+  const staff = document.getElementById('apptStaff').value;
+  const time = document.getElementById('apptTime').value;
+  if(!customer || !staff || !time){
+    showToast('error','Eksik Bilgi','Lütfen müşteri, personel ve saat seçin');
+    return;
+  }
+  closeModal('addModal');
+  showToast('success','Randevu Oluşturuldu', customer + ' · ' + time + ' · ' + staff);
+  setTimeout(() => {
+    showToast('info','SMS Gönderildi',customer + ' için onay SMS\'i gönderildi');
+  }, 1500);
+}
+function editAppt(id){
+  showToast('info','Düzenleme', 'Randevu #' + id + ' düzenleme modunda (demo)');
+  openModal('addModal');
+}
+function deleteAppt(id){
+  if(!confirm('Bu randevuyu silmek istediğinize emin misiniz?')) return;
+  showToast('warning','Randevu Silindi', 'Randevu #' + id + ' silindi');
+}
+function exportAppointments(){
+  showToast('success','Dışa Aktarıldı','28 randevu CSV olarak indirildi');
+}
+function toggleTheme(){
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme') || 'dark';
+  html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+}
+function showNotifications(){
+  showToast('info','Bildirimler','3 yeni bildirim var (demo)');
+}
+function showToast(type,title,message){
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  const icons = {success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  toast.innerHTML = '<div class="toast-icon">' + icons[type] + '</div><div class="toast-content"><div class="toast-title">' + title + '</div><div class="toast-message">' + message + '</div></div><button class="toast-close" onclick="this.parentElement.remove()">✕</button><div class="toast-progress"></div>';
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('exit');
+    setTimeout(() => toast.remove(), 400);
+  }, 4000);
+}
+// Mobile sidebar overlay
+const overlay = document.createElement('div');
+overlay.className = 'sidebar-overlay';
+overlay.onclick = () => { document.getElementById('sidebar').classList.remove('mobile-open'); overlay.classList.remove('active'); };
+document.body.appendChild(overlay);
+const origToggle = toggleSidebar;
+toggleSidebar = function(){
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  overlay.classList.toggle('active');
+};
+</script>
+
+</body>
+</html>

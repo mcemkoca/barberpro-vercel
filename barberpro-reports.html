@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Raporlar & Analitik</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{ --primary-500:#8b5cf6; --primary-600:#7c3aed; --primary-400:#a78bfa; --shadow-glow:rgba(139,92,246,0.15); }
+  .report-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+  .report-tab { padding:10px 20px; border-radius:8px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-secondary); cursor:pointer; font-size:var(--text-sm); font-weight:500; transition:all 0.2s; }
+  .report-tab.active { background:linear-gradient(135deg,var(--primary-500),var(--primary-600)); color:white; border-color:transparent; }
+  .chart-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; margin-bottom:24px; }
+  @media(max-width:1024px){ .chart-grid { grid-template-columns:1fr; } }
+  .chart-card { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:12px; padding:20px; }
+  .chart-card h4 { margin-bottom:16px; font-size:var(--text-sm); font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; }
+  .chart-canvas { max-height:300px; }
+  .report-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  @media(max-width:1024px){ .report-summary { grid-template-columns:repeat(2,1fr); } }
+  .summary-item { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:12px; padding:16px; }
+  .summary-item .value { font-size:var(--text-2xl); font-weight:700; color:var(--primary-400); }
+  .summary-item .label { font-size:var(--text-xs); color:var(--text-muted); margin-top:4px; }
+  .summary-item .change { font-size:var(--text-xs); margin-top:4px; }
+  .change-up { color:#10b981; }
+  .change-down { color:#ef4444; }
+  .date-range { display:flex; gap:12px; align-items:center; margin-bottom:24px; }
+  .date-range input { padding:8px 12px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:var(--text-sm); }
+  .export-buttons { display:flex; gap:8px; margin-bottom:24px; }
+  .ranking-table { width:100%; }
+  .ranking-table td { padding:12px; border-bottom:1px solid var(--border-color); }
+  .ranking-table tr:hover { background:var(--bg-tertiary); }
+  .rank-num { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:var(--text-xs); font-weight:700; color:white; }
+  .rank-1 { background:linear-gradient(135deg,#fbbf24,#f59e0b); }
+  .rank-2 { background:linear-gradient(135deg,#9ca3af,#6b7280); }
+  .rank-3 { background:linear-gradient(135deg,#b45309,#92400e); }
+  .rank-other { background:var(--bg-tertiary); color:var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="dashboard">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="sidebar-brand-icon" style="background:linear-gradient(135deg,var(--primary-500),var(--primary-600));">BP</div><span class="sidebar-brand-text">BarberPro</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section"><div class="sidebar-section-title">Genel</div>
+        <a class="sidebar-link" href="dashboard.html"><span class="icon">📊</span><span class="sidebar-text">Dashboard</span></a>
+        <a class="sidebar-link" href="barberpro-appointments.html"><span class="icon">📅</span><span class="sidebar-text">Randevular</span></a>
+        <a class="sidebar-link" href="barberpro-services.html"><span class="icon">💇</span><span class="sidebar-text">Hizmetler</span></a>
+        <a class="sidebar-link" href="barberpro-staff.html"><span class="icon">👤</span><span class="sidebar-text">Personel</span></a>
+        <a class="sidebar-link" href="barberpro-customers.html"><span class="icon">🧑‍🤝‍🧑</span><span class="sidebar-text">Müşteriler</span></a>
+      </div>
+      <div class="sidebar-section"><div class="sidebar-section-title">Operasyon</div>
+        <a class="sidebar-link" href="barberpro-inventory.html"><span class="icon">📦</span><span class="sidebar-text">Stok</span></a>
+        <a class="sidebar-link" href="barberpro-loyalty.html"><span class="icon">⭐</span><span class="sidebar-text">Sadakat</span></a>
+        <a class="sidebar-link active" href="barberpro-reports.html"><span class="icon">📈</span><span class="sidebar-text">Raporlar</span></a>
+      </div>
+    </nav>
+    <div class="sidebar-footer">© 2026 BarberPro BV</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="breadcrumbs"><span class="page-title">📈 Raporlar & Analitik</span></div>
+      <div class="topbar-actions">
+        <div class="date-range">
+          <input type="date" value="2026-05-01" id="startDate">
+          <span style="color:var(--text-muted);">→</span>
+          <input type="date" value="2026-05-31" id="endDate">
+          <button class="btn btn-secondary btn-sm" onclick="applyDateRange()">Uygula</button>
+        </div>
+        <div class="export-buttons">
+          <button class="btn btn-secondary btn-sm" onclick="exportPDF()">📄 PDF</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📊 CSV</button>
+        </div>
+        <div class="avatar" onclick="toggleProfileMenu()">A</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="report-tabs">
+        <button class="report-tab active" onclick="switchTab('revenue')" data-tab="revenue">💰 Gelir</button>
+        <button class="report-tab" onclick="switchTab('appointments')" data-tab="appointments">📅 Randevular</button>
+        <button class="report-tab" onclick="switchTab('staff')" data-tab="staff">👤 Personel</button>
+        <button class="report-tab" onclick="switchTab('stock')" data-tab="stock">📦 Stok</button>
+        <button class="report-tab" onclick="switchTab('loyalty')" data-tab="loyalty">⭐ Sadakat</button>
+      </div>
+
+      <!-- Revenue Tab -->
+      <div id="revenue-tab" class="tab-content">
+        <div class="report-summary">
+          <div class="summary-item"><div class="value">€24,580</div><div class="label">Toplam Gelir</div><div class="change change-up">▲ +12.3% geçen aya göre</div></div>
+          <div class="summary-item"><div class="value">€18,420</div><div class="label">Hizmet Geliri</div><div class="change change-up">▲ +8.7%</div></div>
+          <div class="summary-item"><div class="value">€6,160</div><div class="label">Ürün Satışı</div><div class="change change-up">▲ +24.1%</div></div>
+          <div class="summary-item"><div class="value">€4,250</div><div class="label">Komisyon Gideri</div><div class="change change-down">▼ -2.1%</div></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Günlük Gelir Trendi</h4><canvas id="revenueChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Hizmet Geliri Dağılımı</h4><canvas id="serviceRevenueChart" class="chart-canvas"></canvas></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Haftalık Karşılaştırma</h4><canvas id="weeklyChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Ödeme Tipi Dağılımı</h4><canvas id="paymentChart" class="chart-canvas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Appointments Tab -->
+      <div id="appointments-tab" class="tab-content" style="display:none;">
+        <div class="report-summary">
+          <div class="summary-item"><div class="value">487</div><div class="label">Toplam Randevu</div><div class="change change-up">▲ +15.2%</div></div>
+          <div class="summary-item"><div class="value">92.4%</div><div class="label">Katılım Oranı</div><div class="change change-up">▲ +3.1%</div></div>
+          <div class="summary-item"><div class="value">4.2%</div><div class="label">İptal Oranı</div><div class="change change-down">▼ -1.8%</div></div>
+          <div class="summary-item"><div class="value">42 dk</div><div class="label">Ort. Hizmet Süresi</div><div class="change change-up">▲ +2 dk</div></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Saat Bazlı Yoğunluk</h4><canvas id="hourlyChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Gün Bazlı Randevu</h4><canvas id="dailyApptChart" class="chart-canvas"></canvas></div>
+        </div>
+        <div class="chart-card" style="margin-bottom:24px;"><h4>Online vs Walk-in Oranı</h4><canvas id="bookingTypeChart" class="chart-canvas"></canvas></div>
+      </div>
+
+      <!-- Staff Tab -->
+      <div id="staff-tab" class="tab-content" style="display:none;">
+        <div class="report-summary">
+          <div class="summary-item"><div class="value">Marc V.</div><div class="label">En Yüksek Gelir</div><div class="change change-up">€3,420</div></div>
+          <div class="summary-item"><div class="value">Sophie D.</div><div class="label">En Çok Randevu</div><div class="change change-up">142 randevu</div></div>
+          <div class="summary-item"><div class="value">4.9</div><div class="label">En Yüksek Puan</div><div class="change change-up">Sophie D.</div></div>
+          <div class="summary-item"><div class="value">2</div><div class="label">Yeni Personel</div><div class="change change-up">Bu ay</div></div>
+        </div>
+        <div class="chart-card" style="margin-bottom:24px;"><h4>Personel Performans Sıralaması</h4>
+          <table class="ranking-table">
+            <tr><td><div class="rank-num rank-1">1</div></td><td style="font-weight:600;">Marc Van den Berghe</td><td style="color:var(--text-muted);">Usta Berber</td><td style="font-weight:600;">€3,420</td><td>98 randevu</td><td><span class="rating-stars">★★★★★</span> 5.0</td></tr>
+            <tr><td><div class="rank-num rank-2">2</div></td><td style="font-weight:600;">Laura Peeters</td><td style="color:var(--text-muted);">Colorist</td><td style="font-weight:600;">€3,150</td><td>76 randevu</td><td><span class="rating-stars">★★★★★</span> 4.8</td></tr>
+            <tr><td><div class="rank-num rank-3">3</div></td><td style="font-weight:600;">Jean-Pierre De Smet</td><td style="color:var(--text-muted);">Usta Berber</td><td style="font-weight:600;">€3,180</td><td>91 randevu</td><td><span class="rating-stars">★★★★★</span> 4.9</td></tr>
+            <tr><td><div class="rank-num rank-other">4</div></td><td style="font-weight:600;">Sophie Dubois</td><td style="color:var(--text-muted);">Kuaför</td><td style="font-weight:600;">€2,890</td><td>142 randevu</td><td><span class="rating-stars">★★★★★</span> 4.9</td></tr>
+            <tr><td><div class="rank-num rank-other">5</div></td><td style="font-weight:600;">Marie Vermeulen</td><td style="color:var(--text-muted);">Kuaför</td><td style="font-weight:600;">€2,780</td><td>118 randevu</td><td><span class="rating-stars">★★★★☆</span> 4.6</td></tr>
+            <tr><td><div class="rank-num rank-other">6</div></td><td style="font-weight:600;">Emma Wouters</td><td style="color:var(--text-muted);">Manikürcü</td><td style="font-weight:600;">€2,560</td><td>104 randevu</td><td><span class="rating-stars">★★★★★</span> 4.7</td></tr>
+            <tr><td><div class="rank-num rank-other">7</div></td><td style="font-weight:600;">Nadia Caron</td><td style="color:var(--text-muted);">Kasiyer</td><td style="font-weight:600;">€2,100</td><td>—</td><td><span class="rating-stars">★★★★★</span> 4.8</td></tr>
+            <tr><td><div class="rank-num rank-other">8</div></td><td style="font-weight:600;">Thomas Lefèvre</td><td style="color:var(--text-muted);">Asistan</td><td style="font-weight:600;">€1,450</td><td>67 randevu</td><td><span class="rating-stars">★★★★☆</span> 4.4</td></tr>
+          </table>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Personel Gelir Karşılaştırması</h4><canvas id="staffRevenueChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Randevu Dağılımı</h4><canvas id="staffApptChart" class="chart-canvas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Stock Tab -->
+      <div id="stock-tab" class="tab-content" style="display:none;">
+        <div class="report-summary">
+          <div class="summary-item"><div class="value">156</div><div class="label">Toplam Ürün</div><div class="change change-up">▲ +8 yeni</div></div>
+          <div class="summary-item"><div class="value">12</div><div class="label">Kritik Stok</div><div class="change change-down">▼ -3 düzeltildi</div></div>
+          <div class="summary-item"><div class="value">€4,280</div><div class="label">Stok Değeri</div><div class="change change-up">▲ +€520</div></div>
+          <div class="summary-item"><div class="value">€1,890</div><div class="label">Aylık Tüketim</div><div class="change change-up">▲ +€340</div></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Kategori Dağılımı</h4><canvas id="stockCategoryChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Stok Değeri Trendi</h4><canvas id="stockValueChart" class="chart-canvas"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Loyalty Tab -->
+      <div id="loyalty-tab" class="tab-content" style="display:none;">
+        <div class="report-summary">
+          <div class="summary-item"><div class="value">342</div><div class="label">Toplam Üye</div><div class="change change-up">▲ +24 yeni</div></div>
+          <div class="summary-item"><div class="value">89,420</div><div class="label">Toplam Puan</div><div class="change change-up">▲ +8,520</div></div>
+          <div class="summary-item"><div class="value">€2,340</div><div class="label">Puan Değeri (€)</div><div class="change change-up">▲ +€280</div></div>
+          <div class="summary-item"><div class="value">67%</div><div class="label">Aktif Üye Oranı</div><div class="change change-up">▲ +5%</div></div>
+        </div>
+        <div class="chart-grid">
+          <div class="chart-card"><h4>Üyelik Seviyesi Dağılımı</h4><canvas id="tierChart" class="chart-canvas"></canvas></div>
+          <div class="chart-card"><h4>Puan Kullanım Trendi</h4><canvas id="pointsChart" class="chart-canvas"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const hamburger=document.getElementById('hamburger');const sidebar=document.getElementById('sidebar');hamburger.addEventListener('click',()=>sidebar.classList.toggle('active'));
+
+function switchTab(tab){
+  document.querySelectorAll('.report-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('[data-tab="'+tab+'"]').classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c=>c.style.display='none');
+  document.getElementById(tab+'-tab').style.display='block';
+  if(tab==='revenue') initRevenueCharts();
+  if(tab==='appointments') initAppointmentCharts();
+  if(tab==='staff') initStaffCharts();
+  if(tab==='stock') initStockCharts();
+  if(tab==='loyalty') initLoyaltyCharts();
+}
+
+const chartDefaults={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3b8',font:{size:11}}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(148,163,184,0.1)'}},y:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(148,163,184,0.1)'}}}};
+
+function initRevenueCharts(){
+  new Chart(document.getElementById('revenueChart'),{type:'line',data:{labels:['1 May','5 May','10 May','15 May','20 May','25 May','30 May'],datasets:[{label:'Gelir (€)',data:[820,950,780,1120,980,1250,1080],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.1)',fill:true,tension:0.4}]},options:chartDefaults});
+  new Chart(document.getElementById('serviceRevenueChart'),{type:'doughnut',data:{labels:['Saç Kesimi','Boyama','Manikür','Pedikür','Keratin','Diğer'],datasets:[{data:[5200,3800,2100,1800,3500,1020],backgroundColor:['#8b5cf6','#a78bfa','#ec4899','#f59e0b','#0ea5e9','#6b7280']}]},options:{...chartDefaults,scales:{}}});
+  new Chart(document.getElementById('weeklyChart'),{type:'bar',data:{labels:['Hafta 1','Hafta 2','Hafta 3','Hafta 4'],datasets:[{label:'Bu Ay',data:[5800,6200,5900,7100],backgroundColor:'#8b5cf6'},{label:'Geçen Ay',data:[5200,5400,5100,5800],backgroundColor:'rgba(139,92,246,0.3)'}]},options:chartDefaults});
+  new Chart(document.getElementById('paymentChart'),{type:'pie',data:{labels:['Nakit','Kredi Kartı','Online','Havale'],datasets:[{data:[35,42,18,5],backgroundColor:['#10b981','#8b5cf6','#0ea5e9','#f59e0b']}]},options:{...chartDefaults,scales:{}}});
+}
+function initAppointmentCharts(){
+  new Chart(document.getElementById('hourlyChart'),{type:'bar',data:{labels:['09','10','11','12','13','14','15','16','17','18','19','20'],datasets:[{label:'Randevu',data:[8,15,22,18,12,25,28,24,20,16,10,5],backgroundColor:'#8b5cf6'}]},options:chartDefaults});
+  new Chart(document.getElementById('dailyApptChart'),{type:'line',data:{labels:['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'],datasets:[{label:'Randevu',data:[72,68,75,82,95,55,40],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.1)',fill:true}]},options:chartDefaults});
+  new Chart(document.getElementById('bookingTypeChart'),{type:'bar',data:{labels:['Online','Walk-in','Telefon','WhatsApp'],datasets:[{label:'Miktar',data:[210,168,78,31],backgroundColor:['#0ea5e9','#8b5cf6','#10b981','#25d366']}]},options:chartDefaults});
+}
+function initStaffCharts(){
+  new Chart(document.getElementById('staffRevenueChart'),{type:'bar',data:{labels:['Marc','Laura','JP','Sophie','Marie','Emma','Nadia','Thomas'],datasets:[{label:'Gelir (€)',data:[3420,3150,3180,2890,2780,2560,2100,1450],backgroundColor:'#8b5cf6'}]},options:chartDefaults});
+  new Chart(document.getElementById('staffApptChart'),{type:'doughnut',data:{labels:['Marc','Sophie','JP','Marie','Laura','Emma','Thomas','Nadia'],datasets:[{data:[98,142,91,118,76,104,67,0],backgroundColor:['#8b5cf6','#ec4899','#a78bfa','#f472b6','#f59e0b','#0ea5e9','#10b981','#6b7280']}]},options:{...chartDefaults,scales:{}}});
+}
+function initStockCharts(){
+  new Chart(document.getElementById('stockCategoryChart'),{type:'doughnut',data:{labels:['Şampuan','Boya','Jöle/Wax','Bakım','Aksesuar','Diğer'],datasets:[{data:[42,28,35,25,14,12],backgroundColor:['#8b5cf6','#ec4899','#f59e0b','#0ea5e9','#10b981','#6b7280']}]},options:{...chartDefaults,scales:{}}});
+  new Chart(document.getElementById('stockValueChart'),{type:'line',data:{labels:['Oca','Şub','Mar','Nis','May'],datasets:[{label:'Stok Değeri (€)',data:[3200,3450,3100,3760,4280],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.1)',fill:true}]},options:chartDefaults});
+}
+function initLoyaltyCharts(){
+  new Chart(document.getElementById('tierChart'),{type:'bar',data:{labels:['Bronze','Silver','Gold','Platinum'],datasets:[{label:'Üye Sayısı',data:[142,98,67,35],backgroundColor:['#b45309','#9ca3af','#fbbf24','#8b5cf6']}]},options:chartDefaults});
+  new Chart(document.getElementById('pointsChart'),{type:'line',data:{labels:['Oca','Şub','Mar','Nis','May'],datasets:[{label:'Kazanılan',data:[15200,16800,14500,18200,21000],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',fill:true},{label:'Kullanılan',data:[5200,6800,6100,7900,10200],borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,0.1)',fill:true}]},options:chartDefaults});
+}
+
+function applyDateRange(){showToast('Tarih aralığı uygulandı','success');}
+function exportPDF(){showToast('PDF indiriliyor...','success');}
+function exportCSV(){showToast('CSV indiriliyor...','success');}
+function toggleProfileMenu(){}
+
+function showToast(message,type){const container=document.createElement('div');container.style.cssText='position:fixed;bottom:24px;right:24px;z-index:1000;';const toast=document.createElement('div');toast.style.cssText='background:var(--bg-secondary);border:1px solid var(--border-color);padding:12px 20px;border-radius:8px;color:var(--text-primary);font-size:var(--text-sm);box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;align-items:center;gap:8px;animation:slideIn 0.3s ease;';const icon=type==='success'?'✅':'❌';toast.innerHTML=icon+' '+message;container.appendChild(toast);document.body.appendChild(container);setTimeout(()=>{toast.style.animation='slideOut 0.3s ease';setTimeout(()=>container.remove(),300);},3000);}
+
+// Init first tab
+initRevenueCharts();
+</script>
+<style>@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}@keyframes slideOut{from{transform:translateX(0);opacity:1;}to{transform:translateX(100%);opacity:0;}}</style>
+</body>
+</html>
