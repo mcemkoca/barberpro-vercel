@@ -246,29 +246,83 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
-  <div class="sidebar-brand"><div class="sidebar-brand-icon" data-i18n="div_b">B</div><span class="sidebar-brand-text" data-i18n="span_barberpro">BarberPro</span></div>
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon" data-i18n="div_b">B</div>
+    <span class="sidebar-brand-text" data-i18n="span_barberpro">BarberPro</span>
+  </div>
   <nav class="sidebar-nav">
-    <div class="sidebar-section"><div class="sidebar-section-title" data-i18n="div_ana_menü">Ana Menü</div>
-      <a class="sidebar-link" href="dashboard.html"><span class="icon">📊</span><span class="sidebar-text" data-i18n="span_dashboard">Dashboard</span></a>
-      <a class="sidebar-link" href="barberpro-appointments.html"><span class="icon">📅</span><span class="sidebar-text" data-i18n="span_randevular">Randevular</span><span class="badge badge-error">3</span></a>
-      <a class="sidebar-link" href="barberpro-services.html"><span class="icon">✂️</span><span class="sidebar-text" data-i18n="span_hizmetler">Hizmetler</span></a>
-      <a class="sidebar-link" href="barberpro-staff.html"><span class="icon">👥</span><span class="sidebar-text" data-i18n="span_personel">Personel</span></a>
-      <a class="sidebar-link" href="barberpro-customers.html"><span class="icon">🧑‍🤝‍🧑</span><span class="sidebar-text" data-i18n="span_müşteriler">Müşteriler</span></a>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" data-i18n="div_ana_menü">Ana Menü</div>
+      <a class="sidebar-link" href="dashboard.html">
+        <span class="icon">📊</span>
+        <span class="sidebar-text" data-i18n="span_dashboard">Dashboard</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-appointments.html">
+        <span class="icon">📅</span>
+        <span class="sidebar-text" data-i18n="span_randevular">Randevular</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-services.html">
+        <span class="icon">✂️</span>
+        <span class="sidebar-text" data-i18n="span_hizmetler">Hizmetler</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-staff.html">
+        <span class="icon">👥</span>
+        <span class="sidebar-text" data-i18n="span_personel">Personel</span>
+      </a>
     </div>
-    <div class="sidebar-section"><div class="sidebar-section-title" data-i18n="div_operasyon">Operasyon</div>
-      <a class="sidebar-link" href="barberpro-inventory.html"><span class="icon">📦</span><span class="sidebar-text" data-i18n="span_stok">Stok</span><span class="badge badge-warning">2</span></a>
-      <a class="sidebar-link" href="barberpro-loyalty.html"><span class="icon">💎</span><span class="sidebar-text" data-i18n="span_sadakat">Sadakat</span></a>
-      <a class="sidebar-link active" href="barberpro-reports.html"><span class="icon">📈</span><span class="sidebar-text" data-i18n="span_raporlar_analitik">Raporlar &amp; Analitik</span></a>
-      <a class="sidebar-link" href="#"><span class="icon">⚙️</span><span class="sidebar-text" data-i18n="span_portal_ayarları">Portal Ayarları</span></a>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" data-i18n="div_operasyon">Operasyon</div>
+      <a class="sidebar-link" href="barberpro-customers.html">
+        <span class="icon">🧑‍🤝‍🧑</span>
+        <span class="sidebar-text" data-i18n="span_müşteriler">Müşteriler</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-inventory.html">
+        <span class="icon">📦</span>
+        <span class="sidebar-text" data-i18n="span_stok">Stok</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-loyalty.html">
+        <span class="icon">💎</span>
+        <span class="sidebar-text" data-i18n="span_sadakat">Sadakat</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-pos.html">
+        <span class="icon">💶</span>
+        <span class="sidebar-text" data-i18n="span_kasa_pos">Kasa &amp; POS</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-bookings.html">
+        <span class="icon">📲</span>
+        <span class="sidebar-text" data-i18n="span_gelen_rezervasyonlar">Gelen Rezervasyonlar</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-shifts.html">
+        <span class="icon">🕐</span>
+        <span class="sidebar-text" data-i18n="span_vardiyalar">Vardiyalar</span>
+      </a>
+      <a class="sidebar-link" href="barberpro-marketing.html">
+        <span class="icon">📢</span>
+        <span class="sidebar-text" data-i18n="span_sms_kampanya">SMS &amp; Kampanya</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" data-i18n="div_raporlar">Raporlar</div>
+      <a class="sidebar-link active" href="barberpro-reports.html">
+        <span class="icon">📈</span>
+        <span class="sidebar-text" data-i18n="span_raporlar_analitik">Raporlar &amp; Analitik</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title" data-i18n="div_diğer">Diğer</div>
+      <a class="sidebar-link" href="customer-portal.html">
+        <span class="icon">🌐</span>
+        <span class="sidebar-text" data-i18n="span_müşteri_portalı">Müşteri Portalı</span>
+      </a>
     </div>
   </nav>
   <div class="sidebar-footer">
-    <div class="card" style="padding:12px;border:none;background:var(--bg-secondary);">
-      <div style="display:flex;align-items:center;gap:10px;">
+    <div class="card" style="padding:12px; border:none; background:var(--bg-secondary);">
+      <div style="display:flex; align-items:center; gap:10px;">
         <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--teal-500),var(--teal-700));" data-i18n="div_a">A</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);" data-i18n="div_ahmet_yılmaz">Ahmet Yılmaz</div>
-          <div style="font-size:0.6875rem;color:var(--text-muted);" data-i18n="div_sahip_le_barbier_royal">Sahip — Le Barbier Royal</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);" data-i18n="div_ahmet_yılmaz">Ahmet Yılmaz</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);" data-i18n="div_sahip_le_barbier_royal">Sahip — Le Barbier Royal</div>
         </div>
       </div>
     </div>
