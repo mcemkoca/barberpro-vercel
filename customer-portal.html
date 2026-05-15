@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="tr" data-theme="dark">
-<head>
+<!DOCTYPE html><html lang="tr" data-theme="dark"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BarberPro — Online Randevu</title>
+<title data-i18n="meta_barberpro_online_randevu" data-i18n-attr="content">BarberPro — Online Randevu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/components.css">
 <style>
@@ -54,6 +52,19 @@ body { background:var(--bg-primary); min-height:100vh; }
   background:linear-gradient(135deg,var(--teal-500),var(--teal-700)); color:white; border:none;
 }
 .portal-btn-primary:hover { box-shadow:0 0 20px var(--shadow-glow); transform:translateY(-1px); }
+
+/* ── Lang Switcher ── */
+.lang-switcher {
+  display:flex; gap:4px; align-items:center;
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md);
+  padding:3px;
+}
+.lang-btn {
+  padding:4px 10px; border-radius:var(--radius-sm); border:none; background:transparent;
+  font-size:0.75rem; font-weight:600; color:var(--text-muted); cursor:pointer; transition:all var(--duration-fast);
+}
+.lang-btn:hover { color:var(--text-primary); }
+.lang-btn.active { background:var(--teal-600); color:white; }
 
 /* ── Hero ── */
 .hero {
@@ -329,15 +340,20 @@ body { background:var(--bg-primary); min-height:100vh; }
 <!-- Header -->
 <header class="portal-header">
   <div class="portal-header-left">
-    <div class="portal-logo">B</div>
-    <span class="portal-header-title">BarberPro</span>
+    <div class="portal-logo" data-i18n="div_b">B</div>
+    <span class="portal-header-title" data-i18n="span_barberpro">BarberPro</span>
   </div>
   <div class="portal-header-right">
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="tr" onclick="switchLang('tr')">TR</button>
+      <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+      <button class="lang-btn" data-lang="nl" onclick="switchLang('nl')">NL</button>
+    </div>
     <button class="portal-btn" onclick="showToast('Randevularınız yükleniyor...','info')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      Randevularım
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span data-i18n="button_randevularım">Randevularım</span>
     </button>
-    <button class="portal-btn portal-btn-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})">
+    <button class="portal-btn portal-btn-primary" onclick="document.getElementById('bookingSection').scrollIntoView({behavior:'smooth'})" data-i18n="button_randevu_al">
       Randevu Al
     </button>
   </div>
@@ -347,18 +363,18 @@ body { background:var(--bg-primary); min-height:100vh; }
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/></svg>
-      Brüksel'in En İyi Berberi
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"></path></svg>
+      <span data-i18n="div_brükselin_en_iyi_berberi">Brüksel'in En İyi Berberi</span>
     </div>
-    <h1>BarberPro Salon</h1>
-    <p>Profesyonel erkek bakım merkezi. Saç kesiminden sakal şekillendirmeye, boyadan keratin bakımına kadar her şey tek çatı altında.</p>
+    <h1 data-i18n="h1_barberpro_salon">BarberPro Salon</h1>
+    <p data-i18n="p_profesyonel_erkek_bakım_merkezi_saç_kesiminden_sak">Profesyonel erkek bakım merkezi. Saç kesiminden sakal şekillendirmeye, boyadan keratin bakımına kadar her şey tek çatı altında.</p>
     <div class="hero-rating">
       <div class="stars">★★★★★</div>
-      <span style="font-size:var(--text-sm);color:var(--text-muted);">4.9 (312 değerlendirme)</span>
+      <span style="font-size:var(--text-sm);color:var(--text-muted);" data-i18n="span_49_312_değerlendirme">4.9 (312 değerlendirme)</span>
     </div>
     <div class="hero-address">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-      Rue du Commerce 42, 1000 Brüksel, Belçika
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      <span data-i18n="div_rue_du_commerce_42_1000_brüksel_belçika">Rue du Commerce 42, 1000 Brüksel, Belçika</span>
     </div>
   </div>
 </section>
@@ -367,22 +383,22 @@ body { background:var(--bg-primary); min-height:100vh; }
 <div class="steps-bar">
   <div class="step active" id="step1">
     <div class="step-circle">1</div>
-    <span>Hizmet</span>
+    <span data-i18n="span_hizmet">Hizmet</span>
   </div>
   <div class="step-line" id="line1"></div>
   <div class="step" id="step2">
     <div class="step-circle">2</div>
-    <span>Personel</span>
+    <span data-i18n="span_personel">Personel</span>
   </div>
   <div class="step-line" id="line2"></div>
   <div class="step" id="step3">
     <div class="step-circle">3</div>
-    <span>Tarih & Saat</span>
+    <span data-i18n="span_tarih_saat">Tarih &amp; Saat</span>
   </div>
   <div class="step-line" id="line3"></div>
   <div class="step" id="step4">
     <div class="step-circle">4</div>
-    <span>Onay</span>
+    <span data-i18n="span_onay">Onay</span>
   </div>
 </div>
 
@@ -391,93 +407,93 @@ body { background:var(--bg-primary); min-height:100vh; }
 
   <!-- Service Selection -->
   <div class="section" id="serviceSection">
-    <h2 class="section-title">Hizmet Seçin</h2>
-    <p class="section-subtitle">Size en uygun hizmeti seçin. Birden fazla hizmet ekleyebilirsiniz.</p>
+    <h2 class="section-title" data-i18n="h2_hizmet_seçin">Hizmet Seçin</h2>
+    <p class="section-subtitle" data-i18n="p_size_en_uygun_hizmeti_seçin_birden_fazla_hizmet_ek">Size en uygun hizmeti seçin. Birden fazla hizmet ekleyebilirsiniz.</p>
     <div class="service-grid">
       <div class="service-card" onclick="selectService(this, 'Saç Kesimi', 35, 30)">
         <div class="service-icon" style="background:rgba(139,92,246,0.12);">✂️</div>
-        <h3>Saç Kesimi</h3>
-        <p>Klasik veya modern kesim, yıkama dahil</p>
+        <h3 data-i18n="h3_saç_kesimi">Saç Kesimi</h3>
+        <p data-i18n="p_klasik_veya_modern_kesim_yıkama_dahil">Klasik veya modern kesim, yıkama dahil</p>
         <div class="service-meta">
-          <span>⏱ 30 dk</span>
+          <span data-i18n="span__30_dk">⏱ 30 dk</span>
           <span class="service-price">€35</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Premium Saç Kesimi', 45, 45)">
         <div class="service-icon" style="background:rgba(16,185,129,0.12);">✨</div>
-        <h3>Premium Saç Kesimi</h3>
-        <p>Konsültasyon + kesim + styling + yıkama</p>
+        <h3 data-i18n="h3_premium_saç_kesimi">Premium Saç Kesimi</h3>
+        <p data-i18n="p_konsültasyon_kesim_styling_yıkama">Konsültasyon + kesim + styling + yıkama</p>
         <div class="service-meta">
-          <span>⏱ 45 dk</span>
+          <span data-i18n="span__45_dk">⏱ 45 dk</span>
           <span class="service-price">€45</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Sakal Düzeltme', 20, 20)">
         <div class="service-icon" style="background:rgba(59,130,246,0.12);">🧔</div>
-        <h3>Sakal Düzeltme</h3>
-        <p>Şekillendirme, makas veya makine ile</p>
+        <h3 data-i18n="h3_sakal_düzeltme">Sakal Düzeltme</h3>
+        <p data-i18n="p_şekillendirme_makas_veya_makine_ile">Şekillendirme, makas veya makine ile</p>
         <div class="service-meta">
-          <span>⏱ 20 dk</span>
+          <span data-i18n="span__20_dk">⏱ 20 dk</span>
           <span class="service-price">€20</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Klasik Traş', 25, 25)">
         <div class="service-icon" style="background:rgba(245,158,11,0.12);">🪒</div>
-        <h3>Klasik Traş</h3>
-        <p>Geleneksel jilet traşı, köpük dahil</p>
+        <h3 data-i18n="h3_klasik_traş">Klasik Traş</h3>
+        <p data-i18n="p_geleneksel_jilet_traşı_köpük_dahil">Geleneksel jilet traşı, köpük dahil</p>
         <div class="service-meta">
-          <span>⏱ 25 dk</span>
+          <span data-i18n="span__25_dk">⏱ 25 dk</span>
           <span class="service-price">€25</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Saç Boyama', 55, 90)">
         <div class="service-icon" style="background:rgba(236,72,153,0.12);">🎨</div>
-        <h3>Saç Boyama</h3>
-        <p>Kalpana, L'Oréal veya Wella boya ile</p>
+        <h3 data-i18n="h3_saç_boyama">Saç Boyama</h3>
+        <p data-i18n="p_kalpana_loral_veya_wella_boya_ile">Kalpana, L'Oréal veya Wella boya ile</p>
         <div class="service-meta">
-          <span>⏱ 90 dk</span>
+          <span data-i18n="span__90_dk">⏱ 90 dk</span>
           <span class="service-price">€55</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Keratin Bakımı', 75, 120)">
         <div class="service-icon" style="background:rgba(6,182,212,0.12);">💆</div>
-        <h3>Keratin Bakımı</h3>
-        <p>Profesyonel keratin onarım ve bakım</p>
+        <h3 data-i18n="h3_keratin_bakımı">Keratin Bakımı</h3>
+        <p data-i18n="p_profesyonel_keratin_onarım_ve_bakım">Profesyonel keratin onarım ve bakım</p>
         <div class="service-meta">
-          <span>⏱ 120 dk</span>
+          <span data-i18n="span__120_dk">⏱ 120 dk</span>
           <span class="service-price">€75</span>
         </div>
       </div>
-      <div class="service-card" onclick="selectService(this, 'Saç Yıkama & Masaj', 15, 15)">
+      <div class="service-card" onclick="selectService(this, 'Saç Yıkama &amp; Masaj', 15, 15)">
         <div class="service-icon" style="background:rgba(99,102,241,0.12);">💧</div>
-        <h3>Saç Yıkama & Masaj</h3>
-        <p>Rahatlatıcı baş masajı ile yıkama</p>
+        <h3 data-i18n="h3_saç_yıkama_masaj">Saç Yıkama &amp; Masaj</h3>
+        <p data-i18n="p_rahatlatıcı_baş_masajı_ile_yıkama">Rahatlatıcı baş masajı ile yıkama</p>
         <div class="service-meta">
-          <span>⏱ 15 dk</span>
+          <span data-i18n="span__15_dk">⏱ 15 dk</span>
           <span class="service-price">€15</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Sakal Bakım Seti', 35, 40)">
         <div class="service-icon" style="background:rgba(244,63,94,0.12);">🧴</div>
-        <h3>Sakal Bakım Seti</h3>
-        <p>Düzeltme + yağ + bakım + şekillendirme</p>
+        <h3 data-i18n="h3_sakal_bakım_seti">Sakal Bakım Seti</h3>
+        <p data-i18n="p_düzeltme_yağ_bakım_şekillendirme">Düzeltme + yağ + bakım + şekillendirme</p>
         <div class="service-meta">
-          <span>⏱ 40 dk</span>
+          <span data-i18n="span__40_dk">⏱ 40 dk</span>
           <span class="service-price">€35</span>
         </div>
       </div>
       <div class="service-card" onclick="selectService(this, 'Ombre/Sombre', 65, 150)">
         <div class="service-icon" style="background:rgba(139,92,246,0.12);">🌈</div>
-        <h3>Ombre / Sombre</h3>
-        <p>Renk geçişli modern saç boyama</p>
+        <h3 data-i18n="h3_ombre_sombre">Ombre / Sombre</h3>
+        <p data-i18n="p_renk_geçişli_modern_saç_boyama">Renk geçişli modern saç boyama</p>
         <div class="service-meta">
-          <span>⏱ 150 dk</span>
+          <span data-i18n="span__150_dk">⏱ 150 dk</span>
           <span class="service-price">€65</span>
         </div>
       </div>
     </div>
     <div style="display:flex; justify-content:flex-end; margin-top:var(--space-5);">
-      <button class="btn btn-primary" onclick="nextStep(1)" id="step1Btn" disabled>
+      <button class="btn btn-primary" onclick="nextStep(1)" id="step1Btn" disabled="" data-i18n="button_devam_et_">
         Devam Et →
       </button>
     </div>
@@ -485,100 +501,100 @@ body { background:var(--bg-primary); min-height:100vh; }
 
   <!-- Staff Selection -->
   <div class="section" id="staffSection" style="display:none;">
-    <h2 class="section-title">Personel Seçin</h2>
-    <p class="section-subtitle">Size hizmet verecek uzmanı seçin veya "Herhangi Biri" ile devam edin.</p>
+    <h2 class="section-title" data-i18n="h2_personel_seçin">Personel Seçin</h2>
+    <p class="section-subtitle" data-i18n="p_size_hizmet_verecek_uzmanı_seçin_veya_herhangi_bir">Size hizmet verecek uzmanı seçin veya "Herhangi Biri" ile devam edin.</p>
     <div class="staff-grid">
       <div class="staff-card" onclick="selectStaff(this, 'Herhangi Biri')">
         <div class="staff-avatar" style="background:linear-gradient(135deg,var(--teal-500),var(--teal-700));">?</div>
-        <h3>Herhangi Biri</h3>
-        <div class="role">Müsait ilk personel</div>
-        <div class="rating">⭐ 4.7 ort.</div>
-        <div class="availability">✅ Hemen randevu</div>
+        <h3 data-i18n="h3_herhangi_biri">Herhangi Biri</h3>
+        <div class="role" data-i18n="div_müsait_ilk_personel">Müsait ilk personel</div>
+        <div class="rating" data-i18n="div__47_ort">⭐ 4.7 ort.</div>
+        <div class="availability" data-i18n="div__hemen_randevu">✅ Hemen randevu</div>
       </div>
       <div class="staff-card" onclick="selectStaff(this, 'Mehmet Kaya')">
-        <div class="staff-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);">MK</div>
-        <h3>Mehmet Kaya</h3>
-        <div class="role">Master Barber</div>
+        <div class="staff-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706);" data-i18n="div_mk">MK</div>
+        <h3 data-i18n="h3_mehmet_kaya">Mehmet Kaya</h3>
+        <div class="role" data-i18n="div_master_barber">Master Barber</div>
         <div class="rating">⭐ 4.9 (128)</div>
-        <div class="availability">✅ Müsait</div>
+        <div class="availability" data-i18n="div__müsait">✅ Müsait</div>
       </div>
       <div class="staff-card" onclick="selectStaff(this, 'Sofia Novak')">
-        <div class="staff-avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">SN</div>
-        <h3>Sofia Novak</h3>
-        <div class="role">Color Specialist</div>
+        <div class="staff-avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb);" data-i18n="div_sn">SN</div>
+        <h3 data-i18n="h3_sofia_novak">Sofia Novak</h3>
+        <div class="role" data-i18n="div_color_specialist">Color Specialist</div>
         <div class="rating">⭐ 4.8 (96)</div>
-        <div class="availability">✅ Müsait</div>
+        <div class="availability" data-i18n="div__müsait_1">✅ Müsait</div>
       </div>
       <div class="staff-card" onclick="selectStaff(this, 'Lars比利时 Belgium')">
-        <div class="staff-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">LB</div>
-        <h3>Lars比利时 Belgium</h3>
-        <div class="role">Barber & Stylist</div>
+        <div class="staff-avatar" style="background:linear-gradient(135deg,#10b981,#059669);" data-i18n="div_lb">LB</div>
+        <h3 data-i18n="h3_lars_belgium">Lars比利时 Belgium</h3>
+        <div class="role" data-i18n="div_barber_stylist">Barber &amp; Stylist</div>
         <div class="rating">⭐ 4.7 (84)</div>
-        <div class="availability">⏳ 2 saat sonra</div>
+        <div class="availability" data-i18n="div__2_saat_sonra">⏳ 2 saat sonra</div>
       </div>
       <div class="staff-card" onclick="selectStaff(this, 'Ingrid Jansen')">
-        <div class="staff-avatar" style="background:linear-gradient(135deg,#ec4899,#db2777);">IJ</div>
-        <h3>Ingrid Jansen</h3>
-        <div class="role">Hair Artist</div>
+        <div class="staff-avatar" style="background:linear-gradient(135deg,#ec4899,#db2777);" data-i18n="div_ij">IJ</div>
+        <h3 data-i18n="h3_ingrid_jansen">Ingrid Jansen</h3>
+        <div class="role" data-i18n="div_hair_artist">Hair Artist</div>
         <div class="rating">⭐ 4.6 (72)</div>
-        <div class="availability">✅ Müsait</div>
+        <div class="availability" data-i18n="div__müsait_2">✅ Müsait</div>
       </div>
       <div class="staff-card" onclick="selectStaff(this, 'Dimitri比利时 Belgium')">
-        <div class="staff-avatar" style="background:linear-gradient(135deg,#06b6d4,#0891b2);">DB</div>
-        <h3>Dimitri比利时 Belgium</h3>
-        <div class="role">Beard Specialist</div>
+        <div class="staff-avatar" style="background:linear-gradient(135deg,#06b6d4,#0891b2);" data-i18n="div_db">DB</div>
+        <h3 data-i18n="h3_dimitri_belgium">Dimitri比利时 Belgium</h3>
+        <div class="role" data-i18n="div_beard_specialist">Beard Specialist</div>
         <div class="rating">⭐ 4.5 (58)</div>
-        <div class="availability">✅ Müsait</div>
+        <div class="availability" data-i18n="div__müsait_3">✅ Müsait</div>
       </div>
     </div>
     <div style="display:flex; justify-content:space-between; margin-top:var(--space-5);">
-      <button class="btn btn-secondary" onclick="prevStep(2)">← Geri</button>
-      <button class="btn btn-primary" onclick="nextStep(2)" id="step2Btn" disabled>Devam Et →</button>
+      <button class="btn btn-secondary" onclick="prevStep(2)" data-i18n="button__geri">← Geri</button>
+      <button class="btn btn-primary" onclick="nextStep(2)" id="step2Btn" disabled="" data-i18n="button_devam_et__1">Devam Et →</button>
     </div>
   </div>
 
   <!-- Date & Time -->
   <div class="section" id="dateSection" style="display:none;">
-    <h2 class="section-title">Tarih & Saat Seçin</h2>
-    <p class="section-subtitle">Size uygun bir tarih ve saat aralığı seçin.</p>
+    <h2 class="section-title" data-i18n="h2_tarih_saat_seçin">Tarih &amp; Saat Seçin</h2>
+    <p class="section-subtitle" data-i18n="p_size_uygun_bir_tarih_ve_saat_aralığı_seçin">Size uygun bir tarih ve saat aralığı seçin.</p>
     <div class="calendar-card">
       <div class="calendar-header">
-        <h3>Mayıs 2026</h3>
+        <h3 data-i18n="h3_mayıs_2026">Mayıs 2026</h3>
         <div class="cal-nav">
           <button onclick="showToast('Önceki ay','info')">←</button>
-          <button onclick="showToast('Bugün','info')">Bugün</button>
+          <button onclick="showToast('Bugün','info')" data-i18n="button_bugün">Bugün</button>
           <button onclick="showToast('Sonraki ay','info')">→</button>
         </div>
       </div>
       <div class="calendar-grid">
-        <div class="cal-day-label">Pt</div><div class="cal-day-label">Sa</div><div class="cal-day-label">Ça</div>
-        <div class="cal-day-label">Pe</div><div class="cal-day-label">Cu</div><div class="cal-day-label">Ct</div><div class="cal-day-label">Pa</div>
+        <div class="cal-day-label" data-i18n="div_pt">Pt</div><div class="cal-day-label" data-i18n="div_sa">Sa</div><div class="cal-day-label" data-i18n="div_ça">Ça</div>
+        <div class="cal-day-label" data-i18n="div_pe">Pe</div><div class="cal-day-label" data-i18n="div_cu">Cu</div><div class="cal-day-label" data-i18n="div_ct">Ct</div><div class="cal-day-label" data-i18n="div_pa">Pa</div>
         <div class="cal-day disabled"></div><div class="cal-day disabled"></div><div class="cal-day disabled"></div>
-        <div class="cal-day" onclick="selectDate(this, 1)">1<span class="slots">4 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 2)">2<span class="slots">6 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 3)">3<span class="slots">2 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 4)">4<span class="slots">8 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 5)">5<span class="slots">5 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 6)">6<span class="slots">3 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 7)">7<span class="slots">7 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 8)">8<span class="slots">4 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 9)">9<span class="slots">6 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 10)">10<span class="slots">3 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 11)">11<span class="slots">9 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 12)">12<span class="slots">5 boş</span></div>
-        <div class="cal-day today" onclick="selectDate(this, 13)">13<span class="slots">4 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 14)">14<span class="slots">8 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 15)">15<span class="slots">6 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 16)">16<span class="slots">2 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 17)">17<span class="slots">7 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 18)">18<span class="slots">5 boş</span></div>
-        <div class="cal-day" onclick="selectDate(this, 19)">19<span class="slots">3 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 1)">1<span class="slots" data-i18n="span_4_boş">4 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 2)">2<span class="slots" data-i18n="span_6_boş">6 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 3)">3<span class="slots" data-i18n="span_2_boş">2 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 4)">4<span class="slots" data-i18n="span_8_boş">8 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 5)">5<span class="slots" data-i18n="span_5_boş">5 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 6)">6<span class="slots" data-i18n="span_3_boş">3 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 7)">7<span class="slots" data-i18n="span_7_boş">7 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 8)">8<span class="slots" data-i18n="span_4_boş_1">4 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 9)">9<span class="slots" data-i18n="span_6_boş_1">6 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 10)">10<span class="slots" data-i18n="span_3_boş_1">3 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 11)">11<span class="slots" data-i18n="span_9_boş">9 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 12)">12<span class="slots" data-i18n="span_5_boş_1">5 boş</span></div>
+        <div class="cal-day today" onclick="selectDate(this, 13)">13<span class="slots" data-i18n="span_4_boş_2">4 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 14)">14<span class="slots" data-i18n="span_8_boş_1">8 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 15)">15<span class="slots" data-i18n="span_6_boş_2">6 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 16)">16<span class="slots" data-i18n="span_2_boş_1">2 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 17)">17<span class="slots" data-i18n="span_7_boş_1">7 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 18)">18<span class="slots" data-i18n="span_5_boş_2">5 boş</span></div>
+        <div class="cal-day" onclick="selectDate(this, 19)">19<span class="slots" data-i18n="span_3_boş_2">3 boş</span></div>
         <div class="cal-day disabled">20</div><div class="cal-day disabled">21</div><div class="cal-day disabled">22</div>
       </div>
     </div>
 
     <div class="time-section" id="timeSection" style="display:none;">
-      <h4>⚡ Sabah (09:00 — 12:00)</h4>
+      <h4 data-i18n="h4__sabah_0900_1200">⚡ Sabah (09:00 — 12:00)</h4>
       <div class="time-grid">
         <div class="time-slot" onclick="selectTime(this, '09:00')">09:00</div>
         <div class="time-slot" onclick="selectTime(this, '09:30')">09:30</div>
@@ -587,7 +603,7 @@ body { background:var(--bg-primary); min-height:100vh; }
         <div class="time-slot disabled">11:00</div>
         <div class="time-slot" onclick="selectTime(this, '11:30')">11:30</div>
       </div>
-      <h4 style="margin-top:var(--space-4);">☀️ Öğleden Sonra (13:00 — 17:00)</h4>
+      <h4 style="margin-top:var(--space-4);" data-i18n="h4__öğleden_sonra_1300_1700">☀️ Öğleden Sonra (13:00 — 17:00)</h4>
       <div class="time-grid">
         <div class="time-slot" onclick="selectTime(this, '13:00')">13:00</div>
         <div class="time-slot disabled">13:30</div>
@@ -598,7 +614,7 @@ body { background:var(--bg-primary); min-height:100vh; }
         <div class="time-slot" onclick="selectTime(this, '16:00')">16:00</div>
         <div class="time-slot" onclick="selectTime(this, '16:30')">16:30</div>
       </div>
-      <h4 style="margin-top:var(--space-4);">🌙 Akşam (17:30 — 20:00)</h4>
+      <h4 style="margin-top:var(--space-4);" data-i18n="h4__akşam_1730_2000">🌙 Akşam (17:30 — 20:00)</h4>
       <div class="time-grid">
         <div class="time-slot" onclick="selectTime(this, '17:30')">17:30</div>
         <div class="time-slot" onclick="selectTime(this, '18:00')">18:00</div>
@@ -608,149 +624,149 @@ body { background:var(--bg-primary); min-height:100vh; }
     </div>
 
     <div style="display:flex; justify-content:space-between; margin-top:var(--space-5);">
-      <button class="btn btn-secondary" onclick="prevStep(3)">← Geri</button>
-      <button class="btn btn-primary" onclick="nextStep(3)" id="step3Btn" disabled>Devam Et →</button>
+      <button class="btn btn-secondary" onclick="prevStep(3)" data-i18n="button__geri_1">← Geri</button>
+      <button class="btn btn-primary" onclick="nextStep(3)" id="step3Btn" disabled="" data-i18n="button_devam_et__2">Devam Et →</button>
     </div>
   </div>
 
   <!-- Confirmation -->
   <div class="section" id="confirmSection" style="display:none;">
-    <h2 class="section-title">Bilgilerinizi Girin</h2>
-    <p class="section-subtitle">Randevunuzu tamamlamak için iletişim bilgilerinizi girin.</p>
+    <h2 class="section-title" data-i18n="h2_bilgilerinizi_girin">Bilgilerinizi Girin</h2>
+    <p class="section-subtitle" data-i18n="p_randevunuzu_tamamlamak_için_iletişim_bilgilerinizi">Randevunuzu tamamlamak için iletişim bilgilerinizi girin.</p>
     <div class="form-card">
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Ad Soyad *</label>
-          <input type="text" class="form-input" placeholder="Adınız ve soyadınız" value="Pierre Van den Berghe">
+          <label class="form-label" data-i18n="label_ad_soyad_">Ad Soyad *</label>
+          <input type="text" class="form-input" placeholder="Adınız ve soyadınız" value="Pierre Van den Berghe" data-i18n-placeholder="ph_adınız_ve_soyadınız">
         </div>
         <div class="form-group">
-          <label class="form-label">Telefon *</label>
-          <input type="tel" class="form-input" placeholder="+32 XXX XX XX XX" value="+32 486 23 45 67">
+          <label class="form-label" data-i18n="label_telefon_">Telefon *</label>
+          <input type="tel" class="form-input" placeholder="+32 XXX XX XX XX" value="+32 486 23 45 67" data-i18n-placeholder="ph_32_xxx_xx_xx_xx">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">E-posta</label>
-          <input type="email" class="form-input" placeholder="ornek@email.com">
+          <label class="form-label" data-i18n="label_eposta">E-posta</label>
+          <input type="email" class="form-input" placeholder="ornek@email.com" data-i18n-placeholder="ph_ornekemailcom">
         </div>
         <div class="form-group">
-          <label class="form-label">Hatırlatma</label>
+          <label class="form-label" data-i18n="label_hatırlatma">Hatırlatma</label>
           <select class="form-select">
-            <option>SMS ile hatırlat</option>
-            <option>E-posta ile hatırlat</option>
-            <option>Hatırlatma istemiyorum</option>
+            <option data-i18n="option_sms_ile_hatırlat">SMS ile hatırlat</option>
+            <option data-i18n="option_eposta_ile_hatırlat">E-posta ile hatırlat</option>
+            <option data-i18n="option_hatırlatma_istemiyorum">Hatırlatma istemiyorum</option>
           </select>
         </div>
       </div>
       <div class="form-group" style="margin-top:var(--space-4);">
-        <label class="form-label">Not (Opsiyonel)</label>
-        <textarea class="form-textarea" rows="2" placeholder="Özel istekler, alerjiler veya notlar...">Sakal kısa olsun, üst dudak temiz.</textarea>
+        <label class="form-label" data-i18n="label_not_opsiyonel">Not (Opsiyonel)</label>
+        <textarea class="form-textarea" rows="2" placeholder="Özel istekler, alerjiler veya notlar..." data-i18n-placeholder="ph_özel_istekler_alerjiler_veya_notlar">Sakal kısa olsun, üst dudak temiz.</textarea>
       </div>
     </div>
 
-    <h2 class="section-title" style="margin-top:var(--space-8);">Özet</h2>
+    <h2 class="section-title" style="margin-top:var(--space-8);" data-i18n="h2_özet">Özet</h2>
     <div class="summary-card">
       <div class="summary-line">
-        <span class="label">Hizmet</span>
-        <span class="value">Premium Saç Kesimi + Sakal Düzeltme</span>
+        <span class="label" data-i18n="span_hizmet_1">Hizmet</span>
+        <span class="value" data-i18n="span_premium_saç_kesimi_sakal_düzeltme">Premium Saç Kesimi + Sakal Düzeltme</span>
       </div>
       <div class="summary-line">
-        <span class="label">Personel</span>
-        <span class="value">Mehmet Kaya (Master Barber)</span>
+        <span class="label" data-i18n="span_personel_1">Personel</span>
+        <span class="value" data-i18n="span_mehmet_kaya_master_barber">Mehmet Kaya (Master Barber)</span>
       </div>
       <div class="summary-line">
-        <span class="label">Tarih & Saat</span>
-        <span class="value">13 Mayıs 2026, Salı — 10:00</span>
+        <span class="label" data-i18n="span_tarih_saat_1">Tarih &amp; Saat</span>
+        <span class="value" data-i18n="span_13_mayıs_2026_salı_1000">13 Mayıs 2026, Salı — 10:00</span>
       </div>
       <div class="summary-line">
-        <span class="label">Süre</span>
-        <span class="value">65 dk</span>
+        <span class="label" data-i18n="span_süre">Süre</span>
+        <span class="value" data-i18n="span_65_dk">65 dk</span>
       </div>
       <div class="summary-line">
-        <span class="label">Hizmet Tutarı</span>
+        <span class="label" data-i18n="span_hizmet_tutarı">Hizmet Tutarı</span>
         <span class="value">€65</span>
       </div>
       <div class="summary-line">
-        <span class="label">Sadakat İndirimi (Silver %10)</span>
+        <span class="label" data-i18n="span_sadakat_indirimi_silver_10">Sadakat İndirimi (Silver %10)</span>
         <span class="value" style="color:var(--success-500);">-€6.50</span>
       </div>
       <div class="summary-line total">
-        <span class="label">Toplam</span>
+        <span class="label" data-i18n="span_toplam">Toplam</span>
         <span class="value">€58.50</span>
       </div>
     </div>
 
     <div style="display:flex; justify-content:space-between; margin-top:var(--space-5);">
-      <button class="btn btn-secondary" onclick="prevStep(4)">← Geri</button>
+      <button class="btn btn-secondary" onclick="prevStep(4)" data-i18n="button__geri_2">← Geri</button>
       <button class="btn btn-primary" onclick="openModal('confirmModal')" style="padding:12px 32px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Randevuyu Onayla
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span data-i18n="button_randevuyu_onayla">Randevuyu Onayla</span>
       </button>
     </div>
   </div>
 
   <!-- My Appointments -->
   <div class="section" style="margin-top:var(--space-12);">
-    <h2 class="section-title">Yaklaşan Randevularım</h2>
-    <p class="section-subtitle">Giriş yapmadan görüntüleniyor — telefon numaranızla eşleşen randevular.</p>
+    <h2 class="section-title" data-i18n="h2_yaklaşan_randevularım">Yaklaşan Randevularım</h2>
+    <p class="section-subtitle" data-i18n="p_giriş_yapmadan_görüntüleniyor_telefon_numaranızla_">Giriş yapmadan görüntüleniyor — telefon numaranızla eşleşen randevular.</p>
     <div class="appt-list">
       <div class="appt-card">
         <div class="appt-date">
           <div class="day">18</div>
-          <div class="month">Mayıs</div>
+          <div class="month" data-i18n="div_mayıs">Mayıs</div>
         </div>
         <div class="appt-info">
-          <h4>Premium Saç Kesimi + Sakal Düzeltme</h4>
-          <p>14:00 — Mehmet Kaya • Rue du Commerce 42</p>
+          <h4 data-i18n="h4_premium_saç_kesimi_sakal_düzeltme">Premium Saç Kesimi + Sakal Düzeltme</h4>
+          <p data-i18n="p_1400_mehmet_kaya_rue_du_commerce_42">14:00 — Mehmet Kaya • Rue du Commerce 42</p>
         </div>
-        <div class="appt-status upcoming">Yaklaşıyor</div>
+        <div class="appt-status upcoming" data-i18n="div_yaklaşıyor">Yaklaşıyor</div>
       </div>
       <div class="appt-card">
         <div class="appt-date">
           <div class="day">22</div>
-          <div class="month">Mayıs</div>
+          <div class="month" data-i18n="div_mayıs_1">Mayıs</div>
         </div>
         <div class="appt-info">
-          <h4>Keratin Bakımı</h4>
-          <p>10:30 — Sofia Novak • Rue du Commerce 42</p>
+          <h4 data-i18n="h4_keratin_bakımı">Keratin Bakımı</h4>
+          <p data-i18n="p_1030_sofia_novak_rue_du_commerce_42">10:30 — Sofia Novak • Rue du Commerce 42</p>
         </div>
-        <div class="appt-status upcoming">Yaklaşıyor</div>
+        <div class="appt-status upcoming" data-i18n="div_yaklaşıyor_1">Yaklaşıyor</div>
       </div>
       <div class="appt-card">
         <div class="appt-date">
           <div class="day">05</div>
-          <div class="month">Mayıs</div>
+          <div class="month" data-i18n="div_mayıs_2">Mayıs</div>
         </div>
         <div class="appt-info">
-          <h4>Saç Kesimi + Sakal Düzeltme</h4>
-          <p>09:00 — Lars比利时 Belgium • Rue du Commerce 42</p>
+          <h4 data-i18n="h4_saç_kesimi_sakal_düzeltme">Saç Kesimi + Sakal Düzeltme</h4>
+          <p data-i18n="p_0900_lars_belgium_rue_du_commerce_42">09:00 — Lars比利时 Belgium • Rue du Commerce 42</p>
         </div>
-        <div class="appt-status completed">Tamamlandı</div>
+        <div class="appt-status completed" data-i18n="div_tamamlandı">Tamamlandı</div>
       </div>
     </div>
   </div>
 
   <!-- Contact & Map -->
   <div class="contact-section">
-    <h2 class="section-title">İletişim</h2>
+    <h2 class="section-title" data-i18n="h2_iletişim">İletişim</h2>
     <div class="contact-grid">
       <div class="contact-item">
-        <span class="label">Adres</span>
-        <span class="value">Rue du Commerce 42, 1000 Brüksel, Belçika</span>
+        <span class="label" data-i18n="span_adres">Adres</span>
+        <span class="value" data-i18n="span_rue_du_commerce_42_1000_brüksel_belçika">Rue du Commerce 42, 1000 Brüksel, Belçika</span>
       </div>
       <div class="contact-item">
-        <span class="label">Telefon</span>
+        <span class="label" data-i18n="span_telefon">Telefon</span>
         <span class="value">+32 2 123 45 67</span>
       </div>
       <div class="contact-item">
-        <span class="label">Çalışma Saatleri</span>
-        <span class="value">Pzt-Cum: 09:00 — 20:00<br>Cumartesi: 09:00 — 16:00<br>Pazar: Kapalı</span>
+        <span class="label" data-i18n="span_çalışma_saatleri">Çalışma Saatleri</span>
+        <span class="value"><span data-i18n="span_pztcum_0900_2000">Pzt-Cum: 09:00 — 20:00</span><br><span data-i18n="span_cumartesi_0900_1600">Cumartesi: 09:00 — 16:00</span><br><span data-i18n="span_pazar_kapalı">Pazar: Kapalı</span></span>
       </div>
     </div>
     <div class="map-placeholder">
       <div style="text-align:center;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:8px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <div style="font-size:var(--text-xs); color:var(--text-muted);">Harita Görünümü (Google Maps entegrasyonu için yer tutucu)</div>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom:8px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <div style="font-size:var(--text-xs); color:var(--text-muted);" data-i18n="div_harita_görünümü_google_maps_entegrasyonu_için_yer_">Harita Görünümü (Google Maps entegrasyonu için yer tutucu)</div>
       </div>
     </div>
   </div>
@@ -758,11 +774,11 @@ body { background:var(--bg-primary); min-height:100vh; }
   <!-- Footer -->
   <div class="portal-footer">
     <div class="footer-links">
-      <a href="https://cleanfix-demo.vercel.app" target="_blank">🧹 CleanFix</a>
-      <a href="https://buildpro-demo.vercel.app" target="_blank">🏗️ BuildPro</a>
-      <a href="barberpro-loyalty.html">Sadakat Programı</a>
+      <a href="https://cleanfix-demo.vercel.app" target="_blank" data-i18n="a__cleanfix">🧹 CleanFix</a>
+      <a href="https://buildpro-demo.vercel.app" target="_blank" data-i18n="a__buildpro">🏗️ BuildPro</a>
+      <a href="barberpro-loyalty.html" data-i18n="a_sadakat_programı">Sadakat Programı</a>
     </div>
-    <div style="font-size:var(--text-sm);color:var(--text-muted);">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+    <div style="font-size:var(--text-sm);color:var(--text-muted);" data-i18n="div__2026_barberpro_tüm_hakları_saklıdır">© 2026 BarberPro. Tüm hakları saklıdır.</div>
   </div>
 
 </div>
@@ -772,17 +788,17 @@ body { background:var(--bg-primary); min-height:100vh; }
   <div class="modal">
     <div class="modal-body" style="text-align:center;">
       <div class="confirm-icon">🎉</div>
-      <h3 style="font-size:var(--text-xl); font-weight:700; margin-bottom:var(--space-2);">Randevunuz Onaylandı!</h3>
-      <p style="font-size:var(--text-sm); color:var(--text-muted); margin-bottom:var(--space-5);">13 Mayıs 2026, Salı saat 10:00 için randevunuz oluşturuldu.</p>
-      <div class="confirm-code">BP-260513-0842</div>
-      <div style="font-size:var(--text-sm); color:var(--text-muted); margin-bottom:var(--space-5);">
+      <h3 style="font-size:var(--text-xl); font-weight:700; margin-bottom:var(--space-2);" data-i18n="h3_randevunuz_onaylandı">Randevunuz Onaylandı!</h3>
+      <p style="font-size:var(--text-sm); color:var(--text-muted); margin-bottom:var(--space-5);" data-i18n="p_13_mayıs_2026_salı_saat_1000_için_randevunuz_oluşt">13 Mayıs 2026, Salı saat 10:00 için randevunuz oluşturuldu.</p>
+      <div class="confirm-code" data-i18n="div_bp2605130842">BP-260513-0842</div>
+      <div style="font-size:var(--text-sm); color:var(--text-muted); margin-bottom:var(--space-5);" data-i18n="div_randevu_kodunuzu_kaydedin_sms_hatırlatması_24_saat">
         Randevu kodunuzu kaydedin. SMS hatırlatması 24 saat önce gönderilecektir.
       </div>
       <div style="display:flex; gap:var(--space-3); justify-content:center;">
-        <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Kapat</button>
+        <button class="btn btn-secondary" onclick="closeModal('confirmModal')" data-i18n="button_kapat">Kapat</button>
         <button class="btn btn-primary" onclick="showToast('Takvime eklendi!','success'); closeModal('confirmModal')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Takvime Ekle
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span data-i18n="button_takvime_ekle">Takvime Ekle</span>
         </button>
       </div>
     </div>
@@ -906,5 +922,554 @@ function showToast(msg, type = 'success', dur = 3000) {
 @keyframes progressBar { from { width:100%; } to { width:0; } }
 </style>
 
-</body>
-</html>
+
+
+
+<script>
+const i18n = {
+  tr: {
+  "meta_barberpro_online_randevu": "BarberPro — Online Randevu",
+  "ph_adınız_ve_soyadınız": "Adınız ve soyadınız",
+  "ph_32_xxx_xx_xx_xx": "+32 XXX XX XX XX",
+  "ph_ornekemailcom": "ornek@email.com",
+  "ph_özel_istekler_alerjiler_veya_notlar": "Özel istekler, alerjiler veya notlar...",
+  "div_b": "B",
+  "span_barberpro": "BarberPro",
+  "button_randevu_al": "Randevu Al",
+  "h1_barberpro_salon": "BarberPro Salon",
+  "p_profesyonel_erkek_bakım_merkezi_saç_kesiminden_sak": "Profesyonel erkek bakım merkezi. Saç kesiminden sakal şekillendirmeye, boyadan keratin bakımına kadar her şey tek çatı altında.",
+  "span_49_312_değerlendirme": "4.9 (312 değerlendirme)",
+  "span_hizmet": "Hizmet",
+  "span_personel": "Personel",
+  "span_tarih_saat": "Tarih & Saat",
+  "span_onay": "Onay",
+  "h2_hizmet_seçin": "Hizmet Seçin",
+  "p_size_en_uygun_hizmeti_seçin_birden_fazla_hizmet_ek": "Size en uygun hizmeti seçin. Birden fazla hizmet ekleyebilirsiniz.",
+  "h3_saç_kesimi": "Saç Kesimi",
+  "p_klasik_veya_modern_kesim_yıkama_dahil": "Klasik veya modern kesim, yıkama dahil",
+  "span__30_dk": "⏱ 30 dk",
+  "h3_premium_saç_kesimi": "Premium Saç Kesimi",
+  "p_konsültasyon_kesim_styling_yıkama": "Konsültasyon + kesim + styling + yıkama",
+  "span__45_dk": "⏱ 45 dk",
+  "h3_sakal_düzeltme": "Sakal Düzeltme",
+  "p_şekillendirme_makas_veya_makine_ile": "Şekillendirme, makas veya makine ile",
+  "span__20_dk": "⏱ 20 dk",
+  "h3_klasik_traş": "Klasik Traş",
+  "p_geleneksel_jilet_traşı_köpük_dahil": "Geleneksel jilet traşı, köpük dahil",
+  "span__25_dk": "⏱ 25 dk",
+  "h3_saç_boyama": "Saç Boyama",
+  "p_kalpana_loral_veya_wella_boya_ile": "Kalpana, L'Oréal veya Wella boya ile",
+  "span__90_dk": "⏱ 90 dk",
+  "h3_keratin_bakımı": "Keratin Bakımı",
+  "p_profesyonel_keratin_onarım_ve_bakım": "Profesyonel keratin onarım ve bakım",
+  "span__120_dk": "⏱ 120 dk",
+  "h3_saç_yıkama_masaj": "Saç Yıkama & Masaj",
+  "p_rahatlatıcı_baş_masajı_ile_yıkama": "Rahatlatıcı baş masajı ile yıkama",
+  "span__15_dk": "⏱ 15 dk",
+  "h3_sakal_bakım_seti": "Sakal Bakım Seti",
+  "p_düzeltme_yağ_bakım_şekillendirme": "Düzeltme + yağ + bakım + şekillendirme",
+  "span__40_dk": "⏱ 40 dk",
+  "h3_ombre_sombre": "Ombre / Sombre",
+  "p_renk_geçişli_modern_saç_boyama": "Renk geçişli modern saç boyama",
+  "span__150_dk": "⏱ 150 dk",
+  "button_devam_et_": "Devam Et →",
+  "h2_personel_seçin": "Personel Seçin",
+  "p_size_hizmet_verecek_uzmanı_seçin_veya_herhangi_bir": "Size hizmet verecek uzmanı seçin veya \"Herhangi Biri\" ile devam edin.",
+  "h3_herhangi_biri": "Herhangi Biri",
+  "div_müsait_ilk_personel": "Müsait ilk personel",
+  "div__47_ort": "⭐ 4.7 ort.",
+  "div__hemen_randevu": "✅ Hemen randevu",
+  "div_mk": "MK",
+  "h3_mehmet_kaya": "Mehmet Kaya",
+  "div_master_barber": "Master Barber",
+  "div__müsait": "✅ Müsait",
+  "div_sn": "SN",
+  "h3_sofia_novak": "Sofia Novak",
+  "div_color_specialist": "Color Specialist",
+  "div__müsait_1": "✅ Müsait",
+  "div_lb": "LB",
+  "h3_lars_belgium": "Lars比利时 Belgium",
+  "div_barber_stylist": "Barber & Stylist",
+  "div__2_saat_sonra": "⏳ 2 saat sonra",
+  "div_ij": "IJ",
+  "h3_ingrid_jansen": "Ingrid Jansen",
+  "div_hair_artist": "Hair Artist",
+  "div__müsait_2": "✅ Müsait",
+  "div_db": "DB",
+  "h3_dimitri_belgium": "Dimitri比利时 Belgium",
+  "div_beard_specialist": "Beard Specialist",
+  "div__müsait_3": "✅ Müsait",
+  "button__geri": "← Geri",
+  "button_devam_et__1": "Devam Et →",
+  "h2_tarih_saat_seçin": "Tarih & Saat Seçin",
+  "p_size_uygun_bir_tarih_ve_saat_aralığı_seçin": "Size uygun bir tarih ve saat aralığı seçin.",
+  "h3_mayıs_2026": "Mayıs 2026",
+  "button_bugün": "Bugün",
+  "div_pt": "Pt",
+  "div_sa": "Sa",
+  "div_ça": "Ça",
+  "div_pe": "Pe",
+  "div_cu": "Cu",
+  "div_ct": "Ct",
+  "div_pa": "Pa",
+  "span_4_boş": "4 boş",
+  "span_6_boş": "6 boş",
+  "span_2_boş": "2 boş",
+  "span_8_boş": "8 boş",
+  "span_5_boş": "5 boş",
+  "span_3_boş": "3 boş",
+  "span_7_boş": "7 boş",
+  "span_4_boş_1": "4 boş",
+  "span_6_boş_1": "6 boş",
+  "span_3_boş_1": "3 boş",
+  "span_9_boş": "9 boş",
+  "span_5_boş_1": "5 boş",
+  "span_4_boş_2": "4 boş",
+  "span_8_boş_1": "8 boş",
+  "span_6_boş_2": "6 boş",
+  "span_2_boş_1": "2 boş",
+  "span_7_boş_1": "7 boş",
+  "span_5_boş_2": "5 boş",
+  "span_3_boş_2": "3 boş",
+  "h4__sabah_0900_1200": "⚡ Sabah (09:00 — 12:00)",
+  "h4__öğleden_sonra_1300_1700": "☀️ Öğleden Sonra (13:00 — 17:00)",
+  "h4__akşam_1730_2000": "🌙 Akşam (17:30 — 20:00)",
+  "button__geri_1": "← Geri",
+  "button_devam_et__2": "Devam Et →",
+  "h2_bilgilerinizi_girin": "Bilgilerinizi Girin",
+  "p_randevunuzu_tamamlamak_için_iletişim_bilgilerinizi": "Randevunuzu tamamlamak için iletişim bilgilerinizi girin.",
+  "label_ad_soyad_": "Ad Soyad *",
+  "label_telefon_": "Telefon *",
+  "label_eposta": "E-posta",
+  "label_hatırlatma": "Hatırlatma",
+  "option_sms_ile_hatırlat": "SMS ile hatırlat",
+  "option_eposta_ile_hatırlat": "E-posta ile hatırlat",
+  "option_hatırlatma_istemiyorum": "Hatırlatma istemiyorum",
+  "label_not_opsiyonel": "Not (Opsiyonel)",
+  "h2_özet": "Özet",
+  "span_hizmet_1": "Hizmet",
+  "span_premium_saç_kesimi_sakal_düzeltme": "Premium Saç Kesimi + Sakal Düzeltme",
+  "span_personel_1": "Personel",
+  "span_mehmet_kaya_master_barber": "Mehmet Kaya (Master Barber)",
+  "span_tarih_saat_1": "Tarih & Saat",
+  "span_13_mayıs_2026_salı_1000": "13 Mayıs 2026, Salı — 10:00",
+  "span_süre": "Süre",
+  "span_65_dk": "65 dk",
+  "span_hizmet_tutarı": "Hizmet Tutarı",
+  "span_sadakat_indirimi_silver_10": "Sadakat İndirimi (Silver %10)",
+  "span_toplam": "Toplam",
+  "button__geri_2": "← Geri",
+  "h2_yaklaşan_randevularım": "Yaklaşan Randevularım",
+  "p_giriş_yapmadan_görüntüleniyor_telefon_numaranızla_": "Giriş yapmadan görüntüleniyor — telefon numaranızla eşleşen randevular.",
+  "div_mayıs": "Mayıs",
+  "h4_premium_saç_kesimi_sakal_düzeltme": "Premium Saç Kesimi + Sakal Düzeltme",
+  "p_1400_mehmet_kaya_rue_du_commerce_42": "14:00 — Mehmet Kaya • Rue du Commerce 42",
+  "div_yaklaşıyor": "Yaklaşıyor",
+  "div_mayıs_1": "Mayıs",
+  "h4_keratin_bakımı": "Keratin Bakımı",
+  "p_1030_sofia_novak_rue_du_commerce_42": "10:30 — Sofia Novak • Rue du Commerce 42",
+  "div_yaklaşıyor_1": "Yaklaşıyor",
+  "div_mayıs_2": "Mayıs",
+  "h4_saç_kesimi_sakal_düzeltme": "Saç Kesimi + Sakal Düzeltme",
+  "p_0900_lars_belgium_rue_du_commerce_42": "09:00 — Lars比利时 Belgium • Rue du Commerce 42",
+  "div_tamamlandı": "Tamamlandı",
+  "h2_iletişim": "İletişim",
+  "span_adres": "Adres",
+  "span_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "span_telefon": "Telefon",
+  "span_çalışma_saatleri": "Working Hours",
+  "div_harita_görünümü_google_maps_entegrasyonu_için_yer_": "Harita Görünümü (Google Maps entegrasyonu için yer tutucu)",
+  "a__cleanfix": "🧹 CleanFix",
+  "a__buildpro": "🏗️ BuildPro",
+  "a_sadakat_programı": "Sadakat Programı",
+  "div__2026_barberpro_tüm_hakları_saklıdır": "© 2026 BarberPro. Tüm hakları saklıdır.",
+  "h3_randevunuz_onaylandı": "Randevunuz Onaylandı!",
+  "p_13_mayıs_2026_salı_saat_1000_için_randevunuz_oluşt": "13 Mayıs 2026, Salı saat 10:00 için randevunuz oluşturuldu.",
+  "div_bp2605130842": "BP-260513-0842",
+  "div_randevu_kodunuzu_kaydedin_sms_hatırlatması_24_saat": "Randevu kodunuzu kaydedin. SMS hatırlatması 24 saat önce gönderilecektir.",
+  "button_kapat": "Kapat",
+  "button_randevularım": "Randevularım",
+  "div_brükselin_en_iyi_berberi": "Brüksel'in En İyi Berberi",
+  "div_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "button_randevuyu_onayla": "Randevuyu Onayla",
+  "span_pztcum_0900_2000": "Pzt-Cum: 09:00 — 20:00",
+  "span_cumartesi_0900_1600": "Cumartesi: 09:00 — 16:00",
+  "span_pazar_kapalı": "Pazar: Kapalı",
+  "button_takvime_ekle": "Takvime Ekle"
+},
+  en: {
+  "meta_barberpro_online_randevu": "BarberPro — Online Appointment",
+  "ph_adınız_ve_soyadınız": "Adınız ve soyadınız",
+  "ph_32_xxx_xx_xx_xx": "+32 XXX XX XX XX",
+  "ph_ornekemailcom": "ornek@email.com",
+  "ph_özel_istekler_alerjiler_veya_notlar": "Özel istekler, alerjiler veya notlar...",
+  "div_b": "B",
+  "span_barberpro": "BarberPro",
+  "button_randevu_al": "Appointment Receive",
+  "h1_barberpro_salon": "BarberPro Salon",
+  "p_profesyonel_erkek_bakım_merkezi_saç_kesiminden_sak": "Profesyonel erkek bakım merkezi. Hair kesiminden sakal şekillendirmeye, boyadan keratin bakımına kadar her şey tek çatı altında.",
+  "span_49_312_değerlendirme": "4.9 (312 değerlendirme)",
+  "span_hizmet": "Service",
+  "span_personel": "Staff",
+  "span_tarih_saat": "Tarih & Saat",
+  "span_onay": "Confirm",
+  "h2_hizmet_seçin": "Service Selectin",
+  "p_size_en_uygun_hizmeti_seçin_birden_fazla_hizmet_ek": "Size en uygun hizmeti seçin. Birden fazla hizmet ekleyebilirsiniz.",
+  "h3_saç_kesimi": "Haircut",
+  "p_klasik_veya_modern_kesim_yıkama_dahil": "Klasik veya modern kesim, yıkama dahil",
+  "span__30_dk": "⏱ 30 dk",
+  "h3_premium_saç_kesimi": "Premium Hair Cuti",
+  "p_konsültasyon_kesim_styling_yıkama": "Konsültasyon + kesim + styling + yıkama",
+  "span__45_dk": "⏱ 45 dk",
+  "h3_sakal_düzeltme": "Beard Trim",
+  "p_şekillendirme_makas_veya_makine_ile": "Şekillendirme, makas veya makine ile",
+  "span__20_dk": "⏱ 20 dk",
+  "h3_klasik_traş": "Klasik Traş",
+  "p_geleneksel_jilet_traşı_köpük_dahil": "Geleneksel jilet traşı, köpük dahil",
+  "span__25_dk": "⏱ 25 dk",
+  "h3_saç_boyama": "Hair Coloring",
+  "p_kalpana_loral_veya_wella_boya_ile": "Kalpana, L'Oréal veya Wella boya ile",
+  "span__90_dk": "⏱ 90 dk",
+  "h3_keratin_bakımı": "Keratin Careı",
+  "p_profesyonel_keratin_onarım_ve_bakım": "Profesyonel keratin onarım ve bakım",
+  "span__120_dk": "⏱ 120 dk",
+  "h3_saç_yıkama_masaj": "Hair Wash & Masaj",
+  "p_rahatlatıcı_baş_masajı_ile_yıkama": "Rahatlatıcı baş masajı ile yıkama",
+  "span__15_dk": "⏱ 15 dk",
+  "h3_sakal_bakım_seti": "Beard Care Seti",
+  "p_düzeltme_yağ_bakım_şekillendirme": "Düzeltme + yağ + bakım + şekillendirme",
+  "span__40_dk": "⏱ 40 dk",
+  "h3_ombre_sombre": "Ombre / Sombre",
+  "p_renk_geçişli_modern_saç_boyama": "Renk geçişli modern saç boyama",
+  "span__150_dk": "⏱ 150 dk",
+  "button_devam_et_": "Continue Et →",
+  "h2_personel_seçin": "Staff Selectin",
+  "p_size_hizmet_verecek_uzmanı_seçin_veya_herhangi_bir": "Size hizmet verecek uzmanı seçin veya \"Herhangi Biri\" ile devam edin.",
+  "h3_herhangi_biri": "Herhangi Biri",
+  "div_müsait_ilk_personel": "Müsait ilk personel",
+  "div__47_ort": "⭐ 4.7 ort.",
+  "div__hemen_randevu": "✅ Hemen randevu",
+  "div_mk": "MK",
+  "h3_mehmet_kaya": "Mehmet Kaya",
+  "div_master_barber": "Master Barber",
+  "div__müsait": "✅ Müsait",
+  "div_sn": "SN",
+  "h3_sofia_novak": "Sofia Novak",
+  "div_color_specialist": "Color Specialist",
+  "div__müsait_1": "✅ Müsait",
+  "div_lb": "LB",
+  "h3_lars_belgium": "Lars比利时 Belgium",
+  "div_barber_stylist": "Barber & Stylist",
+  "div__2_saat_sonra": "⏳ 2 saat sonra",
+  "div_ij": "IJ",
+  "h3_ingrid_jansen": "Ingrid Jansen",
+  "div_hair_artist": "Hair Artist",
+  "div__müsait_2": "✅ Müsait",
+  "div_db": "DB",
+  "h3_dimitri_belgium": "Dimitri比利时 Belgium",
+  "div_beard_specialist": "Beard Specialist",
+  "div__müsait_3": "✅ Müsait",
+  "button__geri": "← Geri",
+  "button_devam_et__1": "Continue Et →",
+  "h2_tarih_saat_seçin": "Tarih & Saat Selectin",
+  "p_size_uygun_bir_tarih_ve_saat_aralığı_seçin": "Size uygun bir tarih ve saat aralığı seçin.",
+  "h3_mayıs_2026": "Mayıs 2026",
+  "button_bugün": "Today",
+  "div_pt": "Pt",
+  "div_sa": "Sa",
+  "div_ça": "Ça",
+  "div_pe": "Pe",
+  "div_cu": "Cu",
+  "div_ct": "Ct",
+  "div_pa": "Pa",
+  "span_4_boş": "4 boş",
+  "span_6_boş": "6 boş",
+  "span_2_boş": "2 boş",
+  "span_8_boş": "8 boş",
+  "span_5_boş": "5 boş",
+  "span_3_boş": "3 boş",
+  "span_7_boş": "7 boş",
+  "span_4_boş_1": "4 boş",
+  "span_6_boş_1": "6 boş",
+  "span_3_boş_1": "3 boş",
+  "span_9_boş": "9 boş",
+  "span_5_boş_1": "5 boş",
+  "span_4_boş_2": "4 boş",
+  "span_8_boş_1": "8 boş",
+  "span_6_boş_2": "6 boş",
+  "span_2_boş_1": "2 boş",
+  "span_7_boş_1": "7 boş",
+  "span_5_boş_2": "5 boş",
+  "span_3_boş_2": "3 boş",
+  "h4__sabah_0900_1200": "⚡ Sabah (09:00 — 12:00)",
+  "h4__öğleden_sonra_1300_1700": "☀️ Öğleden Later (13:00 — 17:00)",
+  "h4__akşam_1730_2000": "🌙 Akşam (17:30 — 20:00)",
+  "button__geri_1": "← Geri",
+  "button_devam_et__2": "Continue Et →",
+  "h2_bilgilerinizi_girin": "Bilgilerinizi Girin",
+  "p_randevunuzu_tamamlamak_için_iletişim_bilgilerinizi": "Appointmentnuzu tamamlamak için iletişim bilgilerinizi girin.",
+  "label_ad_soyad_": "Ad Soyad *",
+  "label_telefon_": "Telefon *",
+  "label_eposta": "Email",
+  "label_hatırlatma": "Hatırlatma",
+  "option_sms_ile_hatırlat": "SMS ile hatırlat",
+  "option_eposta_ile_hatırlat": "E-posta ile hatırlat",
+  "option_hatırlatma_istemiyorum": "Hatırlatma istemiyorum",
+  "label_not_opsiyonel": "Not (Opsiyonel)",
+  "h2_özet": "Summary",
+  "span_hizmet_1": "Service",
+  "span_premium_saç_kesimi_sakal_düzeltme": "Premium Hair Cuti + Beard Düzeltme",
+  "span_personel_1": "Staff",
+  "span_mehmet_kaya_master_barber": "Mehmet Kaya (Master Barber)",
+  "span_tarih_saat_1": "Tarih & Saat",
+  "span_13_mayıs_2026_salı_1000": "13 Mayıs 2026, Salı — 10:00",
+  "span_süre": "Duration",
+  "span_65_dk": "65 dk",
+  "span_hizmet_tutarı": "Service Tutarı",
+  "span_sadakat_indirimi_silver_10": "Loyalty Downloadimi (Deletever %10)",
+  "span_toplam": "Total",
+  "button__geri_2": "← Geri",
+  "h2_yaklaşan_randevularım": "Yaklaşan Appointmentlarım",
+  "p_giriş_yapmadan_görüntüleniyor_telefon_numaranızla_": "Giriş yapmadan görüntüleniyor — telefon numaranızla eşleşen randevular.",
+  "div_mayıs": "Mayıs",
+  "h4_premium_saç_kesimi_sakal_düzeltme": "Premium Hair Cuti + Beard Düzeltme",
+  "p_1400_mehmet_kaya_rue_du_commerce_42": "14:00 — Mehmet Kaya • Rue du Commerce 42",
+  "div_yaklaşıyor": "Yaklaşıyor",
+  "div_mayıs_1": "Mayıs",
+  "h4_keratin_bakımı": "Keratin Careı",
+  "p_1030_sofia_novak_rue_du_commerce_42": "10:30 — Sofia Novak • Rue du Commerce 42",
+  "div_yaklaşıyor_1": "Yaklaşıyor",
+  "div_mayıs_2": "Mayıs",
+  "h4_saç_kesimi_sakal_düzeltme": "Hair Cuti + Beard Düzeltme",
+  "p_0900_lars_belgium_rue_du_commerce_42": "09:00 — Lars比利时 Belgium • Rue du Commerce 42",
+  "div_tamamlandı": "Completed",
+  "h2_iletişim": "Contact",
+  "span_adres": "Address",
+  "span_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "span_telefon": "Phone",
+  "span_çalışma_saatleri": "Working Hours",
+  "div_harita_görünümü_google_maps_entegrasyonu_için_yer_": "Harita Görünümü (Google Maps entegrasyonu için yer tutucu)",
+  "a__cleanfix": "🧹 CleanFix",
+  "a__buildpro": "🏗️ BuildPro",
+  "a_sadakat_programı": "Loyalty Program",
+  "div__2026_barberpro_tüm_hakları_saklıdır": "© 2026 BarberPro. Tüm hakları saklıdır.",
+  "h3_randevunuz_onaylandı": "Appointmentnuz Confirmndı!",
+  "p_13_mayıs_2026_salı_saat_1000_için_randevunuz_oluşt": "13 Mayıs 2026, Salı saat 10:00 için randevunuz oluşturuldu.",
+  "div_bp2605130842": "BP-260513-0842",
+  "div_randevu_kodunuzu_kaydedin_sms_hatırlatması_24_saat": "Appointment kodunuzu kaydedin. SMS hatırlatması 24 saat önce gönderilecektir.",
+  "button_kapat": "Close",
+  "button_randevularım": "Appointmentlarım",
+  "div_brükselin_en_iyi_berberi": "Brüksel'in En İyi Barberi",
+  "div_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "button_randevuyu_onayla": "Appointmentyu Confirm",
+  "span_pztcum_0900_2000": "Pzt-Cum: 09:00 — 20:00",
+  "span_cumartesi_0900_1600": "Cumartesi: 09:00 — 16:00",
+  "span_pazar_kapalı": "Pazar: Kapalı",
+  "button_takvime_ekle": "Takvime Ekle"
+},
+  nl: {
+  "meta_barberpro_online_randevu": "BarberPro — Online Afspraak",
+  "ph_adınız_ve_soyadınız": "Adınız ve soyadınız",
+  "ph_32_xxx_xx_xx_xx": "+32 XXX XX XX XX",
+  "ph_ornekemailcom": "ornek@email.com",
+  "ph_özel_istekler_alerjiler_veya_notlar": "Özel istekler, alerjiler veya notlar...",
+  "div_b": "B",
+  "span_barberpro": "BarberPro",
+  "button_randevu_al": "Afspraak Ontvangen",
+  "h1_barberpro_salon": "BarberPro Salon",
+  "p_profesyonel_erkek_bakım_merkezi_saç_kesiminden_sak": "Profesyonel erkek bakım merkezi. Haar kesiminden sakal şekillendirmeye, boyadan keratin bakımına kadar her şey tek çatı altında.",
+  "span_49_312_değerlendirme": "4.9 (312 değerlendirme)",
+  "span_hizmet": "Dienst",
+  "span_personel": "Personeel",
+  "span_tarih_saat": "Tarih & Saat",
+  "span_onay": "Bevestiging",
+  "h2_hizmet_seçin": "Hizmet Selecterenin",
+  "p_size_en_uygun_hizmeti_seçin_birden_fazla_hizmet_ek": "Size en uygun hizmeti seçin. Birden fazla hizmet ekleyebilirsiniz.",
+  "h3_saç_kesimi": "Knipt",
+  "p_klasik_veya_modern_kesim_yıkama_dahil": "Klasik veya modern kesim, yıkama dahil",
+  "span__30_dk": "⏱ 30 dk",
+  "h3_premium_saç_kesimi": "Premium Haar Knippeni",
+  "p_konsültasyon_kesim_styling_yıkama": "Konsültasyon + kesim + styling + yıkama",
+  "span__45_dk": "⏱ 45 dk",
+  "h3_sakal_düzeltme": "Baard Trimmen",
+  "p_şekillendirme_makas_veya_makine_ile": "Şekillendirme, makas veya makine ile",
+  "span__20_dk": "⏱ 20 dk",
+  "h3_klasik_traş": "Klasik Traş",
+  "p_geleneksel_jilet_traşı_köpük_dahil": "Geleneksel jilet traşı, köpük dahil",
+  "span__25_dk": "⏱ 25 dk",
+  "h3_saç_boyama": "Haar Gevenfen",
+  "p_kalpana_loral_veya_wella_boya_ile": "Kalpana, L'Oréal veya Wella boya ile",
+  "span__90_dk": "⏱ 90 dk",
+  "h3_keratin_bakımı": "Keratin Gevenzorgingı",
+  "p_profesyonel_keratin_onarım_ve_bakım": "Profesyonel keratin onarım ve bakım",
+  "span__120_dk": "⏱ 120 dk",
+  "h3_saç_yıkama_masaj": "Haar Wassen & Masaj",
+  "p_rahatlatıcı_baş_masajı_ile_yıkama": "Rahatlatıcı baş masajı ile yıkama",
+  "span__15_dk": "⏱ 15 dk",
+  "h3_sakal_bakım_seti": "Baard Gevenzorging Seti",
+  "p_düzeltme_yağ_bakım_şekillendirme": "Düzeltme + yağ + bakım + şekillendirme",
+  "span__40_dk": "⏱ 40 dk",
+  "h3_ombre_sombre": "Ombre / Sombre",
+  "p_renk_geçişli_modern_saç_boyama": "Renk geçişli modern saç boyama",
+  "span__150_dk": "⏱ 150 dk",
+  "button_devam_et_": "Doorgaan Et →",
+  "h2_personel_seçin": "Personeel Selecterenin",
+  "p_size_hizmet_verecek_uzmanı_seçin_veya_herhangi_bir": "Size hizmet verecek uzmanı seçin veya \"Herhangi Biri\" ile devam edin.",
+  "h3_herhangi_biri": "Herhangi Biri",
+  "div_müsait_ilk_personel": "Müsait ilk personel",
+  "div__47_ort": "⭐ 4.7 ort.",
+  "div__hemen_randevu": "✅ Hemen randevu",
+  "div_mk": "MK",
+  "h3_mehmet_kaya": "Mehmet Kaya",
+  "div_master_barber": "Master Barber",
+  "div__müsait": "✅ Müsait",
+  "div_sn": "SN",
+  "h3_sofia_novak": "Sofia Novak",
+  "div_color_specialist": "Color Specialist",
+  "div__müsait_1": "✅ Müsait",
+  "div_lb": "LB",
+  "h3_lars_belgium": "Lars比利时 Belgium",
+  "div_barber_stylist": "Barber & Stylist",
+  "div__2_saat_sonra": "⏳ 2 saat sonra",
+  "div_ij": "IJ",
+  "h3_ingrid_jansen": "Ingrid Jansen",
+  "div_hair_artist": "Hair Artist",
+  "div__müsait_2": "✅ Müsait",
+  "div_db": "DB",
+  "h3_dimitri_belgium": "Dimitri比利时 Belgium",
+  "div_beard_specialist": "Beard Specialist",
+  "div__müsait_3": "✅ Müsait",
+  "button__geri": "← Geri",
+  "button_devam_et__1": "Doorgaan Et →",
+  "h2_tarih_saat_seçin": "Tarih & Saat Selecterenin",
+  "p_size_uygun_bir_tarih_ve_saat_aralığı_seçin": "Size uygun bir tarih ve saat aralığı seçin.",
+  "h3_mayıs_2026": "Mayıs 2026",
+  "button_bugün": "Vandaag",
+  "div_pt": "Pt",
+  "div_sa": "Sa",
+  "div_ça": "Ça",
+  "div_pe": "Pe",
+  "div_cu": "Cu",
+  "div_ct": "Ct",
+  "div_pa": "Pa",
+  "span_4_boş": "4 boş",
+  "span_6_boş": "6 boş",
+  "span_2_boş": "2 boş",
+  "span_8_boş": "8 boş",
+  "span_5_boş": "5 boş",
+  "span_3_boş": "3 boş",
+  "span_7_boş": "7 boş",
+  "span_4_boş_1": "4 boş",
+  "span_6_boş_1": "6 boş",
+  "span_3_boş_1": "3 boş",
+  "span_9_boş": "9 boş",
+  "span_5_boş_1": "5 boş",
+  "span_4_boş_2": "4 boş",
+  "span_8_boş_1": "8 boş",
+  "span_6_boş_2": "6 boş",
+  "span_2_boş_1": "2 boş",
+  "span_7_boş_1": "7 boş",
+  "span_5_boş_2": "5 boş",
+  "span_3_boş_2": "3 boş",
+  "h4__sabah_0900_1200": "⚡ Sabah (09:00 — 12:00)",
+  "h4__öğleden_sonra_1300_1700": "☀️ Öğleden Later (13:00 — 17:00)",
+  "h4__akşam_1730_2000": "🌙 Akşam (17:30 — 20:00)",
+  "button__geri_1": "← Geri",
+  "button_devam_et__2": "Doorgaan Et →",
+  "h2_bilgilerinizi_girin": "Bilgilerinizi Girin",
+  "p_randevunuzu_tamamlamak_için_iletişim_bilgilerinizi": "Afspraaknuzu tamamlamak için iletişim bilgilerinizi girin.",
+  "label_ad_soyad_": "Ad Soyad *",
+  "label_telefon_": "Telefon *",
+  "label_eposta": "E-mail",
+  "label_hatırlatma": "Hatırlatma",
+  "option_sms_ile_hatırlat": "SMS ile hatırlat",
+  "option_eposta_ile_hatırlat": "E-posta ile hatırlat",
+  "option_hatırlatma_istemiyorum": "Hatırlatma istemiyorum",
+  "label_not_opsiyonel": "Not (Opsiyonel)",
+  "h2_özet": "Samenvatting",
+  "span_hizmet_1": "Dienst",
+  "span_premium_saç_kesimi_sakal_düzeltme": "Premium Haar Knippeni + Baard Düzeltme",
+  "span_personel_1": "Personeel",
+  "span_mehmet_kaya_master_barber": "Mehmet Kaya (Master Barber)",
+  "span_tarih_saat_1": "Tarih & Saat",
+  "span_13_mayıs_2026_salı_1000": "13 Mayıs 2026, Salı — 10:00",
+  "span_süre": "Duur",
+  "span_65_dk": "65 dk",
+  "span_hizmet_tutarı": "Hizmet Tutarı",
+  "span_sadakat_indirimi_silver_10": "Loyaliteit Downloadenimi (Silver %10)",
+  "span_toplam": "Totaal",
+  "button__geri_2": "← Geri",
+  "h2_yaklaşan_randevularım": "Yaklaşan Afspraaklarım",
+  "p_giriş_yapmadan_görüntüleniyor_telefon_numaranızla_": "Giriş yapmadan görüntüleniyor — telefon numaranızla eşleşen randevular.",
+  "div_mayıs": "Mayıs",
+  "h4_premium_saç_kesimi_sakal_düzeltme": "Premium Haar Knippeni + Baard Düzeltme",
+  "p_1400_mehmet_kaya_rue_du_commerce_42": "14:00 — Mehmet Kaya • Rue du Commerce 42",
+  "div_yaklaşıyor": "Yaklaşıyor",
+  "div_mayıs_1": "Mayıs",
+  "h4_keratin_bakımı": "Keratin Gevenzorgingı",
+  "p_1030_sofia_novak_rue_du_commerce_42": "10:30 — Sofia Novak • Rue du Commerce 42",
+  "div_yaklaşıyor_1": "Yaklaşıyor",
+  "div_mayıs_2": "Mayıs",
+  "h4_saç_kesimi_sakal_düzeltme": "Haar Knippeni + Baard Düzeltme",
+  "p_0900_lars_belgium_rue_du_commerce_42": "09:00 — Lars比利时 Belgium • Rue du Commerce 42",
+  "div_tamamlandı": "Voltooid",
+  "h2_iletişim": "Contact",
+  "span_adres": "Adres",
+  "span_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "span_telefon": "Telefoon",
+  "span_çalışma_saatleri": "Working Hours",
+  "div_harita_görünümü_google_maps_entegrasyonu_için_yer_": "Harita Görünümü (Google Maps entegrasyonu için yer tutucu)",
+  "a__cleanfix": "🧹 CleanFix",
+  "a__buildpro": "🏗️ BuildPro",
+  "a_sadakat_programı": "Loyaliteitsprogramma",
+  "div__2026_barberpro_tüm_hakları_saklıdır": "© 2026 BarberPro. Tüm hakları saklıdır.",
+  "h3_randevunuz_onaylandı": "Afspraaknuz Bevestigenndı!",
+  "p_13_mayıs_2026_salı_saat_1000_için_randevunuz_oluşt": "13 Mayıs 2026, Salı saat 10:00 için randevunuz oluşturuldu.",
+  "div_bp2605130842": "BP-260513-0842",
+  "div_randevu_kodunuzu_kaydedin_sms_hatırlatması_24_saat": "Afspraak kodunuzu kaydedin. SMS hatırlatması 24 saat önce gönderilecektir.",
+  "button_kapat": "Sluiten",
+  "button_randevularım": "Afspraaklarım",
+  "div_brükselin_en_iyi_berberi": "Brüksel'in En İyi Kapperi",
+  "div_rue_du_commerce_42_1000_brüksel_belçika": "Rue du Commerce 42, 1000 Brüksel, Belçika",
+  "button_randevuyu_onayla": "Afspraakyu Bevestigen",
+  "span_pztcum_0900_2000": "Pzt-Cum: 09:00 — 20:00",
+  "span_cumartesi_0900_1600": "Cumartesi: 09:00 — 16:00",
+  "span_pazar_kapalı": "Pazar: Kapalı",
+  "button_takvime_ekle": "Takvime Ekle"
+}
+};
+let currentLang = localStorage.getItem('barberpro_lang') || 'tr';
+function switchLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('barberpro_lang', lang);
+  document.documentElement.lang = lang;
+  applyTranslations();
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+function applyTranslations() {
+  const dict = i18n[currentLang];
+  if (!dict) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const attr = el.dataset.i18nAttr;
+    const val = dict[key];
+    if (val === undefined) return;
+    if (attr) { el.setAttribute(attr, val); }
+    else if (el.tagName === 'TITLE') { el.textContent = val; }
+    else { el.textContent = val; }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key] !== undefined) el.placeholder = dict[key];
+  });
+}
+if (!document.getElementById('lang-style')) {
+  const st = document.createElement('style');
+  st.id = 'lang-style';
+  st.textContent = '.lang-btn.active{background:var(--teal-600)!important;color:white!important;}.lang-btn:hover{color:var(--text-primary)!important;}';
+  document.head.appendChild(st);
+}
+switchLang(currentLang);
+</script></body></html>

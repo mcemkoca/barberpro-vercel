@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BarberPro — Berber ve Kuaför Salonu Yönetimi</title>
+<title data-i18n="meta.title" data-i18n-attr="content">BarberPro — Berber ve Kuaför Salonu Yönetimi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -153,6 +153,19 @@
 }
 .nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(139,92,246,0.4); }
 .nav-toggle { display:none; background:none; border:none; color:#f1f5f9; font-size:1.5rem; cursor:pointer; }
+
+/* ── Lang Switcher ── */
+.lang-switcher {
+  display:flex; gap:4px; align-items:center;
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md);
+  padding:3px;
+}
+.lang-btn {
+  padding:4px 10px; border-radius:var(--radius-sm); border:none; background:transparent;
+  font-size:0.75rem; font-weight:600; color:var(--text-muted); cursor:pointer; transition:all var(--duration-fast);
+}
+.lang-btn:hover { color:var(--text-primary); }
+.lang-btn.active { background:var(--teal-600); color:white; }
 
 /* ── Sections ── */
 .section { padding:80px 24px; }
@@ -345,11 +358,16 @@
     BarberPro
   </a>
   <div class="nav-links">
-    <a href="#ozellikler">Özellikler</a>
-    <a href="#sektorler">Sektörler</a>
-    <a href="#fiyatlandirma">Fiyatlandırma</a>
-    <a href="#iletisim">İletişim</a>
-    <a href="dashboard.html" class="nav-cta">Demo'yu Dene</a>
+    <a href="#ozellikler" data-i18n="nav.features">Özellikler</a>
+    <a href="#sektorler" data-i18n="nav.sectors">Sektörler</a>
+    <a href="#fiyatlandirma" data-i18n="nav.pricing">Fiyatlandırma</a>
+    <a href="#iletisim" data-i18n="nav.contact">İletişim</a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" data-lang="tr" onclick="switchLang('tr')">TR</button>
+      <button class="lang-btn" data-lang="en" onclick="switchLang('en')">EN</button>
+      <button class="lang-btn" data-lang="nl" onclick="switchLang('nl')">NL</button>
+    </div>
+    <a href="dashboard.html" class="nav-cta" data-i18n="nav.demo">Demo'yu Dene</a>
   </div>
   <button class="nav-toggle" onclick="toggleMobileMenu()">☰</button>
 </nav>
@@ -366,26 +384,26 @@
       <div class="hero-text">
         <div class="hero-badge">
           <span class="pulse-dot"></span>
-          Yeni: Müşteri Portalı Artık Açık
+          <span data-i18n="hero.badge">Yeni: Müşteri Portalı Artık Açık</span>
         </div>
         <h1 class="hero-title">
           BarberPro —<br>
-          <span class="gradient-text">Berber ve Kuaför<br>Salonu Yönetimi</span>
+          <span class="gradient-text" data-i18n="hero.title">Berber ve Kuaför<br>Salonu Yönetimi</span>
         </h1>
-        <p class="hero-desc">
+        <p class="hero-desc" data-i18n="hero.desc">
           Randevuları, personeli, stoku ve sadakat programını tek bir platformdan yönetin.
           Belçika'nın en modern berber ve kuaför salonlarının tercihi.
         </p>
         <div class="hero-buttons">
-          <a href="dashboard.html" class="btn btn-xl" style="background:linear-gradient(135deg,#14b8a6,#0d9488);color:white;box-shadow:0 4px 14px rgba(139,92,246,0.35);">
+          <a href="dashboard.html" class="btn btn-xl" style="background:linear-gradient(135deg,#14b8a6,#0d9488);color:white;box-shadow:0 4px 14px rgba(139,92,246,0.35);" data-i18n="hero.cta1">
             Ücretsiz Demo'yu Dene →
           </a>
-          <a href="#ozellikler" class="btn btn-xl btn-secondary">Nasıl Çalışır?</a>
+          <a href="#ozellikler" class="btn btn-xl btn-secondary" data-i18n="hero.cta2">Nasıl Çalışır?</a>
         </div>
         <div style="margin-top:28px; display:flex; gap:24px; color:var(--text-muted); font-size:0.875rem;">
-          <div>✓ 14 günlük ücretsiz deneme</div>
-          <div>✓ Kredi kartı gerekmez</div>
-          <div>✓ 2 dakikada kurulum</div>
+          <div data-i18n="hero.tag1">✓ 14 günlük ücretsiz deneme</div>
+          <div data-i18n="hero.tag2">✓ Kredi kartı gerekmez</div>
+          <div data-i18n="hero.tag3">✓ 2 dakikada kurulum</div>
         </div>
       </div>
 
@@ -396,22 +414,22 @@
               <div class="hero-card-avatar">JD</div>
               <div class="hero-card-info">
                 <div class="hero-card-name">Jean Dupont</div>
-                <div class="hero-card-time">14:30 — Saç Kesimi</div>
+                <div class="hero-card-time">14:30 — <span data-i18n="hero.card.service1">Saç Kesimi</span></div>
               </div>
-              <div class="hero-card-badge">Bekliyor</div>
+              <div class="hero-card-badge" data-i18n="hero.card.status">Bekliyor</div>
             </div>
             <div class="hero-card-body">
               <div style="display:flex; gap:8px; margin-bottom:8px;">
-                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);">Usta Berber: Mehmet K.</span>
-                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);">İstasyon 3</span>
+                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);" data-i18n="hero.card.barber">Usta Berber: Mehmet K.</span>
+                <span style="padding:2px 8px; background:var(--bg-tertiary); border-radius:4px; font-size:0.7rem; color:var(--text-muted);" data-i18n="hero.card.station">İstasyon 3</span>
               </div>
               <div class="appointment-slot">
                 <span class="time">14:30</span>
-                <span class="service">Saç Kesimi — €25</span>
+                <span class="service" data-i18n="hero.card.slot1">Saç Kesimi — €25</span>
               </div>
               <div class="appointment-slot">
                 <span class="time">15:00</span>
-                <span class="service">Sakal Düzeltme — €15</span>
+                <span class="service" data-i18n="hero.card.slot2">Sakal Düzeltme — €15</span>
               </div>
             </div>
           </div>
@@ -427,9 +445,9 @@
 <section class="section" id="ozellikler">
   <div class="container-landing">
     <div class="section-header">
-      <div class="section-tag">Özellikler</div>
-      <h2 class="section-title">Salonunuzu Baştan Aşağı Dönüştürün</h2>
-      <p class="section-desc">
+      <div class="section-tag" data-i18n="features.tag">Özellikler</div>
+      <h2 class="section-title" data-i18n="features.title">Salonunuzu Baştan Aşağı Dönüştürün</h2>
+      <p class="section-desc" data-i18n="features.desc">
         BarberPro, berber ve kuaför salonlarının günlük operasyonlarını otomatikleştirir,
         müşteri memnuniyetini artırır ve geliri maksimize eder.
       </p>
@@ -437,33 +455,33 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">📅</div>
-        <div class="feature-title">Online Randevu</div>
-        <div class="feature-desc">Müşterileriniz 7/24 web veya mobil üzerinden randevu alır. SMS ve WhatsApp hatırlatmaları otomatik gönderilir. Boş slotları anlık görün.</div>
+        <div class="feature-title" data-i18n="features.f1.title">Online Randevu</div>
+        <div class="feature-desc" data-i18n="features.f1.desc">Müşterileriniz 7/24 web veya mobil üzerinden randevu alır. SMS ve WhatsApp hatırlatmaları otomatik gönderilir. Boş slotları anlık görün.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">👥</div>
-        <div class="feature-title">Personel Yönetimi</div>
-        <div class="feature-desc">Usta berber, kuaför, colorist ve asistanların çalışma saatlerini, izinlerini ve performansını takip edin. Komisyon hesaplamaları otomatik.</div>
+        <div class="feature-title" data-i18n="features.f2.title">Personel Yönetimi</div>
+        <div class="feature-desc" data-i18n="features.f2.desc">Usta berber, kuaför, colorist ve asistanların çalışma saatlerini, izinlerini ve performansını takip edin. Komisyon hesaplamaları otomatik.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">💎</div>
-        <div class="feature-title">Sadakat Programı</div>
-        <div class="feature-desc">Bronze, Silver, Gold ve Platinum üyelik katmanları. Her işlemde puan kazanma, indirim kuponları ve özel gün hediyeleriyle müşteriyi elde tutun.</div>
+        <div class="feature-title" data-i18n="features.f3.title">Sadakat Programı</div>
+        <div class="feature-desc" data-i18n="features.f3.desc">Bronze, Silver, Gold ve Platinum üyelik katmanları. Her işlemde puan kazanma, indirim kuponları ve özel gün hediyeleriyle müşteriyi elde tutun.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📦</div>
-        <div class="feature-title">Stok Takibi</div>
-        <div class="feature-desc">Şampuan, jöle, wax, boya ve bakım ürünlerinin stok seviyelerini takip edin. Düşük stok uyarıları ve otomatik sipariş önerileri.</div>
+        <div class="feature-title" data-i18n="features.f4.title">Stok Takibi</div>
+        <div class="feature-desc" data-i18n="features.f4.desc">Şampuan, jöle, wax, boya ve bakım ürünlerinin stok seviyelerini takip edin. Düşük stok uyarıları ve otomatik sipariş önerileri.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📊</div>
-        <div class="feature-title">Finans Raporları</div>
-        <div class="feature-desc">Günlük, haftalık ve aylık gelir raporları. Hizmet bazlı karlılık analizi, personel performansına göre gelir dağılımı ve vergi hazırlık raporları.</div>
+        <div class="feature-title" data-i18n="features.f5.title">Finans Raporları</div>
+        <div class="feature-desc" data-i18n="features.f5.desc">Günlük, haftalık ve aylık gelir raporları. Hizmet bazlı karlılık analizi, personel performansına göre gelir dağılımı ve vergi hazırlık raporları.</div>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🖥️</div>
-        <div class="feature-title">Müşteri Portalı</div>
-        <div class="feature-desc">Müşterileriniz geçmiş randevularını, puanlarını ve üyelik durumlarını görebilir. Kendi profillerini günceller ve yeni randevuları kolayca oluşturur.</div>
+        <div class="feature-title" data-i18n="features.f6.title">Müşteri Portalı</div>
+        <div class="feature-desc" data-i18n="features.f6.desc">Müşterileriniz geçmiş randevularını, puanlarını ve üyelik durumlarını görebilir. Kendi profillerini günceller ve yeni randevuları kolayca oluşturur.</div>
       </div>
     </div>
   </div>
@@ -473,35 +491,35 @@
 <section class="section" style="background:var(--bg-secondary);" id="sektorler">
   <div class="container-landing">
     <div class="section-header">
-      <div class="section-tag">Sektörler</div>
-      <h2 class="section-title">Her Salon Tipine Uyarlanır</h2>
-      <p class="section-desc">BarberPro, farklı salon tiplerinin ihtiyaçlarına göre özelleştirilebilir modüller sunar.</p>
+      <div class="section-tag" data-i18n="sectors.tag">Sektörler</div>
+      <h2 class="section-title" data-i18n="sectors.title">Her Salon Tipine Uyarlanır</h2>
+      <p class="section-desc" data-i18n="sectors.desc">BarberPro, farklı salon tiplerinin ihtiyaçlarına göre özelleştirilebilir modüller sunar.</p>
     </div>
     <div class="sectors-grid">
       <div class="sector-card">
         <div class="sector-icon">💈</div>
-        <div class="sector-name">Erkek Berberi</div>
-        <div class="sector-count">230+ salon</div>
+        <div class="sector-name" data-i18n="sectors.s1.name">Erkek Berberi</div>
+        <div class="sector-count" data-i18n="sectors.s1.count">230+ salon</div>
       </div>
       <div class="sector-card">
         <div class="sector-icon">💇‍♀️</div>
-        <div class="sector-name">Kadın Kuaförü</div>
-        <div class="sector-count">185+ salon</div>
+        <div class="sector-name" data-i18n="sectors.s2.name">Kadın Kuaförü</div>
+        <div class="sector-count" data-i18n="sectors.s2.count">185+ salon</div>
       </div>
       <div class="sector-card">
         <div class="sector-icon">✨</div>
-        <div class="sector-name">Güzellik Merkezi</div>
-        <div class="sector-count">92+ salon</div>
+        <div class="sector-name" data-i18n="sectors.s3.name">Güzellik Merkezi</div>
+        <div class="sector-count" data-i18n="sectors.s3.count">92+ salon</div>
       </div>
       <div class="sector-card">
         <div class="sector-icon">🏋️‍♂️</div>
-        <div class="sector-name">Spor Salonu Spa</div>
-        <div class="sector-count">47+ salon</div>
+        <div class="sector-name" data-i18n="sectors.s4.name">Spor Salonu Spa</div>
+        <div class="sector-count" data-i18n="sectors.s4.count">47+ salon</div>
       </div>
       <div class="sector-card">
         <div class="sector-icon">💅</div>
-        <div class="sector-name">Nail Art Stüdyosu</div>
-        <div class="sector-count">64+ salon</div>
+        <div class="sector-name" data-i18n="sectors.s5.name">Nail Art Stüdyosu</div>
+        <div class="sector-count" data-i18n="sectors.s5.count">64+ salon</div>
       </div>
     </div>
   </div>
@@ -511,14 +529,14 @@
 <section class="section" id="yorumlar">
   <div class="container-landing">
     <div class="section-header">
-      <div class="section-tag">Müşteri Yorumları</div>
-      <h2 class="section-title">Belçika'daki Salon Sahipleri Ne Diyor?</h2>
-      <p class="section-desc">Gerçek kullanıcıların deneyimleri.</p>
+      <div class="section-tag" data-i18n="testimonials.tag">Müşteri Yorumları</div>
+      <h2 class="section-title" data-i18n="testimonials.title">Belçika'daki Salon Sahipleri Ne Diyor?</h2>
+      <p class="section-desc" data-i18n="testimonials.desc">Gerçek kullanıcıların deneyimleri.</p>
     </div>
     <div class="testimonials-grid">
       <div class="testimonial-card">
         <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
+        <p class="testimonial-text" data-i18n="testimonials.t1.text">
           "Brüksel'deki salonumuzda 4 usta berber çalışıyor. BarberPro sayesinde randevu kaçakları %80 azaldı.
           Online rezervasyon sistemi müşterilerimizin en sevdiği özellik."
         </p>
@@ -526,13 +544,13 @@
           <div class="testimonial-avatar">PV</div>
           <div>
             <div class="testimonial-name">Pierre Van den Berghe</div>
-            <div class="testimonial-role">Sahip — Le Barbier Royal, Brüksel</div>
+            <div class="testimonial-role" data-i18n="testimonials.t1.role">Sahip — Le Barbier Royal, Brüksel</div>
           </div>
         </div>
       </div>
       <div class="testimonial-card">
         <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
+        <p class="testimonial-text" data-i18n="testimonials.t2.text">
           "Sadakat programı sayesinde müşteri tekrar oranımız %45'ten %72'ye çıktı.
           Gold üyeler için özel gün indirimleri çok ilgi görüyor. Stok takibi de artık çok daha kolay."
         </p>
@@ -540,13 +558,13 @@
           <div class="testimonial-avatar">MD</div>
           <div>
             <div class="testimonial-name">Marie Dubois</div>
-            <div class="testimonial-role">Sahip — Coiffure Élégance, Gent</div>
+            <div class="testimonial-role" data-i18n="testimonials.t2.role">Sahip — Coiffure Élégance, Gent</div>
           </div>
         </div>
       </div>
       <div class="testimonial-card">
         <div class="testimonial-stars">★★★★★</div>
-        <p class="testimonial-text">
+        <p class="testimonial-text" data-i18n="testimonials.t3.text">
           "Antwerp'teki 2 şubemizi tek panelden yönetiyorum.
           Finans raporları sayesinde hangi hizmetten ne kadar kazandığımı anlık görüyorum.
           Personel performans takibi de ekibe motivasyon katıyor."
@@ -555,7 +573,7 @@
           <div class="testimonial-avatar">JM</div>
           <div>
             <div class="testimonial-name">Jan Martens</div>
-            <div class="testimonial-role">Sahip — Scheer Meester, Antwerp</div>
+            <div class="testimonial-role" data-i18n="testimonials.t3.role">Sahip — Scheer Meester, Antwerp</div>
           </div>
         </div>
       </div>
@@ -567,57 +585,57 @@
 <section class="section" style="background:var(--bg-secondary);" id="fiyatlandirma">
   <div class="container-landing">
     <div class="section-header">
-      <div class="section-tag">Fiyatlandırma</div>
-      <h2 class="section-title">İşletmenizin Büyüklüğüne Göre Plan Seçin</h2>
-      <p class="section-desc">Şeffaf fiyatlandırma, gizli maliyet yok. İstediğiniz zaman değiştirin veya iptal edin.</p>
+      <div class="section-tag" data-i18n="pricing.tag">Fiyatlandırma</div>
+      <h2 class="section-title" data-i18n="pricing.title">İşletmenizin Büyüklüğüne Göre Plan Seçin</h2>
+      <p class="section-desc" data-i18n="pricing.desc">Şeffaf fiyatlandırma, gizli maliyet yok. İstediğiniz zaman değiştirin veya iptal edin.</p>
     </div>
     <div class="pricing-grid">
       <div class="pricing-card">
-        <div class="pricing-name">Starter</div>
-        <div class="pricing-desc">Tek salon, küçük ekipler için</div>
-        <div class="pricing-price">€39<span>/ay</span></div>
+        <div class="pricing-name" data-i18n="pricing.starter.name">Starter</div>
+        <div class="pricing-desc" data-i18n="pricing.starter.desc">Tek salon, küçük ekipler için</div>
+        <div class="pricing-price">€39<span data-i18n="pricing.permonth">/ay</span></div>
         <div class="pricing-features">
-          <div class="pricing-feature"><span class="check">✓</span> 1 salon lokasyonu</div>
-          <div class="pricing-feature"><span class="check">✓</span> 5 personele kadar</div>
-          <div class="pricing-feature"><span class="check">✓</span> Online randevu</div>
-          <div class="pricing-feature"><span class="check">✓</span> Temel raporlar</div>
-          <div class="pricing-feature"><span class="check">✓</span> E-posta desteği</div>
-          <div class="pricing-feature"><span class="check">✓</span> 100 SMS/ay</div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f1">1 salon lokasyonu</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f2">5 personele kadar</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f3">Online randevu</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f4">Temel raporlar</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f5">E-posta desteği</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.starter.f6">100 SMS/ay</span></div>
         </div>
-        <button class="pricing-cta pricing-cta-secondary">Başla</button>
+        <button class="pricing-cta pricing-cta-secondary" data-i18n="pricing.btn.start">Başla</button>
       </div>
       <div class="pricing-card featured">
-        <div class="pricing-badge">En Popüler</div>
-        <div class="pricing-name">Pro</div>
-        <div class="pricing-desc">Büyüyen salonlar için</div>
-        <div class="pricing-price">€89<span>/ay</span></div>
+        <div class="pricing-badge" data-i18n="pricing.badge.popular">En Popüler</div>
+        <div class="pricing-name" data-i18n="pricing.pro.name">Pro</div>
+        <div class="pricing-desc" data-i18n="pricing.pro.desc">Büyüyen salonlar için</div>
+        <div class="pricing-price">€89<span data-i18n="pricing.permonth">/ay</span></div>
         <div class="pricing-features">
-          <div class="pricing-feature"><span class="check">✓</span> 3 salon lokasyonu</div>
-          <div class="pricing-feature"><span class="check">✓</span> 20 personele kadar</div>
-          <div class="pricing-feature"><span class="check">✓</span> Sadakat programı</div>
-          <div class="pricing-feature"><span class="check">✓</span> Stok yönetimi</div>
-          <div class="pricing-feature"><span class="check">✓</span> Detaylı finans raporları</div>
-          <div class="pricing-feature"><span class="check">✓</span> WhatsApp entegrasyonu</div>
-          <div class="pricing-feature"><span class="check">✓</span> 500 SMS/ay</div>
-          <div class="pricing-feature"><span class="check">✓</span> Öncelikli destek</div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f1">3 salon lokasyonu</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f2">20 personele kadar</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f3">Sadakat programı</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f4">Stok yönetimi</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f5">Detaylı finans raporları</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f6">WhatsApp entegrasyonu</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f7">500 SMS/ay</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.pro.f8">Öncelikli destek</span></div>
         </div>
-        <button class="pricing-cta pricing-cta-primary">Başla</button>
+        <button class="pricing-cta pricing-cta-primary" data-i18n="pricing.btn.start">Başla</button>
       </div>
       <div class="pricing-card">
-        <div class="pricing-name">Enterprise</div>
-        <div class="pricing-desc">Çok şubeli zincirler için</div>
-        <div class="pricing-price">€199<span>/ay</span></div>
+        <div class="pricing-name" data-i18n="pricing.enterprise.name">Enterprise</div>
+        <div class="pricing-desc" data-i18n="pricing.enterprise.desc">Çok şubeli zincirler için</div>
+        <div class="pricing-price">€199<span data-i18n="pricing.permonth">/ay</span></div>
         <div class="pricing-features">
-          <div class="pricing-feature"><span class="check">✓</span> Sınırsız lokasyon</div>
-          <div class="pricing-feature"><span class="check">✓</span> Sınırsız personel</div>
-          <div class="pricing-feature"><span class="check">✓</span> Müşteri portalı (beyaz etiket)</div>
-          <div class="pricing-feature"><span class="check">✓</span> API erişimi</div>
-          <div class="pricing-feature"><span class="check">✓</span> Özel entegrasyonlar</div>
-          <div class="pricing-feature"><span class="check">✓</span> Sınırsız SMS</div>
-          <div class="pricing-feature"><span class="check">✓</span> 7/24 telefon desteği</div>
-          <div class="pricing-feature"><span class="check">✓</span> Özel eğitim</div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f1">Sınırsız lokasyon</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f2">Sınırsız personel</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f3">Müşteri portalı (beyaz etiket)</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f4">API erişimi</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f5">Özel entegrasyonlar</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f6">Sınırsız SMS</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f7">7/24 telefon desteği</span></div>
+          <div class="pricing-feature"><span class="check">✓</span> <span data-i18n="pricing.enterprise.f8">Özel eğitim</span></div>
         </div>
-        <button class="pricing-cta pricing-cta-secondary">Satış Ekibiyle Konuş</button>
+        <button class="pricing-cta pricing-cta-secondary" data-i18n="pricing.btn.sales">Satış Ekibiyle Konuş</button>
       </div>
     </div>
   </div>
@@ -627,14 +645,14 @@
 <section class="section" id="iletisim">
   <div class="container-landing">
     <div class="cta-section">
-      <h2 class="cta-title">Bugün Başlayın — 14 Gün Ücretsiz</h2>
-      <p class="cta-desc">
+      <h2 class="cta-title" data-i18n="cta.title">Bugün Başlayın — 14 Gün Ücretsiz</h2>
+      <p class="cta-desc" data-i18n="cta.desc">
         Kredi kartı gerekmez. 2 dakikada hesabınızı oluşturun ve salonunuzu dijitalleştirmeye başlayın.
       </p>
-      <a href="dashboard.html" class="cta-btn">
+      <a href="dashboard.html" class="cta-btn" data-i18n="cta.btn">
         Ücretsiz Demo'yu Dene →
       </a>
-      <p style="position:relative; margin-top:16px; font-size:0.875rem; color:var(--text-muted);">
+      <p style="position:relative; margin-top:16px; font-size:0.875rem; color:var(--text-muted);" data-i18n="cta.footer">
         Şu anda 500+ salon tarafından aktif olarak kullanılıyor
       </p>
     </div>
@@ -650,40 +668,40 @@
           <div class="footer-brand-icon">B</div>
           BarberPro
         </div>
-        <p class="footer-desc">
+        <p class="footer-desc" data-i18n="footer.desc">
           Berber ve kuaför salonlarının dijital dönüşüm ortağı.
           Randevu, personel, stok ve sadakat — hepsi tek yerde.
         </p>
       </div>
       <div>
-        <div class="footer-title">Ürün</div>
+        <div class="footer-title" data-i18n="footer.product">Ürün</div>
         <div class="footer-links">
-          <a href="#ozellikler">Özellikler</a>
-          <a href="#fiyatlandirma">Fiyatlandırma</a>
-          <a href="#sektorler">Sektörler</a>
-          <a href="dashboard.html">Demo</a>
+          <a href="#ozellikler" data-i18n="footer.link.features">Özellikler</a>
+          <a href="#fiyatlandirma" data-i18n="footer.link.pricing">Fiyatlandırma</a>
+          <a href="#sektorler" data-i18n="footer.link.sectors">Sektörler</a>
+          <a href="dashboard.html" data-i18n="footer.link.demo">Demo</a>
         </div>
       </div>
       <div>
-        <div class="footer-title">Şirket</div>
+        <div class="footer-title" data-i18n="footer.company">Şirket</div>
         <div class="footer-links">
-          <a href="#">Hakkımızda</a>
-          <a href="#">Blog</a>
-          <a href="#">Kariyer</a>
-          <a href="#">İletişim</a>
+          <a href="#" data-i18n="footer.link.about">Hakkımızda</a>
+          <a href="#" data-i18n="footer.link.blog">Blog</a>
+          <a href="#" data-i18n="footer.link.careers">Kariyer</a>
+          <a href="#" data-i18n="footer.link.contact">İletişim</a>
         </div>
       </div>
       <div>
-        <div class="footer-title">Yasal</div>
+        <div class="footer-title" data-i18n="footer.legal">Yasal</div>
         <div class="footer-links">
-          <a href="#">Gizlilik Politikası</a>
-          <a href="#">Kullanım Koşulları</a>
-          <a href="#">GDPR Uyumu</a>
+          <a href="#" data-i18n="footer.link.privacy">Gizlilik Politikası</a>
+          <a href="#" data-i18n="footer.link.terms">Kullanım Koşulları</a>
+          <a href="#" data-i18n="footer.link.gdpr">GDPR Uyumu</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <div class="footer-copy">© 2026 BarberPro. Tüm hakları saklıdır.</div>
+      <div class="footer-copy" data-i18n="footer.copy">© 2026 BarberPro. Tüm hakları saklıdır.</div>
       <div class="footer-platforms">
         <a href="https://cleanfix-demo.vercel.app" class="footer-platform" target="_blank">
           🧹 CleanFix
@@ -697,6 +715,383 @@
 </footer>
 
 <script>
+const i18n = {
+  tr: {
+    "meta.title": "BarberPro — Berber ve Kuaför Salonu Yönetimi",
+    "nav.features": "Özellikler",
+    "nav.sectors": "Sektörler",
+    "nav.pricing": "Fiyatlandırma",
+    "nav.contact": "İletişim",
+    "nav.demo": "Demo'yu Dene",
+    "hero.badge": "Yeni: Müşteri Portalı Artık Açık",
+    "hero.title": "Berber ve Kuaför\nSalonu Yönetimi",
+    "hero.desc": "Randevuları, personeli, stoku ve sadakat programını tek bir platformdan yönetin. Belçika'nın en modern berber ve kuaför salonlarının tercihi.",
+    "hero.cta1": "Ücretsiz Demo'yu Dene →",
+    "hero.cta2": "Nasıl Çalışır?",
+    "hero.tag1": "✓ 14 günlük ücretsiz deneme",
+    "hero.tag2": "✓ Kredi kartı gerekmez",
+    "hero.tag3": "✓ 2 dakikada kurulum",
+    "hero.card.service1": "Saç Kesimi",
+    "hero.card.status": "Bekliyor",
+    "hero.card.barber": "Usta Berber: Mehmet K.",
+    "hero.card.station": "İstasyon 3",
+    "hero.card.slot1": "Saç Kesimi — €25",
+    "hero.card.slot2": "Sakal Düzeltme — €15",
+    "features.tag": "Özellikler",
+    "features.title": "Salonunuzu Baştan Aşağı Dönüştürün",
+    "features.desc": "BarberPro, berber ve kuaför salonlarının günlük operasyonlarını otomatikleştirir, müşteri memnuniyetini artırır ve geliri maksimize eder.",
+    "features.f1.title": "Online Randevu",
+    "features.f1.desc": "Müşterileriniz 7/24 web veya mobil üzerinden randevu alır. SMS ve WhatsApp hatırlatmaları otomatik gönderilir. Boş slotları anlık görün.",
+    "features.f2.title": "Personel Yönetimi",
+    "features.f2.desc": "Usta berber, kuaför, colorist ve asistanların çalışma saatlerini, izinlerini ve performansını takip edin. Komisyon hesaplamaları otomatik.",
+    "features.f3.title": "Sadakat Programı",
+    "features.f3.desc": "Bronze, Silver, Gold ve Platinum üyelik katmanları. Her işlemde puan kazanma, indirim kuponları ve özel gün hediyeleriyle müşteriyi elde tutun.",
+    "features.f4.title": "Stok Takibi",
+    "features.f4.desc": "Şampuan, jöle, wax, boya ve bakım ürünlerinin stok seviyelerini takip edin. Düşük stok uyarıları ve otomatik sipariş önerileri.",
+    "features.f5.title": "Finans Raporları",
+    "features.f5.desc": "Günlük, haftalık ve aylık gelir raporları. Hizmet bazlı karlılık analizi, personel performansına göre gelir dağılımı ve vergi hazırlık raporları.",
+    "features.f6.title": "Müşteri Portalı",
+    "features.f6.desc": "Müşterileriniz geçmiş randevularını, puanlarını ve üyelik durumlarını görebilir. Kendi profillerini günceller ve yeni randevuları kolayca oluşturur.",
+    "sectors.tag": "Sektörler",
+    "sectors.title": "Her Salon Tipine Uyarlanır",
+    "sectors.desc": "BarberPro, farklı salon tiplerinin ihtiyaçlarına göre özelleştirilebilir modüller sunar.",
+    "sectors.s1.name": "Erkek Berberi",
+    "sectors.s1.count": "230+ salon",
+    "sectors.s2.name": "Kadın Kuaförü",
+    "sectors.s2.count": "185+ salon",
+    "sectors.s3.name": "Güzellik Merkezi",
+    "sectors.s3.count": "92+ salon",
+    "sectors.s4.name": "Spor Salonu Spa",
+    "sectors.s4.count": "47+ salon",
+    "sectors.s5.name": "Nail Art Stüdyosu",
+    "sectors.s5.count": "64+ salon",
+    "testimonials.tag": "Müşteri Yorumları",
+    "testimonials.title": "Belçika'daki Salon Sahipleri Ne Diyor?",
+    "testimonials.desc": "Gerçek kullanıcıların deneyimleri.",
+    "testimonials.t1.text": "Brüksel'deki salonumuzda 4 usta berber çalışıyor. BarberPro sayesinde randevu kaçakları %80 azaldı. Online rezervasyon sistemi müşterilerimizin en sevdiği özellik.",
+    "testimonials.t1.role": "Sahip — Le Barbier Royal, Brüksel",
+    "testimonials.t2.text": "Sadakat programı sayesinde müşteri tekrar oranımız %45'ten %72'ye çıktı. Gold üyeler için özel gün indirimleri çok ilgi görüyor. Stok takibi de artık çok daha kolay.",
+    "testimonials.t2.role": "Sahip — Coiffure Élégance, Gent",
+    "testimonials.t3.text": "Antwerp'teki 2 şubemizi tek panelden yönetiyorum. Finans raporları sayesinde hangi hizmetten ne kadar kazandığımı anlık görüyorum. Personel performans takibi de ekibe motivasyon katıyor.",
+    "testimonials.t3.role": "Sahip — Scheer Meester, Antwerp",
+    "pricing.tag": "Fiyatlandırma",
+    "pricing.title": "İşletmenizin Büyüklüğüne Göre Plan Seçin",
+    "pricing.desc": "Şeffaf fiyatlandırma, gizli maliyet yok. İstediğiniz zaman değiştirin veya iptal edin.",
+    "pricing.permonth": "/ay",
+    "pricing.starter.name": "Starter",
+    "pricing.starter.desc": "Tek salon, küçük ekipler için",
+    "pricing.starter.f1": "1 salon lokasyonu",
+    "pricing.starter.f2": "5 personele kadar",
+    "pricing.starter.f3": "Online randevu",
+    "pricing.starter.f4": "Temel raporlar",
+    "pricing.starter.f5": "E-posta desteği",
+    "pricing.starter.f6": "100 SMS/ay",
+    "pricing.pro.name": "Pro",
+    "pricing.pro.desc": "Büyüyen salonlar için",
+    "pricing.pro.f1": "3 salon lokasyonu",
+    "pricing.pro.f2": "20 personele kadar",
+    "pricing.pro.f3": "Sadakat programı",
+    "pricing.pro.f4": "Stok yönetimi",
+    "pricing.pro.f5": "Detaylı finans raporları",
+    "pricing.pro.f6": "WhatsApp entegrasyonu",
+    "pricing.pro.f7": "500 SMS/ay",
+    "pricing.pro.f8": "Öncelikli destek",
+    "pricing.enterprise.name": "Enterprise",
+    "pricing.enterprise.desc": "Çok şubeli zincirler için",
+    "pricing.enterprise.f1": "Sınırsız lokasyon",
+    "pricing.enterprise.f2": "Sınırsız personel",
+    "pricing.enterprise.f3": "Müşteri portalı (beyaz etiket)",
+    "pricing.enterprise.f4": "API erişimi",
+    "pricing.enterprise.f5": "Özel entegrasyonlar",
+    "pricing.enterprise.f6": "Sınırsız SMS",
+    "pricing.enterprise.f7": "7/24 telefon desteği",
+    "pricing.enterprise.f8": "Özel eğitim",
+    "pricing.badge.popular": "En Popüler",
+    "pricing.btn.start": "Başla",
+    "pricing.btn.sales": "Satış Ekibiyle Konuş",
+    "cta.title": "Bugün Başlayın — 14 Gün Ücretsiz",
+    "cta.desc": "Kredi kartı gerekmez. 2 dakikada hesabınızı oluşturun ve salonunuzu dijitalleştirmeye başlayın.",
+    "cta.btn": "Ücretsiz Demo'yu Dene →",
+    "cta.footer": "Şu anda 500+ salon tarafından aktif olarak kullanılıyor",
+    "footer.desc": "Berber ve kuaför salonlarının dijital dönüşüm ortağı. Randevu, personel, stok ve sadakat — hepsi tek yerde.",
+    "footer.product": "Ürün",
+    "footer.company": "Şirket",
+    "footer.legal": "Yasal",
+    "footer.link.features": "Özellikler",
+    "footer.link.pricing": "Fiyatlandırma",
+    "footer.link.sectors": "Sektörler",
+    "footer.link.demo": "Demo",
+    "footer.link.about": "Hakkımızda",
+    "footer.link.blog": "Blog",
+    "footer.link.careers": "Kariyer",
+    "footer.link.contact": "İletişim",
+    "footer.link.privacy": "Gizlilik Politikası",
+    "footer.link.terms": "Kullanım Koşulları",
+    "footer.link.gdpr": "GDPR Uyumu",
+    "footer.copy": "© 2026 BarberPro. Tüm hakları saklıdır."
+  },
+  en: {
+    "meta.title": "BarberPro — Barber & Hair Salon Management",
+    "nav.features": "Features",
+    "nav.sectors": "Sectors",
+    "nav.pricing": "Pricing",
+    "nav.contact": "Contact",
+    "nav.demo": "Try Demo",
+    "hero.badge": "New: Customer Portal Now Open",
+    "hero.title": "Barber & Hair\nSalon Management",
+    "hero.desc": "Manage appointments, staff, inventory and loyalty programs from a single platform. The choice of Belgium's most modern barber and hair salons.",
+    "hero.cta1": "Try Free Demo →",
+    "hero.cta2": "How It Works?",
+    "hero.tag1": "✓ 14-day free trial",
+    "hero.tag2": "✓ No credit card needed",
+    "hero.tag3": "✓ Set up in 2 minutes",
+    "hero.card.service1": "Haircut",
+    "hero.card.status": "Waiting",
+    "hero.card.barber": "Master Barber: Mehmet K.",
+    "hero.card.station": "Station 3",
+    "hero.card.slot1": "Haircut — €25",
+    "hero.card.slot2": "Beard Trim — €15",
+    "features.tag": "Features",
+    "features.title": "Transform Your Salon from Top to Bottom",
+    "features.desc": "BarberPro automates daily operations for barber and hair salons, increases customer satisfaction and maximizes revenue.",
+    "features.f1.title": "Online Appointments",
+    "features.f1.desc": "Your customers book 24/7 via web or mobile. SMS and WhatsApp reminders sent automatically. See empty slots instantly.",
+    "features.f2.title": "Staff Management",
+    "features.f2.desc": "Track working hours, leaves and performance of barbers, hairdressers, colorists and assistants. Commission calculations are automatic.",
+    "features.f3.title": "Loyalty Program",
+    "features.f3.desc": "Bronze, Silver, Gold and Platinum membership tiers. Earn points per service, discount coupons and special day gifts to retain customers.",
+    "features.f4.title": "Inventory Tracking",
+    "features.f4.desc": "Track stock levels of shampoo, gel, wax, color and care products. Low stock alerts and automatic reorder suggestions.",
+    "features.f5.title": "Financial Reports",
+    "features.f5.desc": "Daily, weekly and monthly revenue reports. Service-based profitability analysis, revenue distribution by staff performance and tax preparation reports.",
+    "features.f6.title": "Customer Portal",
+    "features.f6.desc": "Your customers can view past appointments, points and membership status. They update their profiles and easily create new appointments.",
+    "sectors.tag": "Sectors",
+    "sectors.title": "Adapts to Every Salon Type",
+    "sectors.desc": "BarberPro offers customizable modules tailored to the needs of different salon types.",
+    "sectors.s1.name": "Men's Barber",
+    "sectors.s1.count": "230+ salons",
+    "sectors.s2.name": "Women's Hairdresser",
+    "sectors.s2.count": "185+ salons",
+    "sectors.s3.name": "Beauty Center",
+    "sectors.s3.count": "92+ salons",
+    "sectors.s4.name": "Gym Spa",
+    "sectors.s4.count": "47+ salons",
+    "sectors.s5.name": "Nail Art Studio",
+    "sectors.s5.count": "64+ salons",
+    "testimonials.tag": "Customer Reviews",
+    "testimonials.title": "What Do Salon Owners in Belgium Say?",
+    "testimonials.desc": "Real user experiences.",
+    "testimonials.t1.text": "We have 4 master barbers working at our salon in Brussels. Thanks to BarberPro, no-shows dropped by 80%. The online booking system is our customers' favorite feature.",
+    "testimonials.t1.role": "Owner — Le Barbier Royal, Brussels",
+    "testimonials.t2.text": "Our customer return rate went from 45% to 72% thanks to the loyalty program. Special day discounts for Gold members are very popular. Inventory tracking is now much easier too.",
+    "testimonials.t2.role": "Owner — Coiffure Élégance, Ghent",
+    "testimonials.t3.text": "I manage my 2 branches in Antwerp from a single panel. Financial reports let me see instantly how much I earn from each service. Staff performance tracking also motivates the team.",
+    "testimonials.t3.role": "Owner — Scheer Meester, Antwerp",
+    "pricing.tag": "Pricing",
+    "pricing.title": "Choose a Plan Based on Your Business Size",
+    "pricing.desc": "Transparent pricing, no hidden costs. Change or cancel anytime.",
+    "pricing.permonth": "/mo",
+    "pricing.starter.name": "Starter",
+    "pricing.starter.desc": "For single salon, small teams",
+    "pricing.starter.f1": "1 salon location",
+    "pricing.starter.f2": "Up to 5 staff",
+    "pricing.starter.f3": "Online appointments",
+    "pricing.starter.f4": "Basic reports",
+    "pricing.starter.f5": "Email support",
+    "pricing.starter.f6": "100 SMS/mo",
+    "pricing.pro.name": "Pro",
+    "pricing.pro.desc": "For growing salons",
+    "pricing.pro.f1": "3 salon locations",
+    "pricing.pro.f2": "Up to 20 staff",
+    "pricing.pro.f3": "Loyalty program",
+    "pricing.pro.f4": "Inventory management",
+    "pricing.pro.f5": "Detailed financial reports",
+    "pricing.pro.f6": "WhatsApp integration",
+    "pricing.pro.f7": "500 SMS/mo",
+    "pricing.pro.f8": "Priority support",
+    "pricing.enterprise.name": "Enterprise",
+    "pricing.enterprise.desc": "For multi-branch chains",
+    "pricing.enterprise.f1": "Unlimited locations",
+    "pricing.enterprise.f2": "Unlimited staff",
+    "pricing.enterprise.f3": "Customer portal (white label)",
+    "pricing.enterprise.f4": "API access",
+    "pricing.enterprise.f5": "Custom integrations",
+    "pricing.enterprise.f6": "Unlimited SMS",
+    "pricing.enterprise.f7": "24/7 phone support",
+    "pricing.enterprise.f8": "Custom training",
+    "pricing.badge.popular": "Most Popular",
+    "pricing.btn.start": "Get Started",
+    "pricing.btn.sales": "Talk to Sales",
+    "cta.title": "Start Today — 14 Days Free",
+    "cta.desc": "No credit card required. Create your account in 2 minutes and start digitizing your salon.",
+    "cta.btn": "Try Free Demo →",
+    "cta.footer": "Currently actively used by 500+ salons",
+    "footer.desc": "The digital transformation partner for barber and hair salons. Appointments, staff, inventory and loyalty — all in one place.",
+    "footer.product": "Product",
+    "footer.company": "Company",
+    "footer.legal": "Legal",
+    "footer.link.features": "Features",
+    "footer.link.pricing": "Pricing",
+    "footer.link.sectors": "Sectors",
+    "footer.link.demo": "Demo",
+    "footer.link.about": "About Us",
+    "footer.link.blog": "Blog",
+    "footer.link.careers": "Careers",
+    "footer.link.contact": "Contact",
+    "footer.link.privacy": "Privacy Policy",
+    "footer.link.terms": "Terms of Use",
+    "footer.link.gdpr": "GDPR Compliance",
+    "footer.copy": "© 2026 BarberPro. All rights reserved."
+  },
+  nl: {
+    "meta.title": "BarberPro — Kapper & Kapsalon Beheer",
+    "nav.features": "Functies",
+    "nav.sectors": "Sectoren",
+    "nav.pricing": "Prijzen",
+    "nav.contact": "Contact",
+    "nav.demo": "Probeer Demo",
+    "hero.badge": "Nieuw: Klantenportal Nu Open",
+    "hero.title": "Kapper & Kapsalon\nBeheer",
+    "hero.desc": "Beheer afspraken, personeel, voorraad en loyaliteitsprogramma's vanuit één platform. De keuze van de meest moderne kappers en kapsalons in België.",
+    "hero.cta1": "Probeer Gratis Demo →",
+    "hero.cta2": "Hoe Werkt Het?",
+    "hero.tag1": "✓ 14 dagen gratis proefperiode",
+    "hero.tag2": "✓ Geen creditcard nodig",
+    "hero.tag3": "✓ Binnen 2 minuten opgezet",
+    "hero.card.service1": "Knipt",
+    "hero.card.status": "Wacht",
+    "hero.card.barber": "Meester Kapper: Mehmet K.",
+    "hero.card.station": "Post 3",
+    "hero.card.slot1": "Knipt — €25",
+    "hero.card.slot2": "Baard Trimmen — €15",
+    "features.tag": "Functies",
+    "features.title": "Transformeer Uw Salon van Top tot Teen",
+    "features.desc": "BarberPro automatiseert dagelijkse operaties voor kappers en kapsalons, verhoogt klanttevredenheid en maximaliseert omzet.",
+    "features.f1.title": "Online Afspraken",
+    "features.f1.desc": "Uw klanten boeken 24/7 via web of mobiel. SMS en WhatsApp herinneringen worden automatisch verzonden. Zie vrije slots direct.",
+    "features.f2.title": "Personeelsbeheer",
+    "features.f2.desc": "Volg werktijden, verlof en prestaties van kappers, kleurspecialisten en assistenten. Commissieberekeningen zijn automatisch.",
+    "features.f3.title": "Loyaliteitsprogramma",
+    "features.f3.desc": "Bronze, Silver, Gold en Platinum lidmaatschapsniveaus. Verdien punten per behandeling, kortingsbonnen en cadeaus op speciale dagen om klanten te behouden.",
+    "features.f4.title": "Voorraadbeheer",
+    "features.f4.desc": "Volg voorraadniveaus van shampoo, gel, wax, verf en verzorgingsproducten. Lage voorraad waarschuwingen en automatische herbestelsuggesties.",
+    "features.f5.title": "Financiële Rapporten",
+    "features.f5.desc": "Dagelijkse, wekelijkse en maandelijkse omzetrapporten. Service-gebaseerde winstgevendheidsanalyse, omzetverdeling op personeelsprestaties en belastingvoorbereidingsrapporten.",
+    "features.f6.title": "Klantenportal",
+    "features.f6.desc": "Uw klanten kunnen eerdere afspraken, punten en lidmaatschapsstatus bekijken. Ze updaten hun profielen en maken eenvoudig nieuwe afspraken.",
+    "sectors.tag": "Sectoren",
+    "sectors.title": "Geschikt voor Elk Salontype",
+    "sectors.desc": "BarberPro biedt aanpasbare modules die zijn afgestemd op de behoeften van verschillende salontypes.",
+    "sectors.s1.name": "Herenkapper",
+    "sectors.s1.count": "230+ salons",
+    "sectors.s2.name": "Dameskapper",
+    "sectors.s2.count": "185+ salons",
+    "sectors.s3.name": "Schoonheidssalon",
+    "sectors.s3.count": "92+ salons",
+    "sectors.s4.name": "Sportschool Spa",
+    "sectors.s4.count": "47+ salons",
+    "sectors.s5.name": "Nagelstudio",
+    "sectors.s5.count": "64+ salons",
+    "testimonials.tag": "Klantrecensies",
+    "testimonials.title": "Wat Zeggen Saloneigenaren in België?",
+    "testimonials.desc": "Ervaringen van echte gebruikers.",
+    "testimonials.t1.text": "We hebben 4 meester kappers werkzaam in onze salon in Brussel. Dankzij BarberPro zijn no-shows met 80% gedaald. Het online boekingssysteem is de favoriete functie van onze klanten.",
+    "testimonials.t1.role": "Eigenaar — Le Barbier Royal, Brussel",
+    "testimonials.t2.text": "Ons klantretentiepercentage steeg van 45% naar 72% dankzij het loyaliteitsprogramma. Kortingen op speciale dagen voor Gold-leden zijn erg populair. Voorraadbeheer is nu ook veel gemakkelijker.",
+    "testimonials.t2.role": "Eigenaar — Coiffure Élégance, Gent",
+    "testimonials.t3.text": "Ik beheer mijn 2 filialen in Antwerpen vanuit één paneel. Financiële rapporten laten me direct zien hoeveel ik verdien per dienst. Personeelsprestatietracking motiveert het team ook.",
+    "testimonials.t3.role": "Eigenaar — Scheer Meester, Antwerpen",
+    "pricing.tag": "Prijzen",
+    "pricing.title": "Kies een Plan op Basis van Uw Bedrijfsgrootte",
+    "pricing.desc": "Transparante prijzen, geen verborgen kosten. Wijzig of annuleer op elk gewenst moment.",
+    "pricing.permonth": "/maand",
+    "pricing.starter.name": "Starter",
+    "pricing.starter.desc": "Voor enkele salon, kleine teams",
+    "pricing.starter.f1": "1 salonlocatie",
+    "pricing.starter.f2": "Tot 5 medewerkers",
+    "pricing.starter.f3": "Online afspraken",
+    "pricing.starter.f4": "Basisrapporten",
+    "pricing.starter.f5": "E-mail ondersteuning",
+    "pricing.starter.f6": "100 SMS/maand",
+    "pricing.pro.name": "Pro",
+    "pricing.pro.desc": "Voor groeiende salons",
+    "pricing.pro.f1": "3 salonlocaties",
+    "pricing.pro.f2": "Tot 20 medewerkers",
+    "pricing.pro.f3": "Loyaliteitsprogramma",
+    "pricing.pro.f4": "Voorraadbeheer",
+    "pricing.pro.f5": "Gedetailleerde financiële rapporten",
+    "pricing.pro.f6": "WhatsApp integratie",
+    "pricing.pro.f7": "500 SMS/maand",
+    "pricing.pro.f8": "Prioritaire ondersteuning",
+    "pricing.enterprise.name": "Enterprise",
+    "pricing.enterprise.desc": "Voor multi-filiaal ketens",
+    "pricing.enterprise.f1": "Onbeperkte locaties",
+    "pricing.enterprise.f2": "Onbeperkt personeel",
+    "pricing.enterprise.f3": "Klantenportal (white label)",
+    "pricing.enterprise.f4": "API toegang",
+    "pricing.enterprise.f5": "Aangepaste integraties",
+    "pricing.enterprise.f6": "Onbeperkte SMS",
+    "pricing.enterprise.f7": "24/7 telefonische ondersteuning",
+    "pricing.enterprise.f8": "Aangepaste training",
+    "pricing.badge.popular": "Meest Populair",
+    "pricing.btn.start": "Aan de Slag",
+    "pricing.btn.sales": "Praat met Verkoop",
+    "cta.title": "Begin Vandaag — 14 Dagen Gratis",
+    "cta.desc": "Geen creditcard vereist. Maak uw account aan in 2 minuten en begin met het digitaliseren van uw salon.",
+    "cta.btn": "Probeer Gratis Demo →",
+    "cta.footer": "Momenteel actief gebruikt door 500+ salons",
+    "footer.desc": "De digitale transformatiepartner voor kappers en kapsalons. Afspraken, personeel, voorraad en loyaliteit — alles op één plek.",
+    "footer.product": "Product",
+    "footer.company": "Bedrijf",
+    "footer.legal": "Juridisch",
+    "footer.link.features": "Functies",
+    "footer.link.pricing": "Prijzen",
+    "footer.link.sectors": "Sectoren",
+    "footer.link.demo": "Demo",
+    "footer.link.about": "Over Ons",
+    "footer.link.blog": "Blog",
+    "footer.link.careers": "Carrière",
+    "footer.link.contact": "Contact",
+    "footer.link.privacy": "Privacybeleid",
+    "footer.link.terms": "Gebruiksvoorwaarden",
+    "footer.link.gdpr": "GDPR Naleving",
+    "footer.copy": "© 2026 BarberPro. Alle rechten voorbehouden."
+  }
+};
+
+let currentLang = localStorage.getItem('barberpro_lang') || 'tr';
+
+function switchLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('barberpro_lang', lang);
+  document.documentElement.lang = lang;
+  applyTranslations();
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+
+function applyTranslations() {
+  const dict = i18n[currentLang];
+  if (!dict) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const attr = el.dataset.i18nAttr;
+    const val = dict[key];
+    if (val === undefined) return;
+    if (attr) { el.setAttribute(attr, val); }
+    else if (el.tagName === 'TITLE') { el.textContent = val; }
+    else { el.textContent = val; }
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (dict[key] !== undefined) el.placeholder = dict[key];
+  });
+}
+
+switchLang(currentLang);
+
 // Navbar scroll effect
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
@@ -705,7 +1100,8 @@ window.addEventListener('scroll', () => {
 
 // Mobile menu (simple toggle)
 function toggleMobileMenu() {
-  alert('Mobil menü: Özellikler, Fiyatlandırma, Demo bağlantıları');
+  const msgs = { tr: 'Mobil menü: Özellikler, Fiyatlandırma, Demo bağlantıları', en: 'Mobile menu: Features, Pricing, Demo links', nl: 'Mobiel menu: Functies, Prijzen, Demo links' };
+  alert(msgs[currentLang] || msgs.tr);
 }
 
 // Scroll reveal
