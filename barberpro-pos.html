@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro Kasa & POS — Satış Noktası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+/* ── Purple Theme Overrides ── */
+:root, [data-theme="dark"] {
+  --teal-50: #f0fdfa; --teal-100: #ccfbf1; --teal-200: #99f6e4; --teal-300: #5eead4;
+  --teal-400: #2dd4bf; --teal-500: #14b8a6; --teal-600: #0d9488; --teal-700: #0f766e;
+  --teal-800: #115e59; --teal-900: #134e4a;
+  --amber-500: #f59e0b; --amber-600: #d97706;
+  --shadow-glow: rgba(139,92,246,0.25);
+}
+[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+
+/* ── POS Layout ── */
+.pos-container {
+  display: grid;
+  grid-template-columns: 1fr 380px 340px;
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (max-width: 1280px) {
+  .pos-container { grid-template-columns: 1fr 340px; }
+  .pos-payment-col { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+}
+@media (max-width: 1024px) {
+  .pos-container { grid-template-columns: 1fr; }
+  .pos-payment-col { grid-column: auto; display: block; }
+}
+
+/* ── Product Grid ── */
+.pos-search {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+.pos-search input {
+  width: 100%; padding: 12px 14px 12px 42px;
+  background: var(--bg-input); color: var(--text-primary);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-lg);
+  font-size: var(--text-sm); outline: none; transition: all var(--duration-normal);
+}
+.pos-search input:focus {
+  border-color: var(--teal-500); box-shadow: 0 0 0 3px var(--shadow-glow);
+}
+.pos-search svg {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+
+.pos-tabs {
+  display: flex; gap: var(--space-1); margin-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+.pos-tab {
+  padding: var(--space-2) var(--space-4); font-size: var(--text-sm); font-weight: 500;
+  color: var(--text-muted); border-bottom: 2px solid transparent;
+  transition: all var(--duration-fast); cursor: pointer; white-space: nowrap;
+  background: none; border-radius: 0;
+}
+.pos-tab:hover { color: var(--text-secondary); }
+.pos-tab.active { color: var(--teal-500); border-bottom-color: var(--teal-500); }
+
+.pos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  max-height: 520px; overflow-y: auto; padding-right: 4px;
+}
+.pos-item {
+  background: var(--bg-card); border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: var(--space-4);
+  text-align: center; cursor: pointer; transition: all var(--duration-fast);
+  position: relative; overflow: hidden; user-select: none;
+}
+.pos-item:hover {
+  border-color: var(--teal-500); transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(139,92,246,0.15);
+}
+.pos-item:active { transform: scale(0.98); }
+.pos-item-icon {
+  width: 48px; height: 48px; border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(167,139,250,0.1));
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-xl); margin: 0 auto var(--space-3);
+}
+.pos-item-name {
+  font-size: var(--text-sm); font-weight: 600; color: var(--text-primary);
+  line-height: 1.3; margin-bottom: 2px;
+}
+.pos-item-price {
+  font-size: var(--text-base); font-weight: 700; color: var(--teal-400);
+}
+.pos-item-badge {
+  position: absolute; top: 8px; right: 8px;
+  padding: 2px 8px; border-radius: 9999px;
+  font-size: 10px; font-weight: 700;
+}
+.pos-item-badge.paket { background: linear-gradient(135deg, var(--amber-500), var(--amber-600)); color: white; }
+.pos-item-badge.populer { background: rgba(139,92,246,0.2); color: var(--teal-400); }
+
+/* ── Cart ── */
+.pos-cart {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); display: flex; flex-direction: column;
+  height: calc(100vh - 180px); min-height: 520px;
+}
+.pos-cart-header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pos-cart-title { font-size: var(--text-lg); font-weight: 700; }
+.pos-cart-count { font-size: var(--text-xs); color: var(--text-muted); }
+.pos-cart-body {
+  flex: 1; overflow-y: auto; padding: var(--space-3) var(--space-4);
+}
+.pos-cart-item {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3); border-radius: var(--radius-md);
+  background: var(--bg-secondary); margin-bottom: var(--space-2);
+  transition: background var(--duration-fast);
+}
+.pos-cart-item:hover { background: var(--bg-tertiary); }
+.pos-cart-item-info { flex: 1; min-width: 0; }
+.pos-cart-item-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-primary); }
+.pos-cart-item-meta { font-size: var(--text-xs); color: var(--text-muted); margin-top: 1px; }
+.pos-cart-item-qty {
+  display: flex; align-items: center; gap: var(--space-1);
+}
+.pos-qty-btn {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-tertiary); color: var(--text-secondary);
+  font-size: var(--text-sm); font-weight: 700; cursor: pointer;
+  border: none; transition: all var(--duration-fast);
+}
+.pos-qty-btn:hover { background: var(--teal-500); color: white; }
+.pos-cart-item-price {
+  font-size: var(--text-sm); font-weight: 700; color: var(--teal-400);
+  min-width: 56px; text-align: right;
+}
+.pos-cart-item-del {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); cursor: pointer; border: none; background: none;
+  transition: all var(--duration-fast);
+}
+.pos-cart-item-del:hover { background: var(--error-100); color: var(--error-500); }
+[data-theme="dark"] .pos-cart-item-del:hover { background: rgba(244,63,94,0.15); }
+
+.pos-cart-footer {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.pos-cart-line {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: var(--text-sm); margin-bottom: var(--space-2);
+}
+.pos-cart-line .label { color: var(--text-secondary); }
+.pos-cart-line .value { font-weight: 600; color: var(--text-primary); }
+.pos-cart-line.total {
+  font-size: var(--text-xl); font-weight: 700;
+  border-top: 1px solid var(--border-color); padding-top: var(--space-3); margin-top: var(--space-2);
+}
+.pos-cart-line.total .value { color: var(--teal-400); }
+
+/* ── Customer Selector ── */
+.pos-customer {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+.pos-customer-label {
+  font-size: var(--text-xs); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: var(--space-2);
+}
+.pos-customer-row {
+  display: flex; gap: var(--space-2); align-items: center;
+}
+.pos-customer-select {
+  flex: 1; padding: 8px 12px; background: var(--bg-input); color: var(--text-primary);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+  font-size: var(--text-sm); outline: none;
+}
+.pos-customer-select:focus { border-color: var(--teal-500); box-shadow: 0 0 0 3px var(--shadow-glow); }
+.pos-customer-btn {
+  padding: 8px 12px; background: var(--bg-tertiary); color: var(--text-secondary);
+  border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  font-size: var(--text-xs); font-weight: 600; cursor: pointer; white-space: nowrap;
+  transition: all var(--duration-fast);
+}
+.pos-customer-btn:hover { background: var(--teal-500); color: white; border-color: var(--teal-500); }
+
+.pos-appointment-link {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.pos-appointment-link select {
+  flex: 1; padding: 6px 10px; background: var(--bg-input); color: var(--text-primary);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+  font-size: var(--text-xs); outline: none;
+}
+.pos-notes {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+.pos-notes textarea {
+  width: 100%; padding: 8px 12px; background: var(--bg-input); color: var(--text-primary);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+  font-size: var(--text-xs); resize: vertical; min-height: 60px; outline: none;
+}
+.pos-notes textarea:focus { border-color: var(--teal-500); box-shadow: 0 0 0 3px var(--shadow-glow); }
+
+/* ── Payment Panel ── */
+.pos-payment {
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); padding: var(--space-5);
+}
+.pos-payment-title {
+  font-size: var(--text-lg); font-weight: 700; margin-bottom: var(--space-4);
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.pos-payment-methods {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.pos-pay-btn {
+  padding: var(--space-4); border-radius: var(--radius-lg);
+  background: var(--bg-secondary); border: 1.5px solid var(--border-color);
+  color: var(--text-primary); font-size: var(--text-sm); font-weight: 600;
+  cursor: pointer; transition: all var(--duration-fast); text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+}
+.pos-pay-btn:hover { border-color: var(--teal-500); background: rgba(139,92,246,0.08); }
+.pos-pay-btn.active {
+  border-color: var(--teal-500); background: rgba(139,92,246,0.12);
+  box-shadow: 0 0 0 2px var(--shadow-glow);
+}
+.pos-pay-btn .emoji { font-size: var(--text-xl); }
+.pos-pay-btn .label { font-size: var(--text-xs); color: var(--text-muted); }
+
+.pos-split-payment {
+  background: var(--bg-secondary); border-radius: var(--radius-md);
+  padding: var(--space-3); margin-bottom: var(--space-4);
+}
+.pos-split-row {
+  display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);
+}
+.pos-split-row:last-child { margin-bottom: 0; }
+.pos-split-label { font-size: var(--text-xs); color: var(--text-muted); width: 80px; flex-shrink: 0; }
+.pos-split-input {
+  flex: 1; padding: 6px 10px; background: var(--bg-input); color: var(--text-primary);
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-md);
+  font-size: var(--text-sm); outline: none;
+}
+.pos-split-input:focus { border-color: var(--teal-500); box-shadow: 0 0 0 3px var(--shadow-glow); }
+
+.pos-points {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-3); background: var(--bg-secondary);
+  border-radius: var(--radius-md); margin-bottom: var(--space-4);
+}
+.pos-points-info { font-size: var(--text-sm); }
+.pos-points-value { font-weight: 700; color: var(--amber-500); }
+
+.pos-change {
+  padding: var(--space-3); background: var(--bg-secondary);
+  border-radius: var(--radius-md); margin-bottom: var(--space-4);
+}
+.pos-change-label { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: var(--space-1); }
+.pos-change-value { font-size: var(--text-2xl); font-weight: 700; color: var(--teal-400); }
+
+.pos-action-btns {
+  display: flex; flex-direction: column; gap: var(--space-3);
+}
+.pos-btn-complete {
+  width: 100%; padding: var(--space-4);
+  background: linear-gradient(135deg, var(--teal-500), var(--teal-600));
+  color: white; font-size: var(--text-lg); font-weight: 700;
+  border: none; border-radius: var(--radius-lg); cursor: pointer;
+  box-shadow: 0 4px 14px rgba(20,184,166,0.35);
+  transition: all var(--duration-normal);
+}
+.pos-btn-complete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(20,184,166,0.45), 0 0 0 3px rgba(20,184,166,0.15);
+}
+.pos-btn-complete:active { transform: translateY(0); }
+.pos-btn-draft {
+  width: 100%; padding: var(--space-3);
+  background: var(--bg-elevated); color: var(--text-secondary);
+  font-size: var(--text-sm); font-weight: 600;
+  border: 1.5px solid var(--border-color); border-radius: var(--radius-lg);
+  cursor: pointer; transition: all var(--duration-fast);
+}
+.pos-btn-draft:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* ── Daily Summary ── */
+.daily-summary {
+  margin-top: var(--space-6);
+  background: var(--bg-card); border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.daily-summary-header {
+  padding: var(--space-4) var(--space-5);
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none;
+  transition: background var(--duration-fast);
+}
+.daily-summary-header:hover { background: var(--bg-secondary); }
+.daily-summary-title { font-size: var(--text-lg); font-weight: 700; display: flex; align-items: center; gap: var(--space-2); }
+.daily-summary-toggle { font-size: var(--text-xl); color: var(--text-muted); transition: transform var(--duration-fast); }
+.daily-summary.open .daily-summary-toggle { transform: rotate(180deg); }
+.daily-summary-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height var(--duration-slow) var(--ease-out);
+}
+.daily-summary.open .daily-summary-body { max-height: 800px; }
+.daily-summary-content { padding: 0 var(--space-5) var(--space-5); }
+
+.daily-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+@media (max-width: 768px) { .daily-stats { grid-template-columns: repeat(2, 1fr); } }
+.daily-stat {
+  background: var(--bg-secondary); border-radius: var(--radius-md);
+  padding: var(--space-4); text-align: center;
+}
+.daily-stat-value { font-size: var(--text-2xl); font-weight: 700; color: var(--teal-400); }
+.daily-stat-label { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
+
+/* ── Receipt Print Preview ── */
+.receipt-preview {
+  background: white; color: #1e293b;
+  border-radius: var(--radius-md); padding: var(--space-5);
+  font-family: 'Courier New', monospace; font-size: 13px;
+  max-width: 320px; margin: 0 auto;
+}
+.receipt-preview h3 { text-align: center; font-size: 16px; margin-bottom: 8px; }
+.receipt-preview .receipt-line { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.receipt-preview .receipt-total { border-top: 2px dashed #ccc; margin-top: 8px; padding-top: 8px; font-weight: 700; }
+
+/* ── POS-specific touch targets ── */
+.pos-item, .pos-pay-btn, .pos-qty-btn, .pos-btn-complete {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Animations ── */
+@keyframes cartBump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.04); }
+  60% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+.cart-bump { animation: cartBump 0.35s var(--ease-spring); }
+
+/* Scrollbar for cart */
+.pos-cart-body::-webkit-scrollbar { width: 4px; }
+.pos-cart-body::-webkit-scrollbar-thumb { background: var(--slate-700); border-radius: 2px; }
+
+/* ── Modal Receipt ── */
+.modal-receipt .modal { max-width: 420px; }
+.receipt-options {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.receipt-option {
+  padding: var(--space-4); border-radius: var(--radius-lg);
+  background: var(--bg-secondary); border: 1.5px solid var(--border-color);
+  text-align: center; cursor: pointer; transition: all var(--duration-fast);
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+}
+.receipt-option:hover { border-color: var(--teal-500); background: rgba(139,92,246,0.08); }
+.receipt-option .emoji { font-size: var(--text-2xl); }
+.receipt-option .label { font-size: var(--text-xs); color: var(--text-secondary); font-weight: 600; }
+
+/* ── Empty cart placeholder (hidden by default since we have items) ── */
+.pos-cart-empty {
+  text-align: center; padding: var(--space-10) var(--space-4);
+  color: var(--text-muted);
+}
+.pos-cart-empty-icon { font-size: var(--text-4xl); margin-bottom: var(--space-3); opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">B</div>
+    <span class="sidebar-brand-text">BarberPro</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Ana Menü</div>
+      <a class="sidebar-link" href="dashboard.html">
+        <span class="icon">📊</span>
+        <span class="sidebar-text">Dashboard</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📅</span>
+        <span class="sidebar-text">Randevular</span>
+        <span class="badge badge-error">3</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">✂️</span>
+        <span class="sidebar-text">Hizmetler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">👥</span>
+        <span class="sidebar-text">Personel</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operasyon</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">🧑‍🤝‍🧑</span>
+        <span class="sidebar-text">Müşteriler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📦</span>
+        <span class="sidebar-text">Stok</span>
+        <span class="badge badge-warning">2</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">💎</span>
+        <span class="sidebar-text">Sadakat</span>
+      </a>
+      <a class="sidebar-link active" href="barberpro-pos.html">
+        <span class="icon">💶</span>
+        <span class="sidebar-text">Kasa & POS</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Raporlar</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📈</span>
+        <span class="sidebar-text">Raporlar</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">⚙️</span>
+        <span class="sidebar-text">Portal Ayarları</span>
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="card" style="padding:12px; border:none; background:var(--bg-secondary);">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--teal-500),var(--teal-700));">A</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);">Ahmet Yılmaz</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Sahip — Le Barbier Royal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn mobile-visible" onclick="toggleMobileSidebar()">☰</button>
+      <div>
+        <div class="header-title">Kasa & POS</div>
+        <div class="header-breadcrumb">Le Barbier Royal › Brüksel › 16 Mayıs 2026, Cumartesi</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="showNotifications()" title="Bildirimler">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <button class="header-btn" onclick="toggleTheme()" title="Tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notifications Panel -->
+  <div class="notifications-panel" id="notificationsPanel">
+    <div class="notifications-header">
+      <span style="font-weight:600; font-size:0.9375rem;">Bildirimler</span>
+      <button class="btn btn-ghost btn-sm" onclick="showNotifications()">Kapat</button>
+    </div>
+    <div class="notifications-list">
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📅</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Yeni randevu: Jean Dupont</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">15:30 — Saç Kesimi + Sakal</div>
+        </div>
+      </div>
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📦</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Düşük stok uyarısı</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Wella Koleston 6/1 — 3 adet kaldı</div>
+        </div>
+      </div>
+      <div class="notifications-item">
+        <div class="avatar avatar-sm">💎</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Gold üye yükseldi</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Sophie Laurent → Platinum</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">🛒 Satış Noktası</h1>
+        <p class="page-subtitle">Hizmet, ürün ve paket satışı — Le Barbier Royal, Brüksel</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="clearCart()">
+          <span>🗑️</span> Sepeti Temizle
+        </button>
+        <button class="btn btn-primary" onclick="openDailySummary()">
+          <span>📋</span> X/Z Raporu
+        </button>
+      </div>
+    </div>
+
+    <!-- POS 3-Column Layout -->
+    <div class="pos-container">
+      <!-- LEFT: Product/Service Grid -->
+      <div class="pos-products-col">
+        <div class="pos-search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+          <input type="text" id="posSearch" placeholder="Hizmet, ürün veya paket ara..." oninput="filterPosItems(this.value)">
+        </div>
+
+        <div class="pos-tabs" id="posTabs">
+          <button class="pos-tab active" data-tab="hizmetler" onclick="switchPosTab('hizmetler')">✂️ Hizmetler</button>
+          <button class="pos-tab" data-tab="urunler" onclick="switchPosTab('urunler')">🧴 Ürünler</button>
+          <button class="pos-tab" data-tab="paketler" onclick="switchPosTab('paketler')">🎁 Paketler</button>
+        </div>
+
+        <div class="pos-grid" id="posGrid">
+          <!-- Items injected by JS -->
+        </div>
+      </div>
+
+      <!-- CENTER: Cart -->
+      <div class="pos-cart-col">
+        <div class="pos-cart" id="posCart">
+          <div class="pos-cart-header">
+            <div>
+              <div class="pos-cart-title">🛍️ Sepet</div>
+              <div class="pos-cart-count" id="cartCount">0 ürün</div>
+            </div>
+            <span style="font-size:var(--text-sm); color:var(--text-muted);" id="cartTime">14:32</span>
+          </div>
+
+          <div class="pos-customer">
+            <div class="pos-customer-label">Müşteri</div>
+            <div class="pos-customer-row">
+              <select class="pos-customer-select" id="cartCustomer" onchange="onCustomerChange()">
+                <option value="walkin">🚶 Yeni Gelen (Walk-in)</option>
+                <option value="jean">Jean Dupont — Gold (€320 puan)</option>
+                <option value="sophie">Sophie Laurent — Platinum (€580 puan)</option>
+                <option value="marc">Marc Dubois — Silver (€150 puan)</option>
+                <option value="emma">Emma Vermeulen — Bronze (€45 puan)</option>
+                <option value="lucas">Lucas Peeters — Gold (€290 puan)</option>
+              </select>
+              <button class="pos-customer-btn" onclick="quickAddCustomer()">+ Yeni</button>
+            </div>
+          </div>
+
+          <div class="pos-appointment-link">
+            <span style="font-size:var(--text-xs); color:var(--text-muted); white-space:nowrap;">📅 Randevu:</span>
+            <select id="cartAppointment">
+              <option value="">Randevu bağlama (opsiyonel)</option>
+              <option value="r1">09:00 — Jean Dupont — Saç Kesimi</option>
+              <option value="r2">10:00 — Sophie Laurent — Saç Boyama</option>
+              <option value="r3">11:00 — Marc Dubois — Keratin Bakım</option>
+              <option value="r4">14:00 — Emma Vermeulen — Manikür</option>
+              <option value="r5">15:30 — Lucas Peeters — Traş</option>
+            </select>
+          </div>
+
+          <div class="pos-cart-body" id="cartBody">
+            <!-- Cart items injected by JS -->
+          </div>
+
+          <div class="pos-notes">
+            <textarea id="cartNotes" placeholder="Satış notu: özel istek, alerji, vs..."></textarea>
+          </div>
+
+          <div class="pos-cart-footer">
+            <div class="pos-cart-line">
+              <span class="label">Ara Toplam</span>
+              <span class="value" id="cartSubtotal">€0,00</span>
+            </div>
+            <div class="pos-cart-line">
+              <span class="label">KDV %21</span>
+              <span class="value" id="cartKDV">€0,00</span>
+            </div>
+            <div class="pos-cart-line">
+              <span class="label">İndirim</span>
+              <span class="value" style="color:var(--error-500);" id="cartDiscount">-€0,00</span>
+            </div>
+            <div class="pos-cart-line">
+              <span class="label">Bahşiş</span>
+              <span class="value" id="cartTip">€0,00</span>
+            </div>
+            <div class="pos-cart-line total">
+              <span class="label">GENEL TOPLAM</span>
+              <span class="value" id="cartTotal">€0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Payment -->
+      <div class="pos-payment-col">
+        <div class="pos-payment">
+          <div class="pos-payment-title">💳 Ödeme</div>
+
+          <div class="pos-payment-methods" id="paymentMethods">
+            <button class="pos-pay-btn active" data-method="nakit" onclick="selectPayment('nakit')">
+              <span class="emoji">💶</span>
+              <span>Nakit</span>
+              <span class="label">Para üstü hesaplanır</span>
+            </button>
+            <button class="pos-pay-btn" data-method="kredi" onclick="selectPayment('kredi')">
+              <span class="emoji">💳</span>
+              <span>Kredi Kartı</span>
+              <span class="label">POS cihazı</span>
+            </button>
+            <button class="pos-pay-btn" data-method="bancontact" onclick="selectPayment('bancontact')">
+              <span class="emoji">📱</span>
+              <span>Bancontact</span>
+              <span class="label">Temassız ödeme</span>
+            </button>
+            <button class="pos-pay-btn" data-method="puan" onclick="selectPayment('puan')">
+              <span class="emoji">🔄</span>
+              <span>Puan Kullan</span>
+              <span class="label">Sadakat puanları</span>
+            </button>
+          </div>
+
+          <div class="pos-split-payment" id="splitPayment" style="display:none;">
+            <div style="font-size:var(--text-xs); font-weight:600; color:var(--text-muted); margin-bottom:var(--space-2); text-transform:uppercase; letter-spacing:0.05em;">Bölünmüş Ödeme</div>
+            <div class="pos-split-row">
+              <span class="pos-split-label">💶 Nakit</span>
+              <input type="number" class="pos-split-input" id="splitCash" placeholder="0,00" step="0.01" oninput="calculateSplit()">
+            </div>
+            <div class="pos-split-row">
+              <span class="pos-split-label">💳 Kart</span>
+              <input type="number" class="pos-split-input" id="splitCard" placeholder="0,00" step="0.01" oninput="calculateSplit()">
+            </div>
+            <div class="pos-split-row">
+              <span class="pos-split-label">📱 Bancontact</span>
+              <input type="number" class="pos-split-input" id="splitBancontact" placeholder="0,00" step="0.01" oninput="calculateSplit()">
+            </div>
+            <div class="pos-split-row" style="margin-top:var(--space-2); padding-top:var(--space-2); border-top:1px solid var(--border-color);">
+              <span class="pos-split-label" style="font-weight:600;">Kalan</span>
+              <span id="splitRemaining" style="font-weight:700; color:var(--teal-400);">€0,00</span>
+            </div>
+          </div>
+
+          <div class="pos-points" id="pointsSection">
+            <div class="pos-points-info">
+              <div style="font-size:var(--text-xs); color:var(--text-muted);">Mevcut Puan</div>
+              <div class="pos-points-value" id="customerPoints">—</div>
+            </div>
+            <label class="toggle" id="pointsToggle" style="display:none;">
+              <input type="checkbox" id="usePoints" onchange="togglePoints()">
+              <span class="toggle-track"></span>
+            </label>
+          </div>
+
+          <div class="pos-change" id="changeSection">
+            <div class="pos-change-label">Para Üstü (Nakit)</div>
+            <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+              <span style="font-size:var(--text-xs); color:var(--text-muted);">Verilen:</span>
+              <input type="number" class="pos-split-input" id="cashGiven" placeholder="0,00" step="0.01" style="max-width:120px;" oninput="calculateChange()">
+            </div>
+            <div class="pos-change-value" id="changeAmount">€0,00</div>
+          </div>
+
+          <div class="pos-action-btns">
+            <button class="pos-btn-complete" onclick="completeSale()">
+              ✅ Satışı Tamamla
+            </button>
+            <button class="pos-btn-draft" onclick="saveDraft()">
+              💾 Taslak Kaydet
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Summary -->
+    <div class="daily-summary open" id="dailySummary">
+      <div class="daily-summary-header" onclick="toggleDailySummary()">
+        <div class="daily-summary-title">📋 Günlük Özet — 16 Mayıs 2026</div>
+        <span class="daily-summary-toggle">▾</span>
+      </div>
+      <div class="daily-summary-body">
+        <div class="daily-summary-content">
+          <div class="daily-stats">
+            <div class="daily-stat">
+              <div class="daily-stat-value" id="dailyTransCount">23</div>
+              <div class="daily-stat-label">İşlem</div>
+            </div>
+            <div class="daily-stat">
+              <div class="daily-stat-value" id="dailyRevenue">€1.847</div>
+              <div class="daily-stat-label">Ciro</div>
+            </div>
+            <div class="daily-stat">
+              <div class="daily-stat-value" id="dailyCash">€892</div>
+              <div class="daily-stat-label">Nakit</div>
+            </div>
+            <div class="daily-stat">
+              <div class="daily-stat-value" id="dailyCard">€955</div>
+              <div class="daily-stat-label">Kart</div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Saat</th>
+                  <th>İşlem</th>
+                  <th>Müşteri</th>
+                  <th>Çalışan</th>
+                  <th style="text-align:right;">Tutar</th>
+                  <th>Ödeme</th>
+                </tr>
+              </thead>
+              <tbody id="dailyTableBody">
+                <!-- Injected by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex; gap:var(--space-3); margin-top:var(--space-4);">
+            <button class="btn btn-primary" onclick="printXZReport('X')">📊 X Raporu Yazdır</button>
+            <button class="btn btn-amber" onclick="printXZReport('Z')">🔒 Z Raporu (Gün Kapat)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ========== MODALS ========== -->
+
+<!-- Transaction Success Modal -->
+<div class="modal-overlay modal-receipt" id="successModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎉 Satış Tamamlandı!</div>
+      <button class="modal-close" onclick="closeModal('successModal')">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div style="font-size:var(--text-5xl); margin-bottom:var(--space-4);">✅</div>
+      <div style="font-size:var(--text-xl); font-weight:700; color:var(--text-primary); margin-bottom:var(--space-2);">Teşekkür ederiz!</div>
+      <div style="font-size:var(--text-sm); color:var(--text-muted); margin-bottom:var(--space-4);">
+        İşlem ID: <span id="receiptId" style="font-family:var(--font-mono); font-weight:600; color:var(--teal-400);">BP-20260516-0042</span>
+      </div>
+
+      <div class="receipt-preview" id="receiptPreview">
+        <h3>Le Barbier Royal</h3>
+        <div style="text-align:center; font-size:11px; color:#64748b; margin-bottom:12px;">
+          Rue de la Loi 42, 1040 Brüksel<br>
+          Tel: +32 2 123 45 67<br>
+          KVK: 0123.456.789
+        </div>
+        <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:8px 0; margin-bottom:8px;">
+          <div class="receipt-line"><span>16/05/2026 14:32</span><span>Kasa 1</span></div>
+          <div class="receipt-line"><span>İşlem:</span><span id="receiptTransactionId">BP-20260516-0042</span></div>
+        </div>
+        <div id="receiptItems"></div>
+        <div class="receipt-total" id="receiptTotals"></div>
+        <div style="text-align:center; margin-top:12px; font-size:11px; color:#64748b;">
+          Teşekkür ederiz, yine bekleriz!<br>
+          BarberPro POS v2.1
+        </div>
+      </div>
+
+      <div style="font-size:var(--text-sm); font-weight:600; color:var(--text-primary); margin-top:var(--space-4); margin-bottom:var(--space-2);">Fiş Gönder:</div>
+      <div class="receipt-options">
+        <div class="receipt-option" onclick="sendReceipt('whatsapp')">
+          <span class="emoji">💬</span>
+          <span class="label">WhatsApp</span>
+        </div>
+        <div class="receipt-option" onclick="sendReceipt('email')">
+          <span class="emoji">📧</span>
+          <span class="label">E-posta</span>
+        </div>
+        <div class="receipt-option" onclick="sendReceipt('print')">
+          <span class="emoji">🖨️</span>
+          <span class="label">Yazdır</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('successModal'); clearCart();">Yeni Satış</button>
+      <button class="btn btn-primary" onclick="closeModal('successModal')">Kapat</button>
+    </div>
+  </div>
+</div>
+
+<!-- X/Z Report Modal -->
+<div class="modal-overlay" id="reportModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title" id="reportModalTitle">📊 X Raporu</div>
+      <button class="modal-close" onclick="closeModal('reportModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="receipt-preview" id="reportPreview" style="max-width:100%;">
+        <h3>Le Barbier Royal</h3>
+        <div style="text-align:center; font-size:11px; color:#64748b; margin-bottom:12px;">
+          Rue de la Loi 42, 1040 Brüksel<br>
+          16 Mayıs 2026, Cumartesi
+        </div>
+        <div style="border-top:1px dashed #ccc; border-bottom:1px dashed #ccc; padding:8px 0; margin-bottom:8px; text-align:center; font-weight:700; font-size:14px;" id="reportTypeHeader">
+          X RAPORU — GÜN İÇİ OKUMA
+        </div>
+        <div id="reportContent"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('reportModal')">Kapat</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Yazdır</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Add Customer Modal -->
+<div class="modal-overlay" id="quickCustomerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🧑‍🤝‍🧑 Hızlı Müşteri Ekle</div>
+      <button class="modal-close" onclick="closeModal('quickCustomerModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Ad Soyad</label>
+        <input type="text" class="form-input" id="qcName" placeholder="örn. Thomas Janssens">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input type="tel" class="form-input" id="qcPhone" placeholder="+32 470 12 34 56">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-posta</label>
+        <input type="email" class="form-input" id="qcEmail" placeholder="ornek@email.com">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quickCustomerModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveQuickCustomer()">Müşteri Ekle</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const posItems = {
+  hizmetler: [
+    { id: 'h1', name: 'Saç Kesimi', price: 25, icon: '✂️', popular: true },
+    { id: 'h2', name: 'Saç + Sakal', price: 35, icon: '✂️', popular: true },
+    { id: 'h3', name: 'Sakal Düzeltme', price: 15, icon: '🪒' },
+    { id: 'h4', name: 'Boyama', price: 55, icon: '🎨', popular: true },
+    { id: 'h5', name: 'Röfle', price: 65, icon: '💫' },
+    { id: 'h6', name: 'Keratin', price: 85, icon: '💆‍♂️', popular: true },
+    { id: 'h7', name: 'Manikür', price: 20, icon: '💅' },
+    { id: 'h8', name: 'Pedikür', price: 25, icon: '🦶' },
+    { id: 'h9', name: 'Kaş Düzeltme', price: 10, icon: '👁️' },
+    { id: 'h10', name: 'Çocuk Saç', price: 18, icon: '👦' },
+    { id: 'h11', name: 'Fön', price: 20, icon: '💨' },
+    { id: 'h12', name: 'Traş', price: 18, icon: '🪒' },
+    { id: 'h13', name: 'Cilt Bakımı', price: 35, icon: '🧴' },
+    { id: 'h14', name: 'Ombre', price: 95, icon: '💇‍♀️' },
+    { id: 'h15', name: 'Perma', price: 55, icon: '〰️' },
+  ],
+  urunler: [
+    { id: 'u1', name: 'American Crew Wax', price: 22, icon: '🧴' },
+    { id: 'u2', name: 'Moroccanoil Şampuan', price: 24, icon: '🧴' },
+    { id: 'u3', name: 'Kerastase Maske', price: 32, icon: '🧴' },
+    { id: 'u4', name: 'Schwarzkopf Köpük', price: 18, icon: '🧴' },
+    { id: 'u5', name: 'Tigi Bed Head Sprey', price: 16, icon: '🧴' },
+    { id: 'u6', name: 'Wahl Trimmer Yağı', price: 12, icon: '🛠️' },
+    { id: 'u7', name: 'BarberPro Beard Oil', price: 19, icon: '🧴' },
+    { id: 'u8', name: 'Wella Şampuan', price: 18, icon: '🧴' },
+    { id: 'u9', name: 'Schwarzkopf Jöle', price: 12, icon: '🧴' },
+    { id: 'u10', name: 'Koleston Boya 6/1', price: 14, icon: '🎨' },
+    { id: 'u11', name: 'Keratin Serum', price: 35, icon: '💆‍♂️' },
+    { id: 'u12', name: 'Redken Wax', price: 21, icon: '🧴' },
+    { id: 'u13', name: 'L\'Oréal Clay', price: 17, icon: '🧴' },
+    { id: 'u14', name: 'BaByliss Pro', price: 45, icon: '🛠️' },
+    { id: 'u15', name: 'Wahl Magic Clip', price: 89, icon: '🛠️' },
+    { id: 'u16', name: 'Andis T-Outliner', price: 75, icon: '🛠️' },
+  ],
+  paketler: [
+    { id: 'p1', name: 'Damat Paketi', price: 120, icon: '🤵', badge: 'paket', desc: 'Saç + Sakal + Manikür + Cilt' },
+    { id: 'p2', name: 'VIP Bakım', price: 150, icon: '👑', badge: 'paket', desc: 'Keratin + Manikür + Pedikür + Cilt' },
+    { id: 'p3', name: 'Haftalık Bakım', price: 45, icon: '📅', badge: 'paket', desc: 'Traş + Kaş + Sakal düzeltme' },
+    { id: 'p4', name: 'Yıllık Üyelik', price: 999, icon: '💎', badge: 'paket', desc: 'Sınırsız saç kesimi + %15 indirim' },
+  ]
+};
+
+const dailyTransactions = [
+  { time: '09:05', item: 'Saç Kesimi', customer: 'Jean Dupont', staff: 'Mehmet K.', amount: 25, method: 'Nakit' },
+  { time: '09:12', item: 'Fön + Ürün', customer: 'Marie Dubois', staff: 'Ayşe D.', amount: 42, method: 'Kredi Kartı' },
+  { time: '09:28', item: 'Traş', customer: 'Pierre Vd Berghe', staff: 'Burak T.', amount: 18, method: 'Bancontact' },
+  { time: '09:45', item: 'Saç Boyama', customer: 'Sophie Laurent', staff: 'Can B.', amount: 70, method: 'Kredi Kartı' },
+  { time: '10:05', item: 'Saç + Sakal', customer: 'Lucas Peeters', staff: 'Mehmet K.', amount: 35, method: 'Nakit' },
+  { time: '10:15', item: 'Manikür + Ürün', customer: 'Emma Vermeulen', staff: 'Zeynep A.', amount: 38, method: 'Bancontact' },
+  { time: '10:35', item: 'Keratin Bakım', customer: 'Jan Martens', staff: 'Ayşe D.', amount: 85, method: 'Kredi Kartı' },
+  { time: '10:50', item: 'Sakal Düzeltme', customer: 'Claire Dubois', staff: 'Burak T.', amount: 15, method: 'Nakit' },
+  { time: '11:10', item: 'Perma', customer: 'Thomas Janssens', staff: 'Kemal S.', amount: 55, method: 'Kredi Kartı' },
+  { time: '11:25', item: 'Ombre', customer: 'Anaïs Lefebvre', staff: 'Can B.', amount: 95, method: 'Bancontact' },
+  { time: '11:40', item: 'Çocuk Saç + Ürün', customer: 'Björn De Vos', staff: 'Mehmet K.', amount: 32, method: 'Nakit' },
+  { time: '12:00', item: 'Pedikür', customer: 'Charlotte Peeters', staff: 'Damla R.', amount: 25, method: 'Kredi Kartı' },
+  { time: '12:30', item: 'Damat Paketi', customer: 'Willem Jacobs', staff: 'Mehmet K.', amount: 120, method: 'Kredi Kartı' },
+  { time: '12:55', item: 'Cilt Bakımı', customer: 'Elise Van Damme', staff: 'Zeynep A.', amount: 35, method: 'Bancontact' },
+  { time: '13:10', item: 'Traş + Ürün', customer: 'Dieter Claes', staff: 'Burak T.', amount: 30, method: 'Nakit' },
+  { time: '13:35', item: 'Saç Boyama', customer: 'Fiona Brouwers', staff: 'Can B.', amount: 70, method: 'Puan' },
+  { time: '13:50', item: 'VIP Bakım', customer: 'Gert Vermeiren', staff: 'Ayşe D.', amount: 150, method: 'Kredi Kartı' },
+  { time: '14:05', item: 'Manikür + Pedikür', customer: 'Isabelle De Smet', staff: 'Damla R.', amount: 43, method: 'Bancontact' },
+  { time: '14:15', item: 'American Crew Wax', customer: 'Jean Dupont', staff: '—', amount: 22, method: 'Nakit' },
+  { time: '14:22', item: 'Keratin Serum', customer: 'Sophie Laurent', staff: '—', amount: 35, method: 'Kredi Kartı' },
+  { time: '14:28', item: 'Saç Kesimi', customer: 'Marc Dubois', staff: 'Mehmet K.', amount: 25, method: 'Nakit' },
+  { time: '14:30', item: 'Haftalık Bakım', customer: 'Emma Vermeulen', staff: 'Burak T.', amount: 45, method: 'Bancontact' },
+  { time: '14:32', item: 'Röfle', customer: 'Lucas Peeters', staff: 'Can B.', amount: 65, method: 'Kredi Kartı' },
+];
+
+const customerPoints = {
+  walkin: 0,
+  jean: 320,
+  sophie: 580,
+  marc: 150,
+  emma: 45,
+  lucas: 290
+};
+
+// ===== STATE =====
+let cart = [];
+let currentTab = 'hizmetler';
+let currentPayment = 'nakit';
+let discountAmount = 0;
+let tipAmount = 0;
+let usePointsAmount = 0;
+
+// ===== RENDER PRODUCT GRID =====
+function renderPosGrid(tab, filter = '') {
+  const grid = document.getElementById('posGrid');
+  const items = posItems[tab] || [];
+  const filtered = filter
+    ? items.filter(i => i.name.toLowerCase().includes(filter.toLowerCase()))
+    : items;
+
+  grid.innerHTML = filtered.map(item => `
+    <div class="pos-item" onclick="addToCart('${item.id}', '${tab}')" title="${item.desc || item.name}">
+      ${item.badge ? `<span class="pos-item-badge ${item.badge}">${item.badge === 'paket' ? 'PAKET' : 'POPÜLER'}</span>` : ''}
+      ${item.popular && !item.badge ? `<span class="pos-item-badge populer">POPÜLER</span>` : ''}
+      <div class="pos-item-icon">${item.icon}</div>
+      <div class="pos-item-name">${item.name}</div>
+      <div class="pos-item-price">€${item.price}</div>
+    </div>
+  `).join('');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1; text-align:center; padding:var(--space-10); color:var(--text-muted);">
+        <div style="font-size:var(--text-3xl); margin-bottom:var(--space-3);">🔍</div>
+        <div style="font-size:var(--text-sm);">Sonuç bulunamadı</div>
+      </div>
+    `;
+  }
+}
+
+function switchPosTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.pos-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.pos-tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('posSearch').value = '';
+  renderPosGrid(tab);
+}
+
+function filterPosItems(query) {
+  renderPosGrid(currentTab, query);
+}
+
+// ===== CART =====
+function addToCart(id, category) {
+  const item = posItems[category].find(i => i.id === id);
+  if (!item) return;
+
+  const existing = cart.find(c => c.id === id && c.category === category);
+  if (existing) {
+    existing.qty++;
+  } else {
+    cart.push({ ...item, category, qty: 1 });
+  }
+
+  renderCart();
+  bumpCart();
+  showToast(`${item.name} sepete eklendi`, 'success');
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+function updateQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) {
+    cart.splice(index, 1);
+  }
+  renderCart();
+}
+
+function renderCart() {
+  const body = document.getElementById('cartBody');
+  const count = document.getElementById('cartCount');
+
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <div class="pos-cart-empty">
+        <div class="pos-cart-empty-icon">🛒</div>
+        <div style="font-size:var(--text-sm); font-weight:600; margin-bottom:4px;">Sepetiniz boş</div>
+        <div style="font-size:var(--text-xs);">Sol panelden ürün veya hizmet ekleyin</div>
+      </div>
+    `;
+    count.textContent = '0 ürün';
+    updateTotals();
+    return;
+  }
+
+  const totalItems = cart.reduce((s, c) => s + c.qty, 0);
+  count.textContent = `${totalItems} ürün`;
+
+  body.innerHTML = cart.map((item, idx) => `
+    <div class="pos-cart-item">
+      <div class="pos-cart-item-info">
+        <div class="pos-cart-item-name">${item.name}</div>
+        <div class="pos-cart-item-meta">€${item.price} / adet</div>
+      </div>
+      <div class="pos-cart-item-qty">
+        <button class="pos-qty-btn" onclick="updateQty(${idx}, -1)">−</button>
+        <span style="font-size:var(--text-sm); font-weight:600; min-width:24px; text-align:center;">${item.qty}</span>
+        <button class="pos-qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+      </div>
+      <div class="pos-cart-item-price">€${(item.price * item.qty).toFixed(2)}</div>
+      <button class="pos-cart-item-del" onclick="removeFromCart(${idx})">🗑️</button>
+    </div>
+  `).join('');
+
+  updateTotals();
+}
+
+function updateTotals() {
+  const subtotal = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+  const kdv = subtotal * 0.21;
+  const total = subtotal + kdv - discountAmount + tipAmount - usePointsAmount;
+
+  document.getElementById('cartSubtotal').textContent = `€${subtotal.toFixed(2)}`;
+  document.getElementById('cartKDV').textContent = `€${kdv.toFixed(2)}`;
+  document.getElementById('cartDiscount').textContent = discountAmount > 0 ? `-€${discountAmount.toFixed(2)}` : '-€0,00';
+  document.getElementById('cartTip').textContent = tipAmount > 0 ? `€${tipAmount.toFixed(2)}` : '€0,00';
+  document.getElementById('cartTotal').textContent = `€${Math.max(0, total).toFixed(2)}`;
+
+  // Update change section
+  calculateChange();
+}
+
+function bumpCart() {
+  const cartEl = document.getElementById('posCart');
+  cartEl.classList.add('cart-bump');
+  setTimeout(() => cartEl.classList.remove('cart-bump'), 350);
+}
+
+function clearCart() {
+  cart = [];
+  discountAmount = 0;
+  tipAmount = 0;
+  usePointsAmount = 0;
+  document.getElementById('cartNotes').value = '';
+  document.getElementById('cartAppointment').value = '';
+  document.getElementById('usePoints').checked = false;
+  renderCart();
+  showToast('Sepet temizlendi', 'info');
+}
+
+// ===== CUSTOMER =====
+function onCustomerChange() {
+  const customer = document.getElementById('cartCustomer').value;
+  const points = customerPoints[customer] || 0;
+  const pointsEl = document.getElementById('customerPoints');
+  const toggleEl = document.getElementById('pointsToggle');
+
+  if (points > 0) {
+    pointsEl.textContent = `€${points} puan`;
+    toggleEl.style.display = 'flex';
+  } else {
+    pointsEl.textContent = '—';
+    toggleEl.style.display = 'none';
+    document.getElementById('usePoints').checked = false;
+    usePointsAmount = 0;
+  }
+  updateTotals();
+}
+
+function togglePoints() {
+  const customer = document.getElementById('cartCustomer').value;
+  const points = customerPoints[customer] || 0;
+  const checked = document.getElementById('usePoints').checked;
+
+  if (checked) {
+    usePointsAmount = Math.min(points, parseFloat(document.getElementById('cartTotal').textContent.replace('€', '').replace(',', '.')) || 0);
+  } else {
+    usePointsAmount = 0;
+  }
+  updateTotals();
+}
+
+function quickAddCustomer() {
+  openModal('quickCustomerModal');
+}
+
+function saveQuickCustomer() {
+  const name = document.getElementById('qcName').value || 'Yeni Müşteri';
+  closeModal('quickCustomerModal');
+  showToast(`${name} eklendi`, 'success');
+  // Add to select
+  const select = document.getElementById('cartCustomer');
+  const option = document.createElement('option');
+  option.value = 'new_' + Date.now();
+  option.textContent = name + ' — Yeni';
+  select.appendChild(option);
+  select.value = option.value;
+  onCustomerChange();
+}
+
+// ===== PAYMENT =====
+function selectPayment(method) {
+  currentPayment = method;
+  document.querySelectorAll('.pos-pay-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.pos-pay-btn[data-method="${method}"]`).classList.add('active');
+
+  // Show/hide split payment
+  const splitEl = document.getElementById('splitPayment');
+  if (method === 'puan') {
+    splitEl.style.display = 'none';
+    document.getElementById('changeSection').style.display = 'none';
+  } else if (method === 'nakit') {
+    splitEl.style.display = 'none';
+    document.getElementById('changeSection').style.display = 'block';
+  } else {
+    splitEl.style.display = 'block';
+    document.getElementById('changeSection').style.display = 'none';
+  }
+}
+
+function calculateSplit() {
+  const total = parseFloat(document.getElementById('cartTotal').textContent.replace('€', '').replace(',', '.')) || 0;
+  const cash = parseFloat(document.getElementById('splitCash').value) || 0;
+  const card = parseFloat(document.getElementById('splitCard').value) || 0;
+  const bc = parseFloat(document.getElementById('splitBancontact').value) || 0;
+  const remaining = total - cash - card - bc;
+  const remEl = document.getElementById('splitRemaining');
+  remEl.textContent = `€${remaining.toFixed(2)}`;
+  remEl.style.color = remaining <= 0.01 ? 'var(--success-500)' : 'var(--error-500)';
+}
+
+function calculateChange() {
+  const total = parseFloat(document.getElementById('cartTotal').textContent.replace('€', '').replace(',', '.')) || 0;
+  const given = parseFloat(document.getElementById('cashGiven').value) || 0;
+  const change = given - total;
+  const changeEl = document.getElementById('changeAmount');
+  changeEl.textContent = change >= 0 ? `€${change.toFixed(2)}` : '€0,00';
+  changeEl.style.color = change >= 0 ? 'var(--success-500)' : 'var(--error-500)';
+}
+
+// ===== COMPLETE SALE =====
+function completeSale() {
+  if (cart.length === 0) {
+    showToast('Sepet boş! Önce ürün ekleyin.', 'error');
+    return;
+  }
+
+  const total = document.getElementById('cartTotal').textContent;
+  const id = 'BP-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*900)+100).padStart(3,'0');
+
+  document.getElementById('receiptId').textContent = id;
+
+  // Build receipt items
+  const receiptItems = cart.map(c => `
+    <div class="receipt-line"><span>${c.qty}x ${c.name}</span><span>€${(c.price * c.qty).toFixed(2)}</span></div>
+  `).join('');
+
+  const subtotal = cart.reduce((s, c) => s + (c.price * c.qty), 0);
+  const kdv = subtotal * 0.21;
+
+  document.getElementById('receiptItems').innerHTML = receiptItems;
+  document.getElementById('receiptTotals').innerHTML = `
+    <div class="receipt-line"><span>Ara Toplam</span><span>€${subtotal.toFixed(2)}</span></div>
+    <div class="receipt-line"><span>KDV %21</span><span>€${kdv.toFixed(2)}</span></div>
+    ${discountAmount > 0 ? `<div class="receipt-line"><span>İndirim</span><span>-€${discountAmount.toFixed(2)}</span></div>` : ''}
+    ${tipAmount > 0 ? `<div class="receipt-line"><span>Bahşiş</span><span>€${tipAmount.toFixed(2)}</span></div>` : ''}
+    ${usePointsAmount > 0 ? `<div class="receipt-line"><span>Puan</span><span>-€${usePointsAmount.toFixed(2)}</span></div>` : ''}
+    <div class="receipt-line receipt-total"><span>TOPLAM</span><span>${total}</span></div>
+    <div class="receipt-line"><span>Ödeme</span><span>${currentPayment === 'nakit' ? 'Nakit' : currentPayment === 'kredi' ? 'Kredi Kartı' : currentPayment === 'bancontact' ? 'Bancontact' : 'Puan'}</span></div>
+  `;
+
+  openModal('successModal');
+
+  // Add to daily summary (simulated)
+  const customerName = document.getElementById('cartCustomer').options[document.getElementById('cartCustomer').selectedIndex].text.split('—')[0].trim();
+  const mainItem = cart[0].name;
+  dailyTransactions.push({
+    time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+    item: mainItem,
+    customer: customerName,
+    staff: 'Ahmet Y.',
+    amount: parseFloat(total.replace('€', '').replace(',', '.')),
+    method: currentPayment === 'nakit' ? 'Nakit' : currentPayment === 'kredi' ? 'Kredi Kartı' : currentPayment === 'bancontact' ? 'Bancontact' : 'Puan'
+  });
+  renderDailyTable();
+}
+
+function saveDraft() {
+  if (cart.length === 0) {
+    showToast('Sepet boş!', 'error');
+    return;
+  }
+  showToast('Taslak kaydedildi', 'info');
+}
+
+function sendReceipt(method) {
+  const methods = { whatsapp: 'WhatsApp', email: 'E-posta', print: 'Yazıcı' };
+  showToast(`Fiş ${methods[method]} gönderildi`, 'success');
+}
+
+// ===== DAILY SUMMARY =====
+function toggleDailySummary() {
+  document.getElementById('dailySummary').classList.toggle('open');
+}
+
+function openDailySummary() {
+  document.getElementById('dailySummary').classList.add('open');
+  document.getElementById('dailySummary').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderDailyTable() {
+  const tbody = document.getElementById('dailyTableBody');
+  tbody.innerHTML = dailyTransactions.map(t => `
+    <tr>
+      <td>${t.time}</td>
+      <td>${t.item}</td>
+      <td>${t.customer}</td>
+      <td>${t.staff}</td>
+      <td style="text-align:right; font-weight:600; color:var(--teal-400);">€${t.amount.toFixed(2)}</td>
+      <td><span class="badge badge-neutral">${t.method}</span></td>
+    </tr>
+  `).join('');
+
+  // Update stats
+  const totalRevenue = dailyTransactions.reduce((s, t) => s + t.amount, 0);
+  const cashTotal = dailyTransactions.filter(t => t.method === 'Nakit').reduce((s, t) => s + t.amount, 0);
+  const cardTotal = dailyTransactions.filter(t => t.method === 'Kredi Kartı' || t.method === 'Bancontact').reduce((s, t) => s + t.amount, 0);
+
+  document.getElementById('dailyTransCount').textContent = dailyTransactions.length;
+  document.getElementById('dailyRevenue').textContent = `€${totalRevenue.toLocaleString('tr-TR')}`;
+  document.getElementById('dailyCash').textContent = `€${Math.round(cashTotal)}`;
+  document.getElementById('dailyCard').textContent = `€${Math.round(cardTotal)}`;
+}
+
+function printXZReport(type) {
+  const isZ = type === 'Z';
+  document.getElementById('reportModalTitle').textContent = isZ ? '🔒 Z Raporu — Gün Kapat' : '📊 X Raporu';
+  document.getElementById('reportTypeHeader').textContent = isZ ? 'Z RAPORU — GÜN KAPATMA' : 'X RAPORU — GÜN İÇİ OKUMA';
+
+  const totalRevenue = dailyTransactions.reduce((s, t) => s + t.amount, 0);
+  const cashTotal = dailyTransactions.filter(t => t.method === 'Nakit').reduce((s, t) => s + t.amount, 0);
+  const cardTotal = dailyTransactions.filter(t => t.method === 'Kredi Kartı').reduce((s, t) => s + t.amount, 0);
+  const bcTotal = dailyTransactions.filter(t => t.method === 'Bancontact').reduce((s, t) => s + t.amount, 0);
+  const puanTotal = dailyTransactions.filter(t => t.method === 'Puan').reduce((s, t) => s + t.amount, 0);
+
+  document.getElementById('reportContent').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div class="receipt-line"><span>İşlem Sayısı</span><span>${dailyTransactions.length}</span></div>
+      <div class="receipt-line"><span>Toplam Ciro</span><span>€${totalRevenue.toFixed(2)}</span></div>
+    </div>
+    <div style="border-top:1px dashed #ccc; padding-top:8px; margin-bottom:12px;">
+      <div style="font-weight:700; margin-bottom:4px;">Ödeme Dağılımı</div>
+      <div class="receipt-line"><span>💶 Nakit</span><span>€${cashTotal.toFixed(2)}</span></div>
+      <div class="receipt-line"><span>💳 Kredi Kartı</span><span>€${cardTotal.toFixed(2)}</span></div>
+      <div class="receipt-line"><span>📱 Bancontact</span><span>€${bcTotal.toFixed(2)}</span></div>
+      <div class="receipt-line"><span>🔄 Puan</span><span>€${puanTotal.toFixed(2)}</span></div>
+    </div>
+    <div style="border-top:1px dashed #ccc; padding-top:8px; margin-bottom:12px;">
+      <div style="font-weight:700; margin-bottom:4px;">KDV Özeti</div>
+      <div class="receipt-line"><span>KDV %21 Matrah</span><span>€${(totalRevenue / 1.21).toFixed(2)}</span></div>
+      <div class="receipt-line"><span>KDV Tutarı</span><span>€${(totalRevenue - totalRevenue / 1.21).toFixed(2)}</span></div>
+    </div>
+    <div style="border-top:2px dashed #ccc; padding-top:8px;">
+      <div class="receipt-line receipt-total"><span>GENEL TOPLAM</span><span>€${totalRevenue.toFixed(2)}</span></div>
+    </div>
+    ${isZ ? `<div style="margin-top:16px; text-align:center; font-weight:700; color:#dc2626;">✓ GÜN KAPATILDI<br>Yeni gün başlatıldı</div>` : ''}
+  `;
+
+  openModal('reportModal');
+  if (isZ) {
+    showToast('Gün kapatıldı. Yeni güne geçildi.', 'success');
+  }
+}
+
+// ===== MODAL UTILS =====
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close on overlay click / ESC
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) overlay.classList.remove('active');
+  });
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+});
+
+// ===== TOAST =====
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+    <div class="toast-content">
+      <div class="toast-message">${message}</div>
+    </div>
+    <span class="toast-close" onclick="this.parentElement.remove()">✕</span>
+    <div class="toast-progress"></div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('exit');
+    setTimeout(() => toast.remove(), 350);
+  }, 4000);
+}
+
+// ===== SIDEBAR =====
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('mobile-open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+}
+
+// ===== NOTIFICATIONS =====
+function showNotifications() {
+  document.getElementById('notificationsPanel').classList.toggle('open');
+}
+
+// ===== THEME =====
+function toggleTheme() {
+  const html = document.documentElement;
+  html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  renderPosGrid('hizmetler');
+  renderCart();
+  renderDailyTable();
+  onCustomerChange();
+
+  // Set current time
+  const now = new Date();
+  document.getElementById('cartTime').textContent = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+});
+</script>
+
+</body>
+</html>

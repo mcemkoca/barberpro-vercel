@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — Personel Vardiya Planı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<style>
+/* ── Purple/Teal Theme Overrides ── */
+:root,[data-theme="dark"]{--shadow-glow:rgba(139,92,246,0.25);}
+[data-theme="dark"]::selection{background:var(--teal-700);color:var(--teal-100);}
+.sidebar-brand-icon{background:linear-gradient(135deg,var(--teal-500),var(--teal-700))!important;}
+.sidebar-link.active{background:linear-gradient(135deg,var(--teal-500),var(--teal-600))!important;}
+
+/* ── Shift Page Specific Styles ── */
+.shift-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4);margin-bottom:var(--space-6);}
+@media(max-width:1024px){.shift-summary-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.shift-summary-grid{grid-template-columns:1fr;}}
+
+/* ── Weekly Shift Calendar ── */
+.shift-calendar-wrap{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-6);}
+.shift-cal-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--border-color);flex-wrap:wrap;gap:var(--space-3);}
+.shift-cal-title{font-size:var(--text-lg);font-weight:600;display:flex;align-items:center;gap:var(--space-2);}
+.shift-cal-nav{display:flex;align-items:center;gap:var(--space-2);}
+.shift-cal-nav-btn{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--text-muted);background:var(--bg-secondary);border:none;cursor:pointer;transition:all var(--duration-fast);}
+.shift-cal-nav-btn:hover{color:#fff;background:linear-gradient(135deg,var(--teal-500),var(--teal-600));}
+.shift-cal-week{font-weight:600;color:var(--text-primary);font-size:var(--text-sm);min-width:180px;text-align:center;}
+
+/* Calendar Grid */
+.shift-cal-grid{display:grid;grid-template-columns:200px repeat(7,1fr);gap:1px;background:var(--border-color);}
+.shift-cal-grid-header{display:contents;}
+.shift-cal-header-cell{background:var(--bg-secondary);padding:var(--space-3) var(--space-2);text-align:center;font-size:var(--text-xs);font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;}
+.shift-cal-header-cell:first-child{text-align:left;padding-left:var(--space-4);}
+.shift-cal-row{display:contents;}
+.shift-cal-staff{background:var(--bg-card);padding:var(--space-3) var(--space-4);display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-sm);font-weight:500;color:var(--text-primary);border-bottom:1px solid var(--border-color);}
+.shift-cal-staff-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:700;color:#fff;flex-shrink:0;}
+.shift-cal-staff-info{min-width:0;}
+.shift-cal-staff-name{font-weight:600;font-size:var(--text-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.shift-cal-staff-role{font-size:10px;color:var(--text-muted);margin-top:1px;}
+
+.shift-cal-cell{background:var(--bg-card);padding:var(--space-2);min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all var(--duration-fast);position:relative;border-bottom:1px solid var(--border-color);}
+.shift-cal-cell:hover{background:var(--bg-tertiary);transform:scale(1.02);z-index:2;box-shadow:var(--shadow-md);}
+.shift-cal-cell.empty-slot{border:2px dashed var(--error-500);background:rgba(244,63,94,0.05);}
+.shift-cal-cell.empty-slot::after{content:"—";color:var(--error-500);font-size:var(--text-lg);font-weight:300;}
+.shift-cal-cell.leave{background:rgba(245,158,11,0.12);border-left:3px solid var(--amber-500);}
+.shift-cal-cell.leave .shift-time{color:var(--amber-400);font-weight:600;}
+.shift-cal-cell.leave .shift-label{color:var(--amber-500);font-size:10px;}
+.shift-cal-cell.full-shift{background:linear-gradient(135deg,rgba(20,184,166,0.15),rgba(139,92,246,0.1));}
+.shift-cal-cell.full-shift .shift-time{color:var(--teal-400);font-weight:600;}
+.shift-cal-cell.half-shift{background:rgba(20,184,166,0.06);}
+.shift-cal-cell.half-shift .shift-time{color:var(--teal-300);font-weight:500;}
+.shift-cal-cell.short-shift{background:rgba(139,92,246,0.06);}
+.shift-cal-cell.short-shift .shift-time{color:#a78bfa;font-weight:500;}
+.shift-time{font-size:11px;}
+.shift-hours{font-size:10px;color:var(--text-muted);}
+
+/* ── Leave Requests Panel ── */
+.leave-panel{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6);}
+@media(max-width:1024px){.leave-panel{grid-template-columns:1fr;}}
+.leave-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-5);}
+.leave-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);}
+.leave-card-title{font-size:var(--text-base);font-weight:600;}
+.leave-list{display:flex;flex-direction:column;gap:var(--space-3);}
+.leave-item{display:flex;align-items:flex-start;gap:var(--space-3);padding:var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);border:1px solid transparent;transition:all var(--duration-fast);cursor:pointer;}
+.leave-item:hover{border-color:var(--slate-300);}
+.leave-item.expanded{background:var(--bg-tertiary);}
+.leave-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:700;color:#fff;flex-shrink:0;}
+.leave-content{flex:1;min-width:0;}
+.leave-top{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);}
+.leave-name{font-size:var(--text-sm);font-weight:600;color:var(--text-primary);}
+.leave-dates{font-size:var(--text-xs);color:var(--text-muted);margin-top:2px;}
+.leave-type{font-size:var(--text-xs);padding:2px 8px;border-radius:9999px;font-weight:600;}
+.leave-type-yillik{background:rgba(59,130,246,0.15);color:#3b82f6;}
+.leave-type-hastalik{background:rgba(244,63,94,0.15);color:var(--error-500);}
+.leave-type-kisisel{background:rgba(139,92,246,0.15);color:#a78bfa;}
+.leave-type-egitim{background:rgba(16,185,129,0.15);color:var(--success-500);}
+.leave-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);}
+.leave-btn{padding:4px 12px;border-radius:var(--radius-sm);font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer;transition:all var(--duration-fast);}
+.leave-btn-approve{background:var(--success-500);color:#fff;}
+.leave-btn-approve:hover{background:#059669;}
+.leave-btn-reject{background:var(--error-500);color:#fff;}
+.leave-btn-reject:hover{background:#e11d48;}
+.leave-detail{padding:var(--space-3);margin-top:var(--space-2);background:var(--bg-card);border-radius:var(--radius-md);font-size:var(--text-xs);color:var(--text-secondary);border:1px solid var(--border-color);display:none;}
+.leave-item.expanded .leave-detail{display:block;}
+.leave-detail-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-color);}
+.leave-detail-row:last-child{border-bottom:none;}
+
+/* ── Weekly Hours Summary ── */
+.hours-table-wrap{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:var(--space-6);}
+.hours-table{width:100%;border-collapse:collapse;font-size:var(--text-sm);}
+.hours-table thead th{background:var(--bg-secondary);padding:var(--space-3) var(--space-4);text-align:left;font-weight:600;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);white-space:nowrap;position:sticky;top:0;z-index:5;cursor:pointer;user-select:none;}
+.hours-table thead th::after{content:'⇅';margin-left:6px;opacity:0.4;font-size:10px;}
+.hours-table thead th.asc::after{content:'↑';opacity:1;}
+.hours-table thead th.desc::after{content:'↓';opacity:1;}
+.hours-table tbody tr{border-bottom:1px solid var(--border-color);transition:background var(--duration-fast);}
+.hours-table tbody tr:last-child{border-bottom:none;}
+.hours-table tbody tr:hover{background:var(--bg-secondary);}
+.hours-table tbody td{padding:var(--space-3) var(--space-4);color:var(--text-primary);vertical-align:middle;}
+.hours-table .cell-name{display:flex;align-items:center;gap:var(--space-3);}
+.hours-table .cell-name-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.hours-over{color:var(--success-500);font-weight:600;}
+.hours-under{color:var(--error-500);font-weight:600;}
+.hours-ok{color:var(--text-secondary);}
+
+/* ── Capacity Alerts ── */
+.capacity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-6);}
+@media(max-width:1024px){.capacity-grid{grid-template-columns:1fr;}}
+.capacity-card{padding:var(--space-4);border-radius:var(--radius-lg);border:1px solid var(--border-color);background:var(--bg-card);display:flex;align-items:flex-start;gap:var(--space-3);transition:all var(--duration-fast);}
+.capacity-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
+.capacity-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:var(--text-lg);flex-shrink:0;}
+.capacity-card.warning .capacity-icon{background:rgba(249,115,22,0.15);color:var(--warning-500);}
+.capacity-card.success .capacity-icon{background:rgba(16,185,129,0.15);color:var(--success-500);}
+.capacity-card.info .capacity-icon{background:rgba(59,130,246,0.15);color:var(--info-500);}
+.capacity-content{flex:1;}
+.capacity-title{font-size:var(--text-sm);font-weight:600;color:var(--text-primary);margin-bottom:2px;}
+.capacity-desc{font-size:var(--text-xs);color:var(--text-muted);line-height:1.4;}
+
+/* ── Modals ── */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:var(--space-4);opacity:0;visibility:hidden;transition:opacity var(--duration-normal),visibility var(--duration-normal);}
+.modal-overlay.active{opacity:1;visibility:visible;}
+.modal{background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-xl);width:100%;max-width:560px;max-height:90vh;overflow:auto;transform:scale(0.95) translateY(20px);opacity:0;transition:transform var(--duration-slow) var(--ease-spring),opacity var(--duration-slow);box-shadow:var(--shadow-xl);}
+.modal-overlay.active .modal{transform:scale(1) translateY(0);opacity:1;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-card);z-index:5;}
+.modal-title{font-size:var(--text-lg);font-weight:600;}
+.modal-close{width:32px;height:32px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:all var(--duration-fast);background:var(--bg-secondary);border:none;cursor:pointer;}
+.modal-close:hover{background:var(--error-100);color:var(--error-500);}
+.modal-body{padding:var(--space-6);}
+.modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:var(--space-3);padding:var(--space-4) var(--space-6);border-top:1px solid var(--border-color);background:var(--bg-secondary);border-radius:0 0 var(--radius-xl) var(--radius-xl);}
+
+/* Multi-select staff list */
+.staff-multi-list{display:flex;flex-direction:column;gap:var(--space-2);max-height:240px;overflow-y:auto;padding:var(--space-2);background:var(--bg-secondary);border-radius:var(--radius-md);}
+.staff-multi-item{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);border-radius:var(--radius-md);cursor:pointer;transition:all var(--duration-fast);border:1.5px solid transparent;}
+.staff-multi-item:hover{background:var(--bg-tertiary);}
+.staff-multi-item.selected{border-color:var(--teal-500);background:rgba(139,92,246,0.08);}
+.staff-multi-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+
+/* Template pills */
+.template-pills{display:flex;gap:var(--space-2);flex-wrap:wrap;}
+.template-pill{padding:8px 14px;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:all var(--duration-fast);border:1.5px solid var(--border-color);background:var(--bg-card);color:var(--text-secondary);}
+.template-pill:hover{border-color:var(--teal-500);color:var(--text-primary);}
+.template-pill.active{background:linear-gradient(135deg,var(--teal-500),var(--teal-600));color:#fff;border-color:transparent;}
+
+/* Role badges inline */
+.role-badge-inline{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:600;}
+.role-badge-usta{background:rgba(139,92,246,0.15);color:#2dd4bf;}
+.role-badge-colorist{background:rgba(236,72,153,0.15);color:#ec4899;}
+.role-badge-kuafor{background:rgba(59,130,246,0.15);color:#3b82f6;}
+.role-badge-manikurcu{background:rgba(245,158,11,0.15);color:#f59e0b;}
+.role-badge-kasiyer{background:rgba(239,68,68,0.15);color:#ef4444;}
+.role-badge-asistan{background:rgba(16,185,129,0.15);color:#10b981;}
+
+/* Quick actions bar */
+.quick-actions-bar{display:flex;gap:var(--space-3);flex-wrap:wrap;padding:var(--space-4);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);margin-bottom:var(--space-6);}
+.quick-action-btn{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);background:var(--bg-secondary);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;color:var(--text-primary);transition:all var(--duration-fast);cursor:pointer;border:1px solid transparent;}
+.quick-action-btn:hover{background:linear-gradient(135deg,var(--teal-500),var(--teal-600));color:#fff;transform:translateY(-2px);box-shadow:var(--shadow-glow-sm);}
+
+/* Toast */
+.toast-container{position:fixed;top:var(--space-6);right:var(--space-6);z-index:2000;display:flex;flex-direction:column;gap:var(--space-3);pointer-events:none;max-width:400px;}
+.toast{pointer-events:all;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--space-4);display:flex;align-items:flex-start;gap:var(--space-3);box-shadow:var(--shadow-lg);animation:toastIn var(--duration-normal) var(--ease-out) forwards;position:relative;overflow:hidden;}
+.toast-success{border-color:var(--success-500);}
+.toast-error{border-color:var(--error-500);}
+.toast-warning{border-color:var(--warning-500);}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px) scale(0.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+.toast-title{font-weight:600;font-size:var(--text-sm);}
+.toast-message{font-size:var(--text-sm);color:var(--text-secondary);margin-top:2px;}
+
+/* Responsive */
+@media(max-width:1024px){
+.shift-cal-grid{grid-template-columns:160px repeat(7,1fr);}
+.shift-cal-staff{padding:var(--space-2) var(--space-2);}
+}
+@media(max-width:768px){
+.shift-cal-grid{grid-template-columns:120px repeat(7,1fr);font-size:10px;}
+.shift-cal-staff-name{font-size:10px;}
+.shift-cal-cell{min-height:56px;padding:var(--space-1);}
+.shift-time{font-size:9px;}
+}
+</style>
+</head>
+<body data-theme="dark">
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">B</div>
+    <span class="sidebar-brand-text">BarberPro</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Ana Menü</div>
+      <a class="sidebar-link" href="barberpro-dashboard.html"><span class="icon">📊</span><span class="sidebar-text">Dashboard</span></a>
+      <a class="sidebar-link" href="barberpro-appointments.html"><span class="icon">📅</span><span class="sidebar-text">Randevular</span></a>
+      <a class="sidebar-link" href="barberpro-customers.html"><span class="icon">👥</span><span class="sidebar-text">Müşteriler</span><span class="badge" style="margin-left:auto">142</span></a>
+      <a class="sidebar-link" href="barberpro-services.html"><span class="icon">✂️</span><span class="sidebar-text">Hizmetler</span></a>
+      <a class="sidebar-link" href="barberpro-staff.html"><span class="icon">🧑‍💼</span><span class="sidebar-text">Personel</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operasyon</div>
+      <a class="sidebar-link active" href="barberpro-shifts.html"><span class="icon">🕐</span><span class="sidebar-text">Vardiyalar</span><span class="badge badge-warning">3</span></a>
+      <a class="sidebar-link" href="barberpro-inventory.html"><span class="icon">📦</span><span class="sidebar-text">Envanter</span></a>
+      <a class="sidebar-link" href="barberpro-reports.html"><span class="icon">📈</span><span class="sidebar-text">Raporlar</span></a>
+      <a class="sidebar-link" href="barberpro-marketing.html"><span class="icon">📣</span><span class="sidebar-text">Pazarlama</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Sistem</div>
+      <a class="sidebar-link" href="barberpro-settings.html"><span class="icon">⚙️</span><span class="sidebar-text">Ayarlar</span></a>
+      <a class="sidebar-link" href="barberpro-help.html"><span class="icon">❓</span><span class="sidebar-text">Yardım</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div style="display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3);background:var(--bg-secondary);border-radius:var(--radius-md);">
+      <div class="avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">AD</div>
+      <div style="overflow:hidden;">
+        <div style="font-size:var(--text-sm);font-weight:600;white-space:nowrap;">Ahmet Demir</div>
+        <div style="font-size:var(--text-xs);color:var(--text-muted);white-space:nowrap;">Salon Yöneticisi</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main" id="main">
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn mobile-visible" onclick="toggleSidebar()" aria-label="Menü">☰</button>
+      <div>
+        <div class="header-title">Personel Vardiya Planı</div>
+        <div class="header-breadcrumb">BarberPro / Vardiyalar</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-btn" onclick="showNotifications()" aria-label="Bildirimler">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <button class="header-btn" onclick="toggleTheme()" aria-label="Tema">🌙</button>
+      <div class="header-avatar" style="background:linear-gradient(135deg,#14b8a6,#0d9488);">AD</div>
+    </div>
+  </header>
+
+  <div class="page">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">🕐 Personel Vardiya Planı</div>
+        <div class="page-subtitle">12 personel · 19-25 Mayıs 2026 · Kapalı gün: Pazar</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary" onclick="openModal('createShiftModal')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Vardiya Oluştur
+        </button>
+        <button class="btn btn-secondary" onclick="exportShifts()">📥 Dışa Aktar</button>
+      </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions-bar">
+      <div class="quick-action-btn" onclick="openModal('createShiftModal')">➕ Yeni Vardiya</div>
+      <div class="quick-action-btn" onclick="scrollToSection('leaveSection')">📝 İzin Talepleri</div>
+      <div class="quick-action-btn" onclick="scrollToSection('hoursSection')">📊 Saat Özeti</div>
+      <div class="quick-action-btn" onclick="scrollToSection('capacitySection')">⚠️ Kapasite Uyarıları</div>
+      <div class="quick-action-btn" onclick="autoFillWeekend()">🔄 Hafta Sonu Otomatik</div>
+    </div>
+
+    <!-- Top Summary -->
+    <div class="shift-summary-grid">
+      <div class="card stat-card">
+        <div class="stat-icon" style="background:rgba(139,92,246,0.15);color:var(--teal-400);">🕐</div>
+        <div class="stat-value">48</div>
+        <div class="stat-label">Bu Hafta Toplam Vardiya</div>
+        <div class="stat-change up">↑ 4 geçen haftaya göre</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:var(--success-500);">🏖️</div>
+        <div class="stat-value">Pazar</div>
+        <div class="stat-label">Kapalı Gün</div>
+        <div class="stat-change down">12 personel izinli</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon" style="background:rgba(244,63,94,0.15);color:var(--error-500);">⚠️</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Boş Slot Uyarısı</div>
+        <div class="stat-change down">Eksik personel tespit edildi</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--amber-500);">📝</div>
+        <div class="stat-value">3</div>
+        <div class="stat-label">Onay Bekleyen İzin</div>
+        <div class="stat-change up">1 yeni talep</div>
+      </div>
+    </div>
+
+    <!-- Weekly Shift Calendar -->
+    <div class="shift-calendar-wrap">
+      <div class="shift-cal-header">
+        <div class="shift-cal-title">📅 Haftalık Vardiya Takvimi</div>
+        <div class="shift-cal-nav">
+          <button class="shift-cal-nav-btn" onclick="changeWeek(-1)">‹</button>
+          <div class="shift-cal-week" id="weekLabel">19-25 Mayıs 2026</div>
+          <button class="shift-cal-nav-btn" onclick="changeWeek(1)">›</button>
+          <button class="shift-cal-nav-btn" style="margin-left:var(--space-2);" onclick="resetWeek()" title="Bugün">📍</button>
+        </div>
+      </div>
+      <div class="shift-cal-grid" id="shiftCalendarGrid">
+        <!-- JS populates this -->
+      </div>
+    </div>
+
+    <!-- Leave Requests + Hours Summary -->
+    <div class="leave-panel">
+      <!-- İzin Talepleri -->
+      <div class="leave-card" id="leaveSection">
+        <div class="leave-card-header">
+          <div class="leave-card-title">📝 İzin Talepleri</div>
+          <span class="badge badge-warning">3 beklemede</span>
+        </div>
+        <div class="leave-list" id="leaveList">
+          <!-- JS populates -->
+        </div>
+      </div>
+
+      <!-- Personel Saat Özeti -->
+      <div class="leave-card" id="hoursSection">
+        <div class="leave-card-header">
+          <div class="leave-card-title">📊 Personel Saat Özeti</div>
+          <span class="badge badge-neutral">Bu hafta</span>
+        </div>
+        <div class="table-wrap" style="max-height:420px;overflow-y:auto;">
+          <table class="hours-table" id="hoursTable">
+            <thead>
+              <tr>
+                <th onclick="sortHours('name')">Personel</th>
+                <th onclick="sortHours('planned')">Planlanan</th>
+                <th onclick="sortHours('actual')">Fiili</th>
+                <th onclick="sortHours('diff')">Fark</th>
+                <th onclick="sortHours('overtime')">Mesai</th>
+                <th onclick="sortHours('leave')">İzin Günü</th>
+              </tr>
+            </thead>
+            <tbody id="hoursTableBody">
+              <!-- JS populates -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salon Kapasite Uyarıları -->
+    <div id="capacitySection">
+      <div class="section-header">
+        <div class="section-title">⚠️ Salon Kapasite Uyarıları</div>
+      </div>
+      <div class="capacity-grid">
+        <div class="capacity-card warning">
+          <div class="capacity-icon">⚡</div>
+          <div class="capacity-content">
+            <div class="capacity-title">Yoğunluk Uyarısı — Cuma 14:00-18:00</div>
+            <div class="capacity-desc">Cuma 14:00-18:00 arası sadece 2 çalışan programlı. Yoğun randevu trafiği bekleniyor. Ek personel ataması önerilir.</div>
+          </div>
+        </div>
+        <div class="capacity-card success">
+          <div class="capacity-icon">✅</div>
+          <div class="capacity-content">
+            <div class="capacity-title">Tam Kapasite — Cumartesi</div>
+            <div class="capacity-desc">Cumartesi tam kapasite çalışılacak. 6 çalışan programlı. Tüm istasyonlar aktif.</div>
+          </div>
+        </div>
+        <div class="capacity-card info">
+          <div class="capacity-icon">🏖️</div>
+          <div class="capacity-content">
+            <div class="capacity-title">Pazar Kapalı — Tüm Personel İzinli</div>
+            <div class="capacity-desc">Pazar günü salon kapalı. Tüm personel izinli. Randevu alımına kapalı.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+</main><!-- /main -->
+
+<!-- Shift Edit Modal -->
+<div class="modal-overlay" id="editShiftModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editModalTitle">Vardiya Düzenle</div>
+      <button class="modal-close" onclick="closeModal('editShiftModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Personel</label>
+        <div id="editModalStaffName" style="font-weight:600;color:var(--text-primary);"></div>
+        <div id="editModalDate" style="font-size:var(--text-xs);color:var(--text-muted);"></div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Başlangıç</label>
+          <input type="time" class="form-input" id="editStartTime" value="09:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bitiş</label>
+          <input type="time" class="form-input" id="editEndTime" value="17:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mola Süresi (dk)</label>
+        <input type="number" class="form-input" id="editBreakDuration" value="60" min="0" max="120" step="15">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Durum</label>
+        <select class="form-select" id="editShiftStatus">
+          <option value="full">Tam Gün</option>
+          <option value="half">Yarım Gün</option>
+          <option value="leave">İzin</option>
+          <option value="empty">Boş Slot</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notlar</label>
+        <textarea class="form-textarea" id="editShiftNotes" rows="2" placeholder="Özel notlar..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editShiftModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveShiftEdit()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Shift Modal -->
+<div class="modal-overlay" id="createShiftModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">🕐 Vardiya Oluştur</div>
+      <button class="modal-close" onclick="closeModal('createShiftModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Personel Seçimi</label>
+        <div class="staff-multi-list" id="createStaffList">
+          <!-- JS populates -->
+        </div>
+      </div>
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="form-group">
+          <label class="form-label">Başlangıç Tarihi</label>
+          <input type="date" class="form-input" id="createStartDate" value="2026-05-19">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bitiş Tarihi</label>
+          <input type="date" class="form-input" id="createEndDate" value="2026-05-25">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Şablon Seçimi</label>
+        <div class="template-pills" id="templatePills">
+          <div class="template-pill active" data-template="morning" onclick="selectTemplate(this)">Sabah 09-17</div>
+          <div class="template-pill" data-template="afternoon" onclick="selectTemplate(this)">Öğle 11-19</div>
+          <div class="template-pill" data-template="full" onclick="selectTemplate(this)">Tam Gün 09-20</div>
+          <div class="template-pill" data-template="half" onclick="selectTemplate(this)">Yarım 09-13</div>
+          <div class="template-pill" data-template="closed" onclick="selectTemplate(this)">Kapalı</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="toggle">
+          <input type="checkbox" id="autoWeekend" checked>
+          <span class="toggle-track"></span>
+          <span class="toggle-label">Hafta sonu farklı şablon (Cumartesi: Tam Gün, Pazar: Kapalı)</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('createShiftModal')">İptal</button>
+      <button class="btn btn-primary" onclick="applyShiftTemplate()">Uygula</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   BarberPro Shifts — Inline JavaScript
+   ================================================================ */
+
+// ── Staff Data ──
+const staffList = [
+  {id:1,name:"Marc Van den Berghe",role:"Usta Berber",initials:"MV",color:"#8b5cf6"},
+  {id:2,name:"Laura Peeters",role:"Colorist",initials:"LP",color:"#ec4899"},
+  {id:3,name:"Jean-Pierre De Smet",role:"Usta Berber",initials:"JP",color:"#8b5cf6"},
+  {id:4,name:"Sophie Dubois",role:"Kuaför",initials:"SD",color:"#3b82f6"},
+  {id:5,name:"Marie Vermeulen",role:"Kuaför",initials:"MV",color:"#3b82f6"},
+  {id:6,name:"Emma Wouters",role:"Manikürcü",initials:"EW",color:"#f59e0b"},
+  {id:7,name:"Nadia Caron",role:"Kasiyer",initials:"NC",color:"#ef4444"},
+  {id:8,name:"Thomas Lefèvre",role:"Asistan",initials:"TL",color:"#10b981"},
+  {id:9,name:"Fatima El Amrani",role:"Kuaför",initials:"FE",color:"#3b82f6"},
+  {id:10,name:"Björn Janssens",role:"Usta Berber",initials:"BJ",color:"#8b5cf6"},
+  {id:11,name:"Charlotte Dubois",role:"Manikürcü",initials:"CD",color:"#f59e0b"},
+  {id:12,name:"Lucas Peeters",role:"Asistan",initials:"LP",color:"#10b981"}
+];
+
+const days = ["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+const fullDays = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+
+// ── Shift Presets ──
+const shiftPresets = [
+  {label:"09:00-17:00",start:"09:00",end:"17:00",hours:8,type:"full-shift"},
+  {label:"11:00-19:00",start:"11:00",end:"19:00",hours:8,type:"full-shift"},
+  {label:"09:00-20:00",start:"09:00",end:"20:00",hours:11,type:"full-shift"},
+  {label:"09:00-13:00",start:"09:00",end:"13:00",hours:4,type:"half-shift"},
+  {label:"İZİN",start:"",end:"",hours:0,type:"leave"},
+  {label:"—",start:"",end:"",hours:0,type:"empty-slot"}
+];
+
+const templates = {
+  morning:{start:"09:00",end:"17:00",hours:8,type:"full-shift",label:"09:00-17:00"},
+  afternoon:{start:"11:00",end:"19:00",hours:8,type:"full-shift",label:"11:00-19:00"},
+  full:{start:"09:00",end:"20:00",hours:11,type:"full-shift",label:"09:00-20:00"},
+  half:{start:"09:00",end:"13:00",hours:4,type:"half-shift",label:"09:00-13:00"},
+  closed:{start:"",end:"",hours:0,type:"leave",label:"İZİN"}
+};
+
+// ── Initial Shift Data (realistic) ──
+let shiftData = {};
+function initShiftData(){
+  const presets = [
+    [0,0,0,1,0,2,4], [0,1,0,0,1,2,4], [0,0,1,0,0,2,4], [1,0,0,1,0,2,4],
+    [0,1,0,0,1,2,4], [3,3,3,3,3,5,4], [0,0,0,0,0,2,4], [0,0,3,0,0,5,4],
+    [1,0,0,1,0,2,4], [0,0,0,0,0,2,4], [3,3,3,3,3,5,4], [0,3,0,3,0,5,4]
+  ];
+  staffList.forEach((s,si)=>{
+    shiftData[s.id] = presets[si].map(pi=>{const p=shiftPresets[pi];return{...p};});
+  });
+}
+initShiftData();
+
+// ── Leave Requests Data ──
+let leaveRequests = [
+  {id:1,staffId:2,name:"Laura Peeters",initials:"LP",color:"#ec4899",start:"20 Mayıs",end:"22 Mayıs",type:"yillik",typeLabel:"Yıllık İzin",status:"pending",notes:"Aile ziyareti. Yerine Sophie Dubois önerildi.",replacement:"Sophie Dubois"},
+  {id:2,staffId:7,name:"Nadia Caron",initials:"NC",color:"#ef4444",start:"23 Mayıs",end:"23 Mayıs",type:"hastalik",typeLabel:"Hastalık",status:"pending",notes:"Doktor raporu eklendi. Grip tedavisi görüyor.",replacement:"Thomas Lefèvre"},
+  {id:3,staffId:12,name:"Lucas Peeters",initials:"LP",color:"#10b981",start:"21 Mayıs",end:"21 Mayıs",type:"egitim",typeLabel:"Eğitim",status:"pending",notes:"Yeni ürün eğitimi. Saat 14:00-17:00 arası salon dışında.",replacement:"Marc Van den Berghe"},
+  {id:4,staffId:4,name:"Sophie Dubois",initials:"SD",color:"#3b82f6",start:"15 Mayıs",end:"15 Mayıs",type:"kisisel",typeLabel:"Kişisel",status:"approved",notes:"Çocuk doktoru randevusu.",replacement:"Marie Vermeulen"},
+  {id:5,staffId:9,name:"Fatima El Amrani",initials:"FE",color:"#3b82f6",start:"12 Mayıs",end:"12 Mayıs",type:"yillik",typeLabel:"Yıllık İzin",status:"approved",notes:"Doğum günü.",replacement:"Björn Janssens"},
+  {id:6,staffId:6,name:"Emma Wouters",initials:"EW",color:"#f59e0b",start:"10 Mayıs",end:"10 Mayıs",type:"hastalik",typeLabel:"Hastalık",status:"rejected",notes:"Yetersiz doktor raporu.",replacement:"Charlotte Dubois"},
+  {id:7,staffId:1,name:"Marc Van den Berghe",initials:"MV",color:"#8b5cf6",start:"8 Mayıs",end:"9 Mayıs",type:"yillik",typeLabel:"Yıllık İzin",status:"approved",notes:"Kısa tatil.",replacement:"Jean-Pierre De Smet"},
+  {id:8,staffId:10,name:"Björn Janssens",initials:"BJ",color:"#8b5cf6",start:"5 Mayıs",end:"5 Mayıs",type:"egitim",typeLabel:"Eğitim",status:"approved",notes:"Barber konferansı Amsterdam.",replacement:"Marc Van den Berghe"}
+];
+
+// ── Hours Summary Data ──
+const hoursSummary = [
+  {name:"Marc Van den Berghe",initials:"MV",color:"#8b5cf6",planned:40,actual:40,diff:0,overtime:2,leave:1},
+  {name:"Laura Peeters",initials:"LP",color:"#ec4899",planned:40,actual:24,diff:-16,overtime:0,leave:2},
+  {name:"Jean-Pierre De Smet",initials:"JP",color:"#8b5cf6",planned:40,actual:40,diff:0,overtime:0,leave:1},
+  {name:"Sophie Dubois",initials:"SD",color:"#3b82f6",planned:40,actual:40,diff:0,overtime:1,leave:1},
+  {name:"Marie Vermeulen",initials:"MV",color:"#3b82f6",planned:40,actual:40,diff:0,overtime:0,leave:1},
+  {name:"Emma Wouters",initials:"EW",color:"#f59e0b",planned:32,actual:20,diff:-12,overtime:0,leave:2},
+  {name:"Nadia Caron",initials:"NC",color:"#ef4444",planned:40,actual:32,diff:-8,overtime:0,leave:2},
+  {name:"Thomas Lefèvre",initials:"TL",color:"#10b981",planned:32,actual:28,diff:-4,overtime:0,leave:2},
+  {name:"Fatima El Amrani",initials:"FE",color:"#3b82f6",planned:40,actual:40,diff:0,overtime:3,leave:1},
+  {name:"Björn Janssens",initials:"BJ",color:"#8b5cf6",planned:40,actual:40,diff:0,overtime:1,leave:1},
+  {name:"Charlotte Dubois",initials:"CD",color:"#f59e0b",planned:32,actual:20,diff:-12,overtime:0,leave:2},
+  {name:"Lucas Peeters",initials:"LP",color:"#10b981",planned:32,actual:24,diff:-8,overtime:0,leave:2}
+];
+
+let currentEdit = {staffId:null,dayIndex:null};
+let selectedTemplate = "morning";
+let selectedStaffForCreate = new Set(staffList.map(s=>s.id));
+
+// ── Render Calendar ──
+function renderCalendar(){
+  const grid = document.getElementById('shiftCalendarGrid');
+  let html = '<div class="shift-cal-grid-header">';
+  html += '<div class="shift-cal-header-cell">Personel</div>';
+  days.forEach((d,i)=>{
+    const date = 19 + i;
+    const isWeekend = i >= 5;
+    html += `<div class="shift-cal-header-cell" style="${isWeekend?'color:var(--amber-400);':''}">${d}<br><span style="font-weight:400;font-size:10px;">${date} May</span></div>`;
+  });
+  html += '</div>';
+
+  staffList.forEach(s=>{
+    const shifts = shiftData[s.id];
+    html += '<div class="shift-cal-row">';
+    html += `<div class="shift-cal-staff">`;
+    html += `<div class="shift-cal-staff-avatar" style="background:${s.color};">${s.initials}</div>`;
+    html += `<div class="shift-cal-staff-info">`;
+    html += `<div class="shift-cal-staff-name">${s.name}</div>`;
+    html += `<span class="role-badge-inline role-badge-${s.role.toLowerCase().replace(/\s/g,'')}">${s.role}</span>`;
+    html += `</div></div>`;
+
+    shifts.forEach((shift,di)=>{
+      const isSunday = di === 6;
+      const cellClass = isSunday ? 'leave' : shift.type;
+      const clickable = !isSunday;
+      const onclick = clickable ? `onclick="cycleShift(${s.id},${di})" ondblclick="openEditModal(${s.id},${di})"` : '';
+      let content = '';
+      if(isSunday){
+        content = '<span class="shift-time">İZİN</span><span class="shift-label">Kapalı</span>';
+      } else if(shift.type === 'empty-slot'){
+        content = '';
+      } else if(shift.type === 'leave'){
+        content = '<span class="shift-time">İZİN</span>';
+      } else {
+        content = `<span class="shift-time">${shift.label}</span>`;
+        if(shift.hours > 0) content += `<span class="shift-hours">${shift.hours} saat</span>`;
+      }
+      html += `<div class="shift-cal-cell ${cellClass}" ${onclick} title="${s.name} — ${fullDays[di]}${shift.label?': '+shift.label:''}">${content}</div>`;
+    });
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+// ── Render Leave Requests ──
+function renderLeaveRequests(){
+  const list = document.getElementById('leaveList');
+  let html = '';
+  leaveRequests.forEach(req=>{
+    const statusBadge = req.status==='pending'?'badge-warning':req.status==='approved'?'badge-success':'badge-error';
+    const statusText = req.status==='pending'?'Onay Bekliyor':req.status==='approved'?'Onaylandı':'Reddedildi';
+    const isPending = req.status==='pending';
+    html += `<div class="leave-item${isPending?'':' expanded'}" id="leaveItem${req.id}">`;
+    html += `<div class="leave-avatar" style="background:${req.color};">${req.initials}</div>`;
+    html += `<div class="leave-content">`;
+    html += `<div class="leave-top">`;
+    html += `<div><div class="leave-name">${req.name}</div><div class="leave-dates">${req.start}${req.start!==req.end?' — '+req.end:''}</div></div>`;
+    html += `<span class="leave-type leave-type-${req.type}">${req.typeLabel}</span>`;
+    html += `</div>`;
+    html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px;">`;
+    html += `<span class="badge ${statusBadge}">${statusText}</span>`;
+    if(isPending){
+      html += `<div class="leave-actions">`;
+      html += `<button class="leave-btn leave-btn-approve" onclick="approveLeave(${req.id})">Onayla</button>`;
+      html += `<button class="leave-btn leave-btn-reject" onclick="rejectLeave(${req.id})">Reddet</button>`;
+      html += `</div>`;
+    }
+    html += `</div>`;
+    html += `<div class="leave-detail">`;
+    html += `<div class="leave-detail-row"><span>Notlar</span><span>${req.notes}</span></div>`;
+    html += `<div class="leave-detail-row"><span>Yerine Bakacak</span><span style="color:var(--teal-400);font-weight:600;">${req.replacement}</span></div>`;
+    html += `</div>`;
+    html += `</div></div>`;
+  });
+  list.innerHTML = html;
+}
+
+// ── Render Hours Table ──
+let hoursSort = {col:'name',dir:'asc'};
+function renderHoursTable(){
+  const tbody = document.getElementById('hoursTableBody');
+  let data = [...hoursSummary];
+  data.sort((a,b)=>{
+    let av,bv;
+    if(hoursSort.col==='name'){av=a.name;bv=b.name;}
+    else if(hoursSort.col==='planned'){av=a.planned;bv=b.planned;}
+    else if(hoursSort.col==='actual'){av=a.actual;bv=b.actual;}
+    else if(hoursSort.col==='diff'){av=a.diff;bv=b.diff;}
+    else if(hoursSort.col==='overtime'){av=a.overtime;bv=b.overtime;}
+    else if(hoursSort.col==='leave'){av=a.leave;bv=b.leave;}
+    if(av<bv)return hoursSort.dir==='asc'?-1:1;
+    if(av>bv)return hoursSort.dir==='asc'?1:-1;
+    return 0;
+  });
+  let html = '';
+  data.forEach(h=>{
+    const diffClass = h.diff>0?'hours-over':h.diff<0?'hours-under':'hours-ok';
+    const diffSign = h.diff>0?'+':'';
+    html += `<tr>`;
+    html += `<td><div class="cell-name"><div class="cell-name-avatar" style="background:${h.color};">${h.initials}</div><span>${h.name}</span></div></td>`;
+    html += `<td>${h.planned}</td>`;
+    html += `<td>${h.actual}</td>`;
+    html += `<td class="${diffClass}">${diffSign}${h.diff}</td>`;
+    html += `<td>${h.overtime>0?'<span class="hours-over">+'+h.overtime+'</span>':'—'}</td>`;
+    html += `<td>${h.leave}</td>`;
+    html += `</tr>`;
+  });
+  tbody.innerHTML = html;
+
+  document.querySelectorAll('#hoursTable thead th').forEach(th=>{
+    th.classList.remove('asc','desc');
+    if(th.getAttribute('onclick')&&th.getAttribute('onclick').includes(hoursSort.col)){
+      th.classList.add(hoursSort.dir);
+    }
+  });
+}
+function sortHours(col){
+  if(hoursSort.col===col) hoursSort.dir = hoursSort.dir==='asc'?'desc':'asc';
+  else{hoursSort.col=col;hoursSort.dir='asc';}
+  renderHoursTable();
+}
+
+// ── Render Create Staff List ──
+function renderCreateStaffList(){
+  const list = document.getElementById('createStaffList');
+  let html = '';
+  staffList.forEach(s=>{
+    const selected = selectedStaffForCreate.has(s.id)?'selected':'';
+    html += `<div class="staff-multi-item ${selected}" onclick="toggleStaffSelection(${s.id})" id="staffMulti${s.id}">`;
+    html += `<div class="staff-multi-avatar" style="background:${s.color};">${s.initials}</div>`;
+    html += `<div style="flex:1;"><div style="font-weight:600;font-size:var(--text-sm);">${s.name}</div><div style="font-size:var(--text-xs);color:var(--text-muted);">${s.role}</div></div>`;
+    html += `<span style="color:var(--teal-500);font-weight:700;font-size:var(--text-lg);opacity:${selected?1:0};">✓</span>`;
+    html += `</div>`;
+  });
+  list.innerHTML = html;
+}
+
+function cycleShift(staffId,dayIndex){
+  const current = shiftData[staffId][dayIndex];
+  const presetLabels = shiftPresets.map(p=>p.label);
+  const currentIdx = presetLabels.indexOf(current.label);
+  const nextIdx = (currentIdx + 1) % shiftPresets.length;
+  shiftData[staffId][dayIndex] = {...shiftPresets[nextIdx]};
+  renderCalendar();
+  showToast('Hızlı güncelleme: '+shiftPresets[nextIdx].label,'info');
+}
+
+// ── Modal Functions ──
+function openModal(id){document.getElementById(id).classList.add('active');if(id==='createShiftModal')renderCreateStaffList();}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+function openEditModal(staffId,dayIndex){
+  currentEdit = {staffId,dayIndex};
+  const s = staffList.find(x=>x.id===staffId);
+  const shift = shiftData[staffId][dayIndex];
+  document.getElementById('editModalTitle').textContent = 'Vardiya Düzenle';
+  document.getElementById('editModalStaffName').textContent = s.name;
+  document.getElementById('editModalDate').textContent = fullDays[dayIndex] + ', ' + (19+dayIndex) + ' Mayıs 2026';
+  document.getElementById('editStartTime').value = shift.start || '09:00';
+  document.getElementById('editEndTime').value = shift.end || '17:00';
+  document.getElementById('editBreakDuration').value = shift.hours>=8?'60':'30';
+  document.getElementById('editShiftStatus').value = shift.type==='full-shift'?'full':shift.type==='half-shift'?'half':shift.type==='leave'?'leave':'empty';
+  document.getElementById('editShiftNotes').value = '';
+  openModal('editShiftModal');
+}
+function saveShiftEdit(){
+  const status = document.getElementById('editShiftStatus').value;
+  const start = document.getElementById('editStartTime').value;
+  const end = document.getElementById('editEndTime').value;
+  let newShift;
+  if(status==='leave'){newShift={label:'İZİN',start:'',end:'',hours:0,type:'leave'};}
+  else if(status==='empty'){newShift={label:'—',start:'',end:'',hours:0,type:'empty-slot'};}
+  else{
+    const sH=parseInt(start.split(':')[0]),sM=parseInt(start.split(':')[1]);
+    const eH=parseInt(end.split(':')[0]),eM=parseInt(end.split(':')[1]);
+    const hours = Math.round(((eH*60+eM)-(sH*60+sM))/60*10)/10;
+    const label = start+'-'+end;
+    const type = hours>=6?'full-shift':'half-shift';
+    newShift={label,start,end,hours,type};
+  }
+  shiftData[currentEdit.staffId][currentEdit.dayIndex] = newShift;
+  renderCalendar();
+  closeModal('editShiftModal');
+  showToast('Vardiya güncellendi','success');
+}
+
+// ── Template Selection ──
+function selectTemplate(el){
+  document.querySelectorAll('#templatePills .template-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  selectedTemplate = el.dataset.template;
+}
+function toggleStaffSelection(id){
+  const el = document.getElementById('staffMulti'+id);
+  if(selectedStaffForCreate.has(id)){selectedStaffForCreate.delete(id);el.classList.remove('selected');el.querySelector('span:last-child').style.opacity='0';}
+  else{selectedStaffForCreate.add(id);el.classList.add('selected');el.querySelector('span:last-child').style.opacity='1';}
+}
+function applyShiftTemplate(){
+  const autoWeekend = document.getElementById('autoWeekend').checked;
+  selectedStaffForCreate.forEach(sid=>{
+    for(let d=0;d<7;d++){
+      let t = templates[selectedTemplate];
+      if(autoWeekend){
+        if(d===5) t = templates.full;
+        if(d===6) t = templates.closed;
+      }
+      shiftData[sid][d] = {...t};
+    }
+  });
+  renderCalendar();
+  closeModal('createShiftModal');
+  showToast('Vardiya şablonu uygulandı ('+selectedStaffForCreate.size+' personel)','success');
+}
+
+// ── Leave Actions ──
+function approveLeave(id){
+  const req = leaveRequests.find(r=>r.id===id);
+  if(req){req.status='approved';renderLeaveRequests();showToast(req.name+' izni onaylandı','success');}
+}
+function rejectLeave(id){
+  const req = leaveRequests.find(r=>r.id===id);
+  if(req){req.status='rejected';renderLeaveRequests();showToast(req.name+' izni reddedildi','error');}
+}
+
+// ── Toast ──
+function showToast(msg,type='info'){
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-'+type;
+  const icon = type==='success'?'✅':type==='error'?'❌':type==='warning'?'⚠️':'ℹ️';
+  toast.innerHTML = `<div style="font-size:var(--text-lg);">${icon}</div><div class="toast-content"><div class="toast-title">${type==='success'?'Başarılı':type==='error'?'Hata':type==='warning'?'Uyarı':'Bilgi'}</div><div class="toast-message">${msg}</div></div>`;
+  container.appendChild(toast);
+  setTimeout(()=>{toast.remove();},3500);
+}
+
+// ── Navigation ──
+function changeWeek(dir){
+  showToast(dir>0?'Sonraki hafta':'Önceki hafta','info');
+}
+function resetWeek(){showToast('Bugünün haftasına dönüldü','info');}
+function scrollToSection(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});}
+function exportShifts(){showToast('Vardiya planı PDF olarak dışa aktarıldı','success');}
+function autoFillWeekend(){
+  staffList.forEach(s=>{
+    shiftData[s.id][5] = {...templates.full};
+    shiftData[s.id][6] = {...templates.closed};
+  });
+  renderCalendar();
+  showToast('Hafta sonu otomatik dolduruldu','success');
+}
+
+// ── Sidebar / Theme ──
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar'),ov=document.getElementById('sidebarOverlay');
+  sb.classList.toggle('mobile-open');ov.classList.toggle('active');
+}
+function toggleMobileSidebar(){toggleSidebar();}
+function toggleTheme(){
+  const h=document.documentElement,t=h.getAttribute('data-theme');
+  h.setAttribute('data-theme',t==='dark'?'light':'dark');
+}
+function showNotifications(){showToast('3 yeni bildirim var','info');}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCalendar();
+  renderLeaveRequests();
+  renderHoursTable();
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('active');});
+});
+</script>
+</body>
+</html>

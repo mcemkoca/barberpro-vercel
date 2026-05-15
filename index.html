@@ -12,16 +12,16 @@
 <style>
 /* ── Purple Theme Overrides ── */
 :root, [data-theme="dark"] {
-  --teal-50: #f5f3ff;
-  --teal-100: #ede9fe;
-  --teal-200: #ddd6fe;
-  --teal-300: #c4b5fd;
-  --teal-400: #a78bfa;
-  --teal-500: #8b5cf6;
-  --teal-600: #7c3aed;
-  --teal-700: #6d28d9;
-  --teal-800: #5b21b6;
-  --teal-900: #4c1d95;
+  --teal-50: #f0fdfa;
+  --teal-100: #ccfbf1;
+  --teal-200: #99f6e4;
+  --teal-300: #5eead4;
+  --teal-400: #2dd4bf;
+  --teal-500: #14b8a6;
+  --teal-600: #0d9488;
+  --teal-700: #0f766e;
+  --teal-800: #115e59;
+  --teal-900: #134e4a;
   --amber-500: #f59e0b;
   --amber-600: #d97706;
   --shadow-glow: rgba(139,92,246,0.25);
@@ -35,7 +35,7 @@
 }
 .hero-bg {
   position:absolute; inset:0; z-index:0;
-  background:linear-gradient(135deg,#0b1120 0%,#1e1b4b 50%,#0b1120 100%);
+  background:linear-gradient(135deg,#0b1120 0%,#042f2e 50%,#0b1120 100%);
   background-size:400% 400%;
   animation:heroGradient 16s ease infinite;
 }
@@ -81,7 +81,7 @@
   color:#f1f5f9; margin-bottom:20px;
 }
 .hero-title .gradient-text {
-  background:linear-gradient(135deg,#a78bfa 0%,#8b5cf6 50%,#c4b5fd 100%);
+  background:linear-gradient(135deg,#2dd4bf 0%,#14b8a6 50%,#5eead4 100%);
   background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent;
   background-clip:text; animation:heroGradient 6s ease infinite;
 }
@@ -140,7 +140,7 @@
 }
 .nav-brand-icon {
   width:36px; height:36px; border-radius:var(--radius-md);
-  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  background:linear-gradient(135deg,#14b8a6,#0d9488);
   display:flex; align-items:center; justify-content:center; color:white; font-weight:700;
 }
 .nav-links { display:flex; gap:28px; align-items:center; }
@@ -148,7 +148,7 @@
 .nav-links a:hover { color:#f1f5f9; }
 .nav-cta {
   padding:8px 18px; border-radius:var(--radius-md);
-  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+  background:linear-gradient(135deg,#14b8a6,#0d9488); color:white;
   font-size:0.875rem; font-weight:600; transition:all var(--duration-fast);
 }
 .nav-cta:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(139,92,246,0.4); }
@@ -233,7 +233,7 @@
 .pricing-badge {
   position:absolute; top:-12px; left:50%; transform:translateX(-50%);
   padding:4px 14px; border-radius:9999px;
-  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+  background:linear-gradient(135deg,#14b8a6,#0d9488); color:white;
   font-size:0.75rem; font-weight:600;
 }
 .pricing-name { font-size:1.25rem; font-weight:700; color:#f1f5f9; margin-bottom:4px; }
@@ -250,7 +250,7 @@
   text-align:center; transition:all var(--duration-fast); border:none; cursor:pointer;
 }
 .pricing-cta-primary {
-  background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white;
+  background:linear-gradient(135deg,#14b8a6,#0d9488); color:white;
 }
 .pricing-cta-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(139,92,246,0.4); }
 .pricing-cta-secondary {
@@ -261,7 +261,7 @@
 /* ── CTA Section ── */
 .cta-section {
   position:relative; overflow:hidden;
-  background:linear-gradient(135deg,#1e1b4b 0%,#0b1120 100%);
+  background:linear-gradient(135deg,#042f2e 0%,#0b1120 100%);
   border-radius:var(--radius-xl); padding:64px 32px; text-align:center;
   border:1px solid rgba(139,92,246,0.2);
 }
@@ -274,7 +274,7 @@
 .cta-btn {
   position:relative; display:inline-flex; align-items:center; gap:8px;
   padding:14px 32px; border-radius:var(--radius-lg);
-  background:linear-gradient(135deg,#8b5cf6,#a78bfa); color:white;
+  background:linear-gradient(135deg,#14b8a6,#2dd4bf); color:white;
   font-size:1rem; font-weight:600; transition:all var(--duration-fast);
 }
 .cta-btn:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(139,92,246,0.4); }
@@ -288,10 +288,10 @@
 .footer-brand { font-size:1.25rem; font-weight:700; color:#f1f5f9; display:flex; align-items:center; gap:10px; margin-bottom:12px; }
 .footer-brand-icon {
   width:32px; height:32px; border-radius:var(--radius-md);
-  background:linear-gradient(135deg,#8b5cf6,#7c3aed);
+  background:linear-gradient(135deg,#14b8a6,#0d9488);
   display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:0.875rem;
 }
-.footer-desc { font-size:0.875rem; color:var(--text-muted); line-height:1.6; max-width:280px; }
+.footer-desc { font-size:0.875rem; color:var(--text-muted); line-height:1.6; max-width:260px; }
 .footer-title { font-size:0.875rem; font-weight:600; color:#f1f5f9; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em; }
 .footer-links { display:flex; flex-direction:column; gap:8px; }
 .footer-links a { font-size:0.875rem; color:var(--text-muted); transition:color var(--duration-fast); }
@@ -377,7 +377,7 @@
           Belçika'nın en modern berber ve kuaför salonlarının tercihi.
         </p>
         <div class="hero-buttons">
-          <a href="dashboard.html" class="btn btn-xl" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;box-shadow:0 4px 14px rgba(139,92,246,0.35);">
+          <a href="dashboard.html" class="btn btn-xl" style="background:linear-gradient(135deg,#14b8a6,#0d9488);color:white;box-shadow:0 4px 14px rgba(139,92,246,0.35);">
             Ücretsiz Demo'yu Dene →
           </a>
           <a href="#ozellikler" class="btn btn-xl btn-secondary">Nasıl Çalışır?</a>

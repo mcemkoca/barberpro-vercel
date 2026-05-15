@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberPro — SMS & Kampanya Yönetimi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ── Purple/Violet Theme Overrides ── */
+[data-theme="dark"] {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1a2234;
+  --bg-card: #151c2c;
+  --bg-elevated: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #1e293b;
+  --shadow-color: rgba(0,0,0,0.4);
+  --shadow-glow: rgba(139,92,246,0.35);
+}
+[data-theme="dark"] ::selection { background:rgba(139,92,246,0.3); color:#e9d5ff; }
+
+/* Sidebar brand */
+.sidebar-brand-icon { background:linear-gradient(135deg,#8b5cf6,#6d28d9) !important; box-shadow:0 4px 12px rgba(139,92,246,0.4) !important; }
+.sidebar-link.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed) !important; box-shadow:0 4px 14px rgba(139,92,246,0.35) !important; }
+
+/* Stat cards */
+.stat-card .stat-icon { background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.08)) !important; color:#a78bfa !important; }
+.stat-revenue .stat-value { background:linear-gradient(135deg,#c4b5fd,#8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+
+/* Page specific */
+.page-title { font-size:var(--text-2xl); font-weight:700; color:var(--text-primary); }
+.page-subtitle { font-size:var(--text-sm); color:var(--text-muted); margin-top:4px; }
+.page-actions { display:flex; gap:10px; flex-wrap:wrap; }
+
+/* Tab system */
+.tab-bar { display:flex; gap:4px; padding:4px; background:var(--bg-secondary); border-radius:var(--radius-lg); border:1px solid var(--border-color); margin-bottom:24px; width:fit-content; }
+.tab-btn { padding:8px 20px; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:600; color:var(--text-muted); cursor:pointer; border:none; background:transparent; transition:all var(--duration-fast); white-space:nowrap; }
+.tab-btn:hover { color:var(--text-secondary); }
+.tab-btn.active { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white; box-shadow:0 4px 14px rgba(139,92,246,0.3); }
+
+/* Campaign cards */
+.campaign-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; }
+.campaign-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:20px; transition:all var(--duration-normal); position:relative; overflow:hidden;
+}
+.campaign-card:hover { border-color:rgba(139,92,246,0.3); transform:translateY(-2px); box-shadow:var(--shadow-md),0 0 20px rgba(139,92,246,0.08); }
+.campaign-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,#8b5cf6,#a78bfa,#c4b5fd); opacity:0.7;
+}
+.campaign-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.campaign-title { font-size:var(--text-base); font-weight:700; color:var(--text-primary); }
+.campaign-desc { font-size:var(--text-xs); color:var(--text-muted); margin-top:2px; }
+.campaign-discount {
+  padding:4px 10px; border-radius:999px; font-size:0.6875rem; font-weight:700;
+  background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(167,139,250,0.1));
+  color:#c4b5fd; border:1px solid rgba(139,92,246,0.2);
+}
+.campaign-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:14px 0; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md); }
+.campaign-stat { text-align:center; }
+.campaign-stat-value { font-size:0.875rem; font-weight:700; color:var(--text-primary); }
+.campaign-stat-label { font-size:0.65rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+.campaign-actions { display:flex; gap:6px; margin-top:12px; }
+.campaign-actions .btn { flex:1; padding:6px 10px; font-size:0.75rem; }
+
+/* Status badges */
+.badge-aktif { background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.2); }
+.badge-planlandi { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.2); }
+.badge-tamamlandi { background:rgba(139,92,246,0.15); color:#a78bfa; border:1px solid rgba(139,92,246,0.2); }
+.badge-durduruldu { background:rgba(244,63,94,0.15); color:#fb7185; border:1px solid rgba(244,63,94,0.2); }
+
+/* Reminder rules */
+.reminder-list { display:flex; flex-direction:column; gap:10px; }
+.reminder-row {
+  display:flex; align-items:center; gap:16px; padding:14px 16px;
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  transition:all var(--duration-fast);
+}
+.reminder-row:hover { border-color:rgba(139,92,246,0.25); background:var(--bg-tertiary); }
+.reminder-icon { width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(167,139,250,0.1)); display:flex; align-items:center; justify-content:center; font-size:1.125rem; flex-shrink:0; }
+.reminder-info { flex:1; min-width:0; }
+.reminder-name { font-size:0.875rem; font-weight:600; color:var(--text-primary); }
+.reminder-trigger { font-size:0.75rem; color:var(--text-muted); margin-top:2px; }
+.reminder-channel { font-size:0.75rem; color:var(--text-secondary); padding:2px 8px; background:var(--bg-secondary); border-radius:999px; }
+.reminder-preview { font-size:0.75rem; color:var(--text-muted); max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Toggle switch */
+.switch { position:relative; display:inline-block; width:44px; height:24px; }
+.switch input { opacity:0; width:0; height:0; }
+.slider { position:absolute; cursor:pointer; inset:0; background:var(--bg-tertiary); border-radius:999px; transition:var(--duration-fast); border:1px solid var(--border-color); }
+.slider::before { content:''; position:absolute; height:18px; width:18px; left:2px; bottom:2px; background:var(--text-muted); border-radius:50%; transition:var(--duration-fast); }
+input:checked + .slider { background:linear-gradient(135deg,#8b5cf6,#7c3aed); border-color:transparent; }
+input:checked + .slider::before { transform:translateX(20px); background:white; }
+
+/* SMS Bubble templates */
+.sms-bubble {
+  max-width:320px; padding:12px 14px; border-radius:18px 18px 18px 4px;
+  background:linear-gradient(135deg,#1e293b,#111827);
+  border:1px solid rgba(139,92,246,0.15); color:var(--text-primary);
+  font-size:0.8125rem; line-height:1.5; position:relative;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+}
+.sms-bubble::after {
+  content:'✓✓'; position:absolute; bottom:4px; right:10px;
+  font-size:0.65rem; color:var(--teal-400); letter-spacing:-1px;
+}
+.sms-time { font-size:0.65rem; color:var(--text-muted); margin-top:6px; text-align:right; padding-right:24px; }
+
+/* Template cards */
+.template-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+.template-card {
+  background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg);
+  padding:16px; transition:all var(--duration-fast); cursor:pointer;
+}
+.template-card:hover { border-color:rgba(139,92,246,0.3); transform:translateY(-2px); }
+.template-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.template-name { font-size:0.875rem; font-weight:600; color:var(--text-primary); }
+.template-count { font-size:0.6875rem; color:var(--text-muted); padding:2px 8px; background:var(--bg-secondary); border-radius:999px; }
+.template-content { font-size:0.8125rem; color:var(--text-secondary); line-height:1.5; min-height:60px; }
+.template-actions { display:flex; gap:6px; margin-top:12px; }
+
+/* History table */
+.history-table { width:100%; border-collapse:separate; border-spacing:0; }
+.history-table th {
+  padding:10px 12px; text-align:left; font-size:0.6875rem; font-weight:600;
+  text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted);
+  border-bottom:1px solid var(--border-color); background:var(--bg-secondary);
+}
+.history-table th:first-child { border-radius:var(--radius-md) 0 0 0; }
+.history-table th:last-child { border-radius:0 var(--radius-md) 0 0; }
+.history-table td {
+  padding:12px; font-size:0.8125rem; color:var(--text-secondary);
+  border-bottom:1px solid var(--border-color);
+}
+.history-table tr:hover td { background:rgba(139,92,246,0.03); }
+.history-table .channel-tag {
+  display:inline-flex; align-items:center; gap:4px; padding:2px 8px;
+  border-radius:999px; font-size:0.6875rem; font-weight:600;
+}
+.channel-sms { background:rgba(16,185,129,0.12); color:#34d399; }
+.channel-whatsapp { background:rgba(37,211,102,0.12); color:#4ade80; }
+.channel-email { background:rgba(59,130,246,0.12); color:#60a5fa; }
+
+/* Analytics mini charts */
+.analytics-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:24px; }
+.analytics-card { background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:16px; }
+.analytics-card:hover { border-color:rgba(139,92,246,0.2); }
+.analytics-title { font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:12px; }
+.analytics-chart { height:140px; position:relative; }
+
+/* Modal extras */
+.modal-body .form-group { margin-bottom:16px; }
+.modal-body .form-label { font-size:0.8125rem; font-weight:600; color:var(--text-primary); margin-bottom:6px; display:block; }
+.modal-body .form-input, .modal-body .form-select, .modal-body .form-textarea {
+  width:100%; padding:10px 14px; border-radius:var(--radius-md);
+  border:1px solid var(--border-color); background:var(--bg-input);
+  color:var(--text-primary); font-size:0.875rem;
+  transition:all var(--duration-fast);
+}
+.modal-body .form-input:focus, .modal-body .form-select:focus, .modal-body .form-textarea:focus {
+  outline:none; border-color:#8b5cf6; box-shadow:0 0 0 3px rgba(139,92,246,0.15);
+}
+.modal-body .form-textarea { resize:vertical; min-height:80px; }
+.preview-panel {
+  background:var(--bg-secondary); border:1px solid var(--border-color);
+  border-radius:var(--radius-lg); padding:16px; margin-top:12px;
+}
+.preview-label { font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+.segment-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.segment-tag {
+  padding:4px 10px; border-radius:999px; font-size:0.75rem; font-weight:500;
+  background:var(--bg-tertiary); color:var(--text-secondary); border:1px solid var(--border-color);
+  cursor:pointer; transition:all var(--duration-fast);
+}
+.segment-tag:hover { border-color:rgba(139,92,246,0.3); color:var(--text-primary); }
+.segment-tag.selected { background:linear-gradient(135deg,#8b5cf6,#7c3aed); color:white; border-color:transparent; }
+
+/* Schedule options */
+.schedule-options { display:flex; gap:8px; margin-top:8px; }
+.schedule-option {
+  flex:1; padding:10px; text-align:center; border-radius:var(--radius-md);
+  border:1px solid var(--border-color); background:var(--bg-card);
+  cursor:pointer; transition:all var(--duration-fast); font-size:0.8125rem;
+}
+.schedule-option:hover { border-color:rgba(139,92,246,0.3); }
+.schedule-option.selected { border-color:#8b5cf6; background:rgba(139,92,246,0.1); color:#c4b5fd; }
+
+/* Filter bar */
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center; }
+.filter-bar select, .filter-bar input {
+  padding:6px 12px; border-radius:var(--radius-md); border:1px solid var(--border-color);
+  background:var(--bg-card); color:var(--text-primary); font-size:0.8125rem;
+}
+
+/* Animations */
+@keyframes fadeSlideIn {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.campaign-card, .reminder-row, .template-card { animation:fadeSlideIn 0.35s ease-out both; }
+
+@media (max-width:1024px) {
+  .analytics-row { grid-template-columns:repeat(2,1fr); }
+  .campaign-grid { grid-template-columns:1fr; }
+}
+@media (max-width:640px) {
+  .analytics-row { grid-template-columns:1fr; }
+  .tab-bar { width:100%; }
+  .tab-btn { flex:1; text-align:center; padding:8px 12px; }
+  .campaign-stats { grid-template-columns:repeat(2,1fr); }
+  .reminder-row { flex-wrap:wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon">B</div>
+    <span class="sidebar-brand-text">BarberPro</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Ana Menü</div>
+      <a class="sidebar-link" href="dashboard.html">
+        <span class="icon">📊</span>
+        <span class="sidebar-text">Dashboard</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📅</span>
+        <span class="sidebar-text">Randevular</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">✂️</span>
+        <span class="sidebar-text">Hizmetler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">👥</span>
+        <span class="sidebar-text">Personel</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Operasyon</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">🧑‍🤝‍🧑</span>
+        <span class="sidebar-text">Müşteriler</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📦</span>
+        <span class="sidebar-text">Stok</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">💎</span>
+        <span class="sidebar-text">Sadakat</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">💶</span>
+        <span class="sidebar-text">Finans</span>
+      </a>
+      <a class="sidebar-link active" href="barberpro-marketing.html">
+        <span class="icon">📢</span>
+        <span class="sidebar-text">Kampanyalar</span>
+        <span class="badge badge-aktif">5</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Raporlar</div>
+      <a class="sidebar-link" href="#">
+        <span class="icon">📈</span>
+        <span class="sidebar-text">Raporlar</span>
+      </a>
+      <a class="sidebar-link" href="#">
+        <span class="icon">⚙️</span>
+        <span class="sidebar-text">Portal Ayarları</span>
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="card" style="padding:12px; border:none; background:var(--bg-secondary);">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">A</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);">Ahmet Yılmaz</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Sahip — Le Barbier Royal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <button class="header-btn mobile-visible" onclick="toggleMobileSidebar()">☰</button>
+      <div>
+        <div class="header-title">SMS & Kampanya Yönetimi</div>
+        <div class="header-breadcrumb">Le Barbier Royal › Brüksel › 15 Mayıs 2026</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        <input type="text" placeholder="Kampanya, şablon veya müşteri ara...">
+      </div>
+      <button class="header-btn" onclick="showNotifications()" title="Bildirimler">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+        <span class="badge-dot"></span>
+      </button>
+      <button class="header-btn" onclick="toggleTheme()" title="Tema">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notifications Panel -->
+  <div class="notifications-panel" id="notificationsPanel">
+    <div class="notifications-header">
+      <span style="font-weight:600; font-size:0.9375rem;">Bildirimler</span>
+      <button class="btn btn-ghost btn-sm" onclick="showNotifications()">Kapat</button>
+    </div>
+    <div class="notifications-list">
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📢</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Kampanya tamamlandı</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">"Yaz Bakımı İndirimi" — 312/312 gönderildi</div>
+        </div>
+      </div>
+      <div class="notifications-item unread">
+        <div class="avatar avatar-sm">📩</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Yeni randevu (kampanya kaynaklı)</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">Jean Dupont — Yaz Bakımı İndirimi</div>
+        </div>
+      </div>
+      <div class="notifications-item">
+        <div class="avatar avatar-sm">🎂</div>
+        <div>
+          <div style="font-size:0.8125rem; font-weight:500; color:var(--text-primary);">Doğum günü kutlaması gönderildi</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted); margin-top:2px;">3 müşteriye otomatik SMS gönderildi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Content -->
+  <div class="page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">📢 Kampanya & İletişim Merkezi</h1>
+        <p class="page-subtitle">Müşterilerinize ulaşın, randevuları artırın, bağlılığı güçlendirin</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary" onclick="openModal('kampanyaModal')">
+          <span>🚀</span> Yeni Kampanya
+        </button>
+        <button class="btn btn-secondary" onclick="openModal('kuralModal')">
+          <span>⚡</span> Yeni Kural Ekle
+        </button>
+      </div>
+    </div>
+
+    <!-- Top Summary Cards -->
+    <div class="widget-grid widget-grid-4" style="grid-template-columns:repeat(4,1fr); margin-bottom:24px;">
+      <div class="card stat-card">
+        <div class="stat-icon">📩</div>
+        <div class="stat-value">1,240</div>
+        <div class="stat-label">Toplam Gönderilen (Bu Ay)</div>
+        <div class="stat-change up">↑ 18% geçen ay</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">👁️</div>
+        <div class="stat-value">78%</div>
+        <div class="stat-label">Açılma Oranı</div>
+        <div class="stat-change up">↑ 5% geçen ay</div>
+      </div>
+      <div class="card stat-card stat-revenue">
+        <div class="stat-icon">🚀</div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">Aktif Kampanya</div>
+        <div class="stat-change up">↑ 2 yeni bu hafta</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">42</div>
+        <div class="stat-label">Yeni Randevu (Kampanya Kaynaklı)</div>
+        <div class="stat-change up">↑ 12 bu hafta</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('kampanyalar')" id="tab-kampanyalar">🚀 Kampanyalar</button>
+      <button class="tab-btn" onclick="switchTab('hatirlatmalar')" id="tab-hatirlatmalar">⚡ Otomatik Hatırlatmalar</button>
+      <button class="tab-btn" onclick="switchTab('sablonlar')" id="tab-sablonlar">📝 Şablonlar</button>
+      <button class="tab-btn" onclick="switchTab('gecmis')" id="tab-gecmis">📜 Gönderim Geçmişi</button>
+    </div>
+
+    <!-- TAB 1: Kampanyalar -->
+    <div id="panel-kampanyalar" class="tab-panel">
+      <!-- Analytics Mini Panel -->
+      <div class="analytics-row">
+        <div class="card analytics-card">
+          <div class="analytics-title">📈 Gönderim Trendi (30 Gün)</div>
+          <div class="analytics-chart"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="card analytics-card">
+          <div class="analytics-title">📊 Kanal Dağılımı</div>
+          <div class="analytics-chart"><canvas id="channelChart"></canvas></div>
+        </div>
+        <div class="card analytics-card">
+          <div class="analytics-title">🎯 Kampanya Dönüşüm Oranları</div>
+          <div class="analytics-chart"><canvas id="conversionChart"></canvas></div>
+        </div>
+        <div class="card analytics-card">
+          <div class="analytics-title">⏰ Açılma Saati Dağılımı</div>
+          <div class="analytics-chart"><canvas id="openTimeChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Campaign Grid -->
+      <div style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h2 style="font-size:var(--text-lg); font-weight:700; color:var(--text-primary);">Aktif Kampanyalar</h2>
+          <button class="btn btn-sm btn-primary" onclick="openModal('kampanyaModal')">+ Yeni Kampanya</button>
+        </div>
+        <div class="campaign-grid" id="campaignGrid">
+          <!-- Campaign 1 -->
+          <div class="campaign-card" style="animation-delay:0.05s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">Yaz Bakımı İndirimi</div>
+                <div class="campaign-desc">Tüm bakım hizmetlerinde geçerli</div>
+              </div>
+              <span class="campaign-discount">%20 İndirim</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-aktif">Aktif</span>
+              <span style="font-size:0.6875rem; color:var(--text-muted);">15 Haz — 15 Tem</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">340</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">312</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">82%</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">18</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+
+          <!-- Campaign 2 -->
+          <div class="campaign-card" style="animation-delay:0.1s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">Doğum Günü Özel</div>
+                <div class="campaign-desc">Otomatik doğum günü kutlaması</div>
+              </div>
+              <span class="campaign-discount">Ücretsiz Manikür</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-aktif">Aktif</span>
+              <span class="badge badge-planlandi">Otomatik</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">28</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">28</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">91%</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">8</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+
+          <!-- Campaign 3 -->
+          <div class="campaign-card" style="animation-delay:0.15s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">Boş Slot Doldur</div>
+                <div class="campaign-desc">Son dakika boşlukları değerlendir</div>
+              </div>
+              <span class="campaign-discount">%15 İndirim</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-aktif">Aktif</span>
+              <span style="font-size:0.6875rem; color:var(--text-muted);">Her gün 09:00</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">120</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">98</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">72%</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">7</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+
+          <!-- Campaign 4 -->
+          <div class="campaign-card" style="animation-delay:0.2s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">VIP Üye Daveti</div>
+                <div class="campaign-desc">Platinum üyelere özel etkinlik</div>
+              </div>
+              <span class="campaign-discount">Platinum Özel</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-planlandi">Planlandı</span>
+              <span style="font-size:0.6875rem; color:var(--text-muted);">20 Mayıs 2026</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">35</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">0</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">—</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">—</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+
+          <!-- Campaign 5 -->
+          <div class="campaign-card" style="animation-delay:0.25s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">Yeni Müşteri %10</div>
+                <div class="campaign-desc">İlk ziyaretine özel hoş geldin</div>
+              </div>
+              <span class="campaign-discount">%10 İndirim</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-aktif">Aktif</span>
+              <span style="font-size:0.6875rem; color:var(--text-muted);">Sürekli</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">200</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">156</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">68%</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">12</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+
+          <!-- Campaign 6 -->
+          <div class="campaign-card" style="animation-delay:0.3s;">
+            <div class="campaign-header">
+              <div>
+                <div class="campaign-title">Haftasonu Paketi</div>
+                <div class="campaign-desc">Cumartesi gününe özel kombine</div>
+              </div>
+              <span class="campaign-discount">Cumartesi Özel</span>
+            </div>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+              <span class="badge badge-tamamlandi">Tamamlandı</span>
+              <span style="font-size:0.6875rem; color:var(--text-muted);">8—10 Mayıs</span>
+            </div>
+            <div class="campaign-stats">
+              <div class="campaign-stat"><div class="campaign-stat-value">150</div><div class="campaign-stat-label">Hedef</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">148</div><div class="campaign-stat-label">Gönderilen</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">85%</div><div class="campaign-stat-label">Açılma</div></div>
+              <div class="campaign-stat"><div class="campaign-stat-value">23</div><div class="campaign-stat-label">Randevu</div></div>
+            </div>
+            <div class="campaign-actions">
+              <button class="btn btn-secondary btn-sm" onclick="showToast('Kampanya düzenleme açıldı','info')">Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya durduruldu','warning')">Durdur</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Sonuç raporu hazırlanıyor','info')">Sonuçlar</button>
+              <button class="btn btn-ghost btn-sm" onclick="showToast('Kampanya tekrarlandı','success')">Tekrarla</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Otomatik Hatırlatmalar -->
+    <div id="panel-hatirlatmalar" class="tab-panel" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="font-size:var(--text-lg); font-weight:700; color:var(--text-primary);">Otomatik Hatırlatma Kuralları</h2>
+        <button class="btn btn-sm btn-primary" onclick="openModal('kuralModal')">+ Yeni Kural Ekle</button>
+      </div>
+      <div class="reminder-list" id="reminderList">
+        <!-- Rule 1 -->
+        <div class="reminder-row" style="animation-delay:0.05s;">
+          <div class="reminder-icon">📅</div>
+          <div class="reminder-info">
+            <div class="reminder-name">Randevu Hatırlatma (24h önce)</div>
+            <div class="reminder-trigger">Randevudan 24 saat önce otomatik gönder</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-sms">SMS</span>
+            <span class="channel-tag channel-whatsapp">WhatsApp</span>
+          </div>
+          <div class="reminder-preview">"Merhaba {isim}, yarın {saat} randevunuz hatırlatması..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 2 -->
+        <div class="reminder-row" style="animation-delay:0.1s;">
+          <div class="reminder-icon">⏰</div>
+          <div class="reminder-info">
+            <div class="reminder-name">Randevu Hatırlatma (2h önce)</div>
+            <div class="reminder-trigger">Randevudan 2 saat önce otomatik gönder</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-whatsapp">WhatsApp</span>
+          </div>
+          <div class="reminder-preview">"{isim}, randevunuza 2 saat kaldı! Le Barbier Royal..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 3 -->
+        <div class="reminder-row" style="animation-delay:0.15s;">
+          <div class="reminder-icon">🎂</div>
+          <div class="reminder-info">
+            <div class="reminder-name">Doğum Günü Kutlaması</div>
+            <div class="reminder-trigger">Doğum günü olan müşterilere otomatik</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-sms">SMS</span>
+          </div>
+          <div class="reminder-preview">"🎉 İyi ki doğdun {isim}! Doğum gününüze özel %20 indirim..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 4 -->
+        <div class="reminder-row" style="animation-delay:0.2s;">
+          <div class="reminder-icon">💔</div>
+          <div class="reminder-info">
+            <div class="reminder-name">Son Ziyaret 30 Gün</div>
+            <div class="reminder-trigger">30 gündür gelmeyen müşterilere</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-sms">SMS</span>
+          </div>
+          <div class="reminder-preview">"{isim}, sizi özledik! Bir süredir uğramadınız..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 5 -->
+        <div class="reminder-row" style="animation-delay:0.25s;">
+          <div class="reminder-icon">🎁</div>
+          <div class="reminder-info">
+            <div class="reminder-name">Son Ziyaret 60 Gün</div>
+            <div class="reminder-trigger">60 gündür gelmeyen müşterilere indirim teklifi</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-whatsapp">WhatsApp</span>
+          </div>
+          <div class="reminder-preview">"{isim}, sizi geri kazanmak istiyoruz! %15 indirim..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 6 -->
+        <div class="reminder-row" style="animation-delay:0.3s;">
+          <div class="reminder-icon">😊</div>
+          <div class="reminder-info">
+            <div class="reminder-name">İptal Sonrası</div>
+            <div class="reminder-trigger">Randevu iptal eden müşterilere ertesi gün</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-sms">SMS</span>
+          </div>
+          <div class="reminder-preview">"{isim}, randevunuzu iptal ettiğinizi gördük. Yeniden bekleriz..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+
+        <!-- Rule 7 -->
+        <div class="reminder-row" style="animation-delay:0.35s;">
+          <div class="reminder-icon">🙏</div>
+          <div class="reminder-info">
+            <div class="reminder-name">İlk Ziyaret Teşekkür</div>
+            <div class="reminder-trigger">İlk randevudan ertesi gün otomatik</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <span class="channel-tag channel-whatsapp">WhatsApp</span>
+          </div>
+          <div class="reminder-preview">"{isim}, bizi tercih ettiğiniz için teşekkürler! Bir sonraki..."</div>
+          <label class="switch"><input type="checkbox" checked onchange="toggleReminder(this)"><span class="slider"></span></label>
+          <button class="btn btn-ghost btn-icon-sm" onclick="showToast('Kural düzenleme açıldı','info')">✏️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Şablonlar -->
+    <div id="panel-sablonlar" class="tab-panel" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="font-size:var(--text-lg); font-weight:700; color:var(--text-primary);">Mesaj Şablonları</h2>
+        <button class="btn btn-sm btn-primary" onclick="openModal('sablonModal')">+ Yeni Şablon</button>
+      </div>
+      <div class="template-grid" id="templateGrid">
+        <!-- Template 1 -->
+        <div class="template-card" style="animation-delay:0.05s;">
+          <div class="template-header">
+            <span class="template-name">📅 Randevu Hatırlatma</span>
+            <span class="template-count">342 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            Merhaba {isim}, {tarih} {saat} tarihli randevunuzu hatırlatmak isteriz. Le Barbier Royal — Rue de la Loi 42, Brüksel
+          </div>
+          <div class="sms-time">Gönderildi: Bugün 09:15</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 2 -->
+        <div class="template-card" style="animation-delay:0.1s;">
+          <div class="template-header">
+            <span class="template-name">🎂 Doğum Günü</span>
+            <span class="template-count">89 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            🎉 İyi ki doğdun {isim}! Doğum gününüze özel {indirim} indirimle gelin, kendinizi şımartın. Geçerlilik: {gecerlilik}
+          </div>
+          <div class="sms-time">Gönderildi: Dün 10:00</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 3 -->
+        <div class="template-card" style="animation-delay:0.15s;">
+          <div class="template-header">
+            <span class="template-name">🏷️ İndirim Duyuru</span>
+            <span class="template-count">156 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, Le Barbier Royal'de {indirim} büyük indirim başladı! Tüm bakım hizmetlerinde geçerli. Fırsatı kaçırmayın — {gecerlilik}
+          </div>
+          <div class="sms-time">Gönderildi: 12 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 4 -->
+        <div class="template-card" style="animation-delay:0.2s;">
+          <div class="template-header">
+            <span class="template-name">🪑 Boş Slot</span>
+            <span class="template-count">67 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, bugün {saat} saatinde boş slotumuz var! Son dakika {indirim} indirimle hemen randevu alın.
+          </div>
+          <div class="sms-time">Gönderildi: 10 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 5 -->
+        <div class="template-card" style="animation-delay:0.25s;">
+          <div class="template-header">
+            <span class="template-name">💔 Geri Kazanma</span>
+            <span class="template-count">45 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, sizi özledik! Bir süredir uğramadınız. Size özel {indirim} indirim kodu: GERI20. Bekliyoruz 🌙
+          </div>
+          <div class="sms-time">Gönderildi: 5 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 6 -->
+        <div class="template-card" style="animation-delay:0.3s;">
+          <div class="template-header">
+            <span class="template-name">🙏 Teşekkür</span>
+            <span class="template-count">198 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, bizi tercih ettiğiniz için teşekkür ederiz! Bir sonraki randevunuzu {gecerlilik} içinde ayırtın, %10 indirim kazanın.
+          </div>
+          <div class="sms-time">Gönderildi: 14 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 7 -->
+        <div class="template-card" style="animation-delay:0.35s;">
+          <div class="template-header">
+            <span class="template-name">❌ İptal Onayı</span>
+            <span class="template-count">23 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, {tarih} {saat} randevunuz iptal edilmiştir. Yeni tarih için bizi arayın veya online rezervasyon yapın.
+          </div>
+          <div class="sms-time">Gönderildi: 13 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 8 -->
+        <div class="template-card" style="animation-delay:0.4s;">
+          <div class="template-header">
+            <span class="template-name">✨ Yeni Hizmet Tanıtım</span>
+            <span class="template-count">34 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, Le Barbier Royal'de yeni hizmetimiz: Keratin Bakım! İlk deneme {indirim} indirimli. {gecerlilik}
+          </div>
+          <div class="sms-time">Gönderildi: 1 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 9 -->
+        <div class="template-card" style="animation-delay:0.45s;">
+          <div class="template-header">
+            <span class="template-name">🎄 Yılbaşı / Bayram Özel</span>
+            <span class="template-count">12 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            🎄 Mutlu Yıllar {isim}! Yeni yılda kendinizi şımartın. {indirim} indirim + ücretsiz saç bakım paketi. {gecerlilik}
+          </div>
+          <div class="sms-time">Gönderildi: 20 Aralık</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 10 -->
+        <div class="template-card" style="animation-delay:0.5s;">
+          <div class="template-header">
+            <span class="template-name">💎 VIP Davet</span>
+            <span class="template-count">8 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            Değerli {isim}, Platinum üyelere özel kokteyl davetimiz: {tarih} {saat}. Özel indirimler ve sürprizler sizi bekliyor!
+          </div>
+          <div class="sms-time">Gönderildi: 15 Nisan</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 11 -->
+        <div class="template-card" style="animation-delay:0.55s;">
+          <div class="template-header">
+            <span class="template-name">⭐ Yorum İsteme</span>
+            <span class="template-count">76 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, hizmetimizden memnun kaldınız mı? Google'da yorum yapın, bir sonraki ziyaretinizde {indirim} puan hediye!
+          </div>
+          <div class="sms-time">Gönderildi: 11 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+
+        <!-- Template 12 -->
+        <div class="template-card" style="animation-delay:0.6s;">
+          <div class="template-header">
+            <span class="template-name">🎁 Referans Ödülü</span>
+            <span class="template-count">54 kullanım</span>
+          </div>
+          <div class="sms-bubble">
+            {isim}, arkadaşınızı getirin, ikiniz de {indirim} puan kazanın! Referans kodunuz: {kod}. Detaylar: {gecerlilik}
+          </div>
+          <div class="sms-time">Gönderildi: 8 Mayıs</div>
+          <div class="template-actions">
+            <button class="btn btn-secondary btn-sm" onclick="showToast('Şablon düzenleme açıldı','info')">Düzenle</button>
+            <button class="btn btn-ghost btn-sm" onclick="showToast('Şablon silindi','error')">Sil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Gönderim Geçmişi -->
+    <div id="panel-gecmis" class="tab-panel" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="font-size:var(--text-lg); font-weight:700; color:var(--text-primary);">Gönderim Geçmişi</h2>
+        <div class="filter-bar">
+          <input type="date" value="2026-05-01">
+          <input type="date" value="2026-05-15">
+          <select><option>Tüm Kanallar</option><option>SMS</option><option>WhatsApp</option><option>E-posta</option></select>
+          <select><option>Tüm Durumlar</option><option>Başarılı</option><option>Başarısız</option><option>Bekliyor</option></select>
+          <button class="btn btn-sm btn-secondary" onclick="showToast('Filtreler uygulandı','info')">🔍 Uygula</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Tarih</th><th>Kampanya/Şablon</th><th>Kanal</th><th>Hedef</th><th>Gönderilen</th><th>Başarılı</th><th>Başarısız</th><th>Açılma</th><th>Tıklama</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr><td>15 May 09:00</td><td>Doğum Günü Özel</td><td><span class="channel-tag channel-sms">SMS</span></td><td>3</td><td>3</td><td>3</td><td>0</td><td>91%</td><td>67%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>15 May 08:30</td><td>Boş Slot Doldur</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>12</td><td>12</td><td>11</td><td>1</td><td>75%</td><td>42%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>14 May 18:00</td><td>Yaz Bakımı İndirimi</td><td><span class="channel-tag channel-sms">SMS</span><span class="channel-tag channel-whatsapp" style="margin-left:4px;">WhatsApp</span></td><td>340</td><td>312</td><td>298</td><td>14</td><td>82%</td><td>58%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>14 May 09:15</td><td>Randevu Hatırlatma</td><td><span class="channel-tag channel-sms">SMS</span></td><td>18</td><td>18</td><td>18</td><td>0</td><td>94%</td><td>—</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>13 May 14:00</td><td>Yeni Müşteri %10</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>45</td><td>45</td><td>43</td><td>2</td><td>71%</td><td>38%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>13 May 09:00</td><td>İlk Ziyaret Teşekkür</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>5</td><td>5</td><td>5</td><td>0</td><td>100%</td><td>60%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>12 May 11:30</td><td>Haftasonu Paketi</td><td><span class="channel-tag channel-sms">SMS</span></td><td>150</td><td>148</td><td>145</td><td>3</td><td>85%</td><td>52%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>12 May 09:00</td><td>İndirim Duyuru</td><td><span class="channel-tag channel-email">E-posta</span></td><td>200</td><td>198</td><td>195</td><td>3</td><td>64%</td><td>31%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>11 May 16:00</td><td>Son Ziyaret 30 Gün</td><td><span class="channel-tag channel-sms">SMS</span></td><td>28</td><td>28</td><td>27</td><td>1</td><td>68%</td><td>29%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>11 May 10:00</td><td>VIP Davet</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>35</td><td>35</td><td>35</td><td>0</td><td>89%</td><td>71%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>10 May 09:00</td><td>Boş Slot Doldur</td><td><span class="channel-tag channel-sms">SMS</span></td><td>8</td><td>8</td><td>8</td><td>0</td><td>88%</td><td>50%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>9 May 14:00</td><td>Yorum İsteme</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>12</td><td>12</td><td>12</td><td>0</td><td>92%</td><td>75%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>9 May 09:30</td><td>Randevu Hatırlatma (2h)</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>6</td><td>6</td><td>6</td><td>0</td><td>100%</td><td>—</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>8 May 11:00</td><td>Referans Ödülü</td><td><span class="channel-tag channel-sms">SMS</span></td><td>50</td><td>50</td><td>48</td><td>2</td><td>72%</td><td>44%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>8 May 09:00</td><td>İptal Sonrası</td><td><span class="channel-tag channel-sms">SMS</span></td><td>2</td><td>2</td><td>2</td><td>0</td><td>100%</td><td>50%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>7 May 18:00</td><td>Yaz Bakımı İndirimi</td><td><span class="channel-tag channel-sms">SMS</span></td><td>120</td><td>115</td><td>110</td><td>5</td><td>79%</td><td>55%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>7 May 09:00</td><td>Doğum Günü Özel</td><td><span class="channel-tag channel-sms">SMS</span></td><td>2</td><td>2</td><td>2</td><td>0</td><td>100%</td><td>100%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>6 May 10:00</td><td>Geri Kazanma</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>15</td><td>15</td><td>14</td><td>1</td><td>67%</td><td>27%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>5 May 14:00</td><td>Yeni Hizmet Tanıtım</td><td><span class="channel-tag channel-email">E-posta</span></td><td>180</td><td>175</td><td>170</td><td>5</td><td>58%</td><td>24%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>5 May 09:00</td><td>Teşekkür</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>8</td><td>8</td><td>8</td><td>0</td><td>88%</td><td>63%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>4 May 11:00</td><td>İndirim Duyuru</td><td><span class="channel-tag channel-sms">SMS</span></td><td>250</td><td>245</td><td>238</td><td>7</td><td>74%</td><td>48%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>3 May 09:15</td><td>Randevu Hatırlatma</td><td><span class="channel-tag channel-sms">SMS</span></td><td>22</td><td>22</td><td>22</td><td>0</td><td>96%</td><td>—</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>2 May 16:00</td><td>Son Ziyaret 60 Gün</td><td><span class="channel-tag channel-whatsapp">WhatsApp</span></td><td>10</td><td>10</td><td>9</td><td>1</td><td>70%</td><td>30%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+            <tr><td>1 May 10:00</td><td>Yılbaşı Özel</td><td><span class="channel-tag channel-email">E-posta</span></td><td>300</td><td>295</td><td>290</td><td>5</td><td>62%</td><td>28%</td><td><button class="btn btn-ghost btn-icon-sm" onclick="openModal('detayModal')">👁️</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ========== MODALS ========== -->
+
+<!-- New Campaign Modal -->
+<div class="modal-overlay" id="kampanyaModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">🚀 Yeni Kampanya Oluştur</div>
+      <button class="modal-close" onclick="closeModal('kampanyaModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kampanya Adı</label>
+          <input type="text" class="form-input" placeholder="Örn: Yaz Bakımı İndirimi" id="kAd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Açıklama</label>
+          <input type="text" class="form-input" placeholder="Kampanya açıklaması..." id="kAciklama">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hedef Kitle</label>
+        <div class="segment-tags">
+          <span class="segment-tag selected" onclick="toggleSegment(this)">Tümü</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">VIP</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">Düzenli</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">Uykuda</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">Yeni</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">Doğum günü olanlar</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kanal</label>
+          <div class="segment-tags">
+            <span class="segment-tag selected" onclick="toggleSegment(this)">SMS</span>
+            <span class="segment-tag selected" onclick="toggleSegment(this)">WhatsApp</span>
+            <span class="segment-tag" onclick="toggleSegment(this)">E-posta</span>
+            <span class="segment-tag" onclick="toggleSegment(this)">Hepsi</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">İndirim Tipi</label>
+          <select class="form-select" id="kIndirimTipi">
+            <option>Yüzde (%)</option>
+            <option>Sabit Tutar (€)</option>
+            <option>Ücretsiz Hizmet</option>
+            <option>Puan Hediye</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">İndirim Değeri</label>
+          <input type="text" class="form-input" placeholder="Örn: 20" id="kIndirimDeger">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Geçerlilik Tarihi</label>
+          <input type="date" class="form-input" id="kGecerlilik">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Şablon Seçimi</label>
+        <select class="form-select" id="kSablon">
+          <option>📝 Özel mesaj yaz</option>
+          <option>📅 Randevu Hatırlatma</option>
+          <option>🏷️ İndirim Duyuru</option>
+          <option>🎂 Doğum Günü</option>
+          <option>🪑 Boş Slot</option>
+          <option>💔 Geri Kazanma</option>
+          <option>🙏 Teşekkür</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mesaj İçeriği</label>
+        <textarea class="form-textarea" rows="3" placeholder="Mesajınızı yazın... {isim}, {indirim}, {gecerlilik} değişkenlerini kullanabilirsiniz." id="kMesaj">Merhaba {isim}, Le Barbier Royal'de {indirim} indirim fırsatı sizi bekliyor! Geçerlilik: {gecerlilik}. Hemen randevu alın!</textarea>
+      </div>
+      <div class="preview-panel">
+        <div class="preview-label">📱 Mesaj Önizleme</div>
+        <div class="sms-bubble" id="previewBubble" style="margin-top:8px;">
+          Merhaba Ahmet, Le Barbier Royal'de %20 indirim fırsatı sizi bekliyor! Geçerlilik: 30 Haziran 2026. Hemen randevu alın!
+        </div>
+        <div class="sms-time">Önizleme — 160 karakter</div>
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <label class="form-label">Zamanlama</label>
+        <div class="schedule-options">
+          <div class="schedule-option selected" onclick="selectSchedule(this)">⚡ Hemen</div>
+          <div class="schedule-option" onclick="selectSchedule(this)">📅 Planlanmış Tarih</div>
+          <div class="schedule-option" onclick="selectSchedule(this)">🔁 Tekrarlayan</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('kampanyaModal')">İptal</button>
+      <button class="btn btn-primary" onclick="closeModal('kampanyaModal'); showToast('Kampanya oluşturuldu ve gönderime alındı!','success')">🚀 Kampanyayı Başlat</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Rule Modal -->
+<div class="modal-overlay" id="kuralModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">⚡ Yeni Otomatik Kural</div>
+      <button class="modal-close" onclick="closeModal('kuralModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kural Adı</label>
+          <input type="text" class="form-input" placeholder="Örn: Randevu Hatırlatma 24h" id="rAd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tetikleyici Koşul</label>
+          <select class="form-select" id="rKosul">
+            <option>Randevudan X saat önce</option>
+            <option>Randevudan X gün önce</option>
+            <option>Doğum gününde</option>
+            <option>Son ziyaret X gün sonra</option>
+            <option>İlk ziyaret ertesi gün</option>
+            <option>İptal sonrası X saat</option>
+            <option>Seviye yükseldiğinde</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Zaman Değeri</label>
+          <input type="number" class="form-input" placeholder="Örn: 24" value="24" id="rZaman">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Birim</label>
+          <select class="form-select" id="rBirim">
+            <option>Dakika</option>
+            <option>Saat</option>
+            <option selected>Gün</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kanal</label>
+        <div class="segment-tags">
+          <span class="segment-tag selected" onclick="toggleSegment(this)">SMS</span>
+          <span class="segment-tag selected" onclick="toggleSegment(this)">WhatsApp</span>
+          <span class="segment-tag" onclick="toggleSegment(this)">E-posta</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Şablon Seçimi</label>
+        <select class="form-select" id="rSablon">
+          <option>📅 Randevu Hatırlatma</option>
+          <option>🎂 Doğum Günü</option>
+          <option>💔 Geri Kazanma</option>
+          <option>🙏 Teşekkür</option>
+          <option>❌ İptal Onayı</option>
+          <option>📝 Özel mesaj yaz</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mesaj İçeriği</label>
+        <textarea class="form-textarea" rows="3" placeholder="Mesajınızı yazın..." id="rMesaj">Merhaba {isim}, {tarih} {saat} tarihli randevunuzu hatırlatmak isteriz. Le Barbier Royal</textarea>
+      </div>
+      <div class="preview-panel">
+        <div class="preview-label">📱 Mesaj Önizleme</div>
+        <div class="sms-bubble" style="margin-top:8px;">
+          Merhaba Ahmet, 16 Mayıs 14:30 tarihli randevunuzu hatırlatmak isteriz. Le Barbier Royal
+        </div>
+        <div class="sms-time">Önizleme — 98 karakter</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('kuralModal')">İptal</button>
+      <button class="btn btn-primary" onclick="closeModal('kuralModal'); showToast('Otomatik kural oluşturuldu!','success')">⚡ Kuralı Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Template Modal -->
+<div class="modal-overlay" id="sablonModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📝 Yeni Şablon</div>
+      <button class="modal-close" onclick="closeModal('sablonModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Şablon Adı</label>
+        <input type="text" class="form-input" placeholder="Örn: Özel Gün Kutlaması" id="sAd">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mesaj İçeriği</label>
+        <textarea class="form-textarea" rows="4" placeholder="Mesajınızı yazın... {isim}, {indirim}, {gecerlilik}, {tarih}, {saat} değişkenlerini kullanabilirsiniz." id="sMesaj"></textarea>
+      </div>
+      <div class="preview-panel">
+        <div class="preview-label">📱 Önizleme</div>
+        <div class="sms-bubble" style="margin-top:8px;" id="sPreview">
+          Önizleme için mesaj yazın...
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('sablonModal')">İptal</button>
+      <button class="btn btn-primary" onclick="closeModal('sablonModal'); showToast('Şablon kaydedildi!','success')">💾 Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" id="detayModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">📜 Gönderim Detayları</div>
+      <button class="modal-close" onclick="closeModal('detayModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px;">
+        <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius-md); text-align:center;">
+          <div style="font-size:1.25rem; font-weight:700; color:var(--text-primary);">312</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Gönderilen</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius-md); text-align:center;">
+          <div style="font-size:1.25rem; font-weight:700; color:var(--success-500);">298</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Başarılı</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius-md); text-align:center;">
+          <div style="font-size:1.25rem; font-weight:700; color:var(--error-500);">14</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Başarısız</div>
+        </div>
+        <div style="padding:12px; background:var(--bg-secondary); border-radius:var(--radius-md); text-align:center;">
+          <div style="font-size:1.25rem; font-weight:700; color:#a78bfa;">82%</div>
+          <div style="font-size:0.6875rem; color:var(--text-muted);">Açılma</div>
+        </div>
+      </div>
+      <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary); margin-bottom:10px;">Alıcı Listesi</h3>
+      <div style="max-height:320px; overflow-y:auto;">
+        <table class="history-table">
+          <thead><tr><th>Müşteri</th><th>Telefon</th><th>Durum</th><th>Açıldı</th><th>Tıkladı</th></tr></thead>
+          <tbody>
+            <tr><td>Jean Dupont</td><td>+32 470 12 34 56</td><td><span class="badge badge-aktif">Başarılı</span></td><td>✓</td><td>✓</td></tr>
+            <tr><td>Sophie Laurent</td><td>+32 471 23 45 67</td><td><span class="badge badge-aktif">Başarılı</span></td><td>✓</td><td>—</td></tr>
+            <tr><td>Marc Dubois</td><td>+32 472 34 56 78</td><td><span class="badge badge-aktif">Başarılı</span></td><td>✓</td><td>✓</td></tr>
+            <tr><td>Emma Vermeulen</td><td>+32 473 45 67 89</td><td><span class="badge badge-aktif">Başarılı</span></td><td>—</td><td>—</td></tr>
+            <tr><td>Lucas Peeters</td><td>+32 474 56 78 90</td><td><span class="badge badge-durduruldu">Başarısız</span></td><td>—</td><td>—</td></tr>
+            <tr><td>Marie Lambert</td><td>+32 475 67 89 01</td><td><span class="badge badge-aktif">Başarılı</span></td><td>✓</td><td>✓</td></tr>
+            <tr><td>Thomas Martin</td><td>+32 476 78 90 12</td><td><span class="badge badge-aktif">Başarılı</span></td><td>✓</td><td>—</td></tr>
+            <tr><td>Julie Bernard</td><td>+32 477 89 01 23</td><td><span class="badge badge-durduruldu">Başarısız</span></td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('detayModal')">Kapat</button>
+      <button class="btn btn-primary" onclick="showToast('Rapor indiriliyor...','info')">📥 Rapor İndir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Tab Switching ── */
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('tab-' + tabName).classList.add('active');
+  document.getElementById('panel-' + tabName).style.display = 'block';
+  if (tabName === 'kampanyalar') { initCharts(); }
+}
+
+/* ── Modal ── */
+function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) closeModal(m.id); }));
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id)); });
+
+/* ── Toast ── */
+function showToast(message, type='info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.innerHTML = '<span>' + message + '</span>';
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('active'));
+  setTimeout(() => { toast.classList.remove('active'); setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+/* ── UI Toggles ── */
+function toggleSegment(el) { el.classList.toggle('selected'); }
+function selectSchedule(el) { el.parentElement.querySelectorAll('.schedule-option').forEach(o => o.classList.remove('selected')); el.classList.add('selected'); }
+function toggleReminder(el) { const on = el.checked; showToast(on ? 'Kural aktifleştirildi' : 'Kural devre dışı bırakıldı', on ? 'success' : 'warning'); }
+
+/* ── Sidebar / Theme / Notifications ── */
+function toggleMobileSidebar() { document.getElementById('sidebar').classList.toggle('mobile-open'); document.getElementById('sidebarOverlay').classList.toggle('active'); document.body.style.overflow = document.getElementById('sidebar').classList.contains('mobile-open') ? 'hidden' : ''; }
+function showNotifications() { document.getElementById('notificationsPanel').classList.toggle('active'); }
+function toggleTheme() { const h = document.documentElement; h.setAttribute('data-theme', h.getAttribute('data-theme')==='dark' ? 'light' : 'dark'); }
+
+/* ── Charts ── */
+let chartsInitialized = false;
+function initCharts() {
+  if (chartsInitialized) return;
+  chartsInitialized = true;
+  const commonOptions = { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false,color:'rgba(148,163,184,0.1)'},ticks:{color:'#64748b',font:{size:10}}},y:{grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#64748b',font:{size:10}}}} };
+
+  // Trend Chart
+  new Chart(document.getElementById('trendChart'), {
+    type:'line',
+    data:{ labels:['15Nis','17Nis','19Nis','21Nis','23Nis','25Nis','27Nis','29Nis','1May','3May','5May','7May','9May','11May','13May'], datasets:[{data:[28,35,42,38,45,52,48,55,62,58,70,75,68,82,88],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.1)',tension:0.4,fill:true,pointRadius:3,pointBackgroundColor:'#8b5cf6'}] },
+    options:{...commonOptions, plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1e293b',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(139,92,246,0.3)',borderWidth:1}}}
+  });
+
+  // Channel Chart
+  new Chart(document.getElementById('channelChart'), {
+    type:'doughnut',
+    data:{ labels:['SMS','WhatsApp','E-posta'], datasets:[{data:[520,410,310],backgroundColor:['#10b981','#25d366','#3b82f6'],borderWidth:0,hoverOffset:8}] },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:10},padding:12}}, tooltip:{backgroundColor:'#1e293b',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(139,92,246,0.3)',borderWidth:1}}}
+  });
+
+  // Conversion Chart
+  new Chart(document.getElementById('conversionChart'), {
+    type:'bar',
+    data:{ labels:['Yaz İnd.','Doğum G.','Boş Slot','VIP','Yeni Müş.','Hft Sn.'], datasets:[{data:[5.8,28.6,7.1,0,7.7,15.5],backgroundColor:['rgba(139,92,246,0.7)','rgba(139,92,246,0.7)','rgba(139,92,246,0.7)','rgba(139,92,246,0.7)','rgba(139,92,246,0.7)','rgba(139,92,246,0.7)'],borderRadius:6,borderSkipped:false}] },
+    options:{...commonOptions, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>c.parsed.y+'%'},backgroundColor:'#1e293b',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(139,92,246,0.3)',borderWidth:1}}}
+  });
+
+  // Open Time Chart
+  new Chart(document.getElementById('openTimeChart'), {
+    type:'bar',
+    data:{ labels:['09','10','11','12','13','14','15','16','17','18','19','20','21'], datasets:[{data:[12,18,25,22,15,35,42,38,28,22,18,14,8],backgroundColor:(ctx)=>{const v=ctx.raw;return v>35?'rgba(139,92,246,0.9)':v>20?'rgba(139,92,246,0.6)':'rgba(139,92,246,0.3)';},borderRadius:4,borderSkipped:false}] },
+    options:{...commonOptions, plugins:{legend:{display:false}, tooltip:{backgroundColor:'#1e293b',titleColor:'#f1f5f9',bodyColor:'#94a3b8',borderColor:'rgba(139,92,246,0.3)',borderWidth:1}}}
+  });
+}
+
+/* ── Preview update on campaign message change ── */
+document.getElementById('kMesaj')?.addEventListener('input', function() {
+  const preview = document.getElementById('previewBubble');
+  if (preview) preview.textContent = this.value.replace('{isim}','Ahmet').replace('{indirim}','%20').replace('{gecerlilik}','30 Haziran 2026');
+});
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => { initCharts(); });
+</script>
+
+</body>
+</html>
