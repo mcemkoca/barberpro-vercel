@@ -17,7 +17,7 @@
   --amber-500: #f59e0b; --amber-600: #d97706;
   --shadow-glow: rgba(139,92,246,0.25);
 }
-[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+[data-theme="dark"] ::selection { background:var(--purple-700,#6d28d9); color:var(--purple-100,#ede9fe); }
 
 .sidebar-brand-icon {
   background:linear-gradient(135deg,var(--teal-500),var(--teal-700)) !important;
@@ -413,6 +413,63 @@
 /* ── New Customer Mini Modal ── */
 .modal-sm { max-width:420px; }
 </style>
+
+/* ── Mobile Responsive Overrides (Stages 5+7) ── */
+@media (max-width:1024px) {
+  .sidebar { transform:translateX(-100%); width:var(--sidebar-width); }
+  .sidebar.mobile-open { transform:translateX(0); }
+  .main { margin-left:0 !important; }
+  .header-search { display:none; }
+  .widget-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .widget-grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:768px) {
+  .page { padding:var(--space-4) var(--space-3); }
+  .page-header { flex-direction:column; gap:var(--space-3); }
+  .page-actions { width:100%; }
+  .page-actions .btn { flex:1; min-height:44px; font-size:var(--text-sm); }
+  .header { padding:0 var(--space-3); }
+  .header-title { font-size:var(--text-base); }
+  .widget-grid-4, .widget-grid-3, .widget-grid-2 { grid-template-columns:1fr; }
+  .chart-container { height:200px; }
+  .quick-actions { gap:var(--space-2); }
+  .quick-action { flex:1; min-width:0; justify-content:center; min-height:44px; }
+  /* Tables: scroll wrapper */
+  .data-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .data-table { min-width:640px; }
+  .notifications-panel { width:100%; max-width:380px; }
+  /* Touch-friendly */
+  .btn, .header-btn, .sidebar-link, .quick-action { min-height:44px; }
+}
+
+@media (max-width:375px) {
+  body { font-size:14px; }
+  .page { padding:var(--space-3) var(--space-2); }
+  .page-title { font-size:var(--text-xl); }
+  .btn { padding:10px 12px; font-size:14px; min-height:44px; }
+  .header-btn { width:40px; height:40px; }
+  .card { padding:var(--space-4); }
+  .stat-value { font-size:var(--text-xl); }
+  .chart-container { height:180px; }
+  .sidebar-brand-icon { width:32px; height:32px; }
+  .quick-action { font-size:13px; padding:var(--space-2) var(--space-3); }
+}
+
+/* Card view tables on very small screens */
+@media (max-width:640px) {
+  .data-table tbody tr {
+    display:flex; flex-direction:column; padding:var(--space-3);
+    border-bottom:1px solid var(--border-color); gap:4px;
+  }
+  .data-table tbody td { padding:2px 0; white-space:normal; font-size:14px; }
+  .data-table thead { display:none; }
+  .data-table tbody td::before {
+    content: attr(data-label); font-weight:600; color:var(--text-muted);
+    font-size:12px; display:block; margin-bottom:2px;
+  }
+}
+
 </head>
 <body>
 

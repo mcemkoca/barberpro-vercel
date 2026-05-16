@@ -187,7 +187,7 @@ ul, ol { list-style:none; }
 
 /* ── Selection ── */
 ::selection { background:var(--teal-200); color:var(--teal-900); }
-[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+[data-theme="dark"] ::selection { background:var(--purple-700,#6d28d9); color:var(--purple-100,#ede9fe); }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width:6px; height:6px; }

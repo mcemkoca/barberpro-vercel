@@ -12,13 +12,13 @@
 <style>
 /* ── Purple Theme Overrides ── */
 :root, [data-theme="dark"] {
-  --teal-50:#f0fdfa; --teal-100:#ccfbf1; --teal-200:#99f6e4; --teal-300:#5eead4;
+  --teal-50:#f0fdfa; --teal-100:#ccfbf1; --teal-200:#c4b5fd; --teal-300:#c4b5fd;
   --teal-400:#a78bfa; --teal-500:#8b5cf6; --teal-600:#7c3aed; --teal-700:#6d28d9;
   --teal-800:#5b21b6; --teal-900:#4c1d95;
   --amber-500:#f59e0b; --amber-600:#d97706;
   --shadow-glow:rgba(139,92,246,0.25);
 }
-[data-theme="dark"] ::selection{background:var(--teal-700);color:var(--teal-100);}
+[data-theme="dark"] ::selection{background:var(--purple-700,#6d28d9);color:var(--purple-100,#ede9fe);}
 .sidebar-brand-icon{background:linear-gradient(135deg,var(--teal-500),var(--teal-700))!important;}
 .sidebar-link.active{background:linear-gradient(135deg,var(--teal-500),var(--teal-600))!important;}
 
@@ -239,6 +239,63 @@
 .heatmap-legend-box{width:14px;height:14px;border-radius:var(--radius-sm);}
 
 </style>
+
+/* ── Mobile Responsive Overrides (Stages 5+7) ── */
+@media (max-width:1024px) {
+  .sidebar { transform:translateX(-100%); width:var(--sidebar-width); }
+  .sidebar.mobile-open { transform:translateX(0); }
+  .main { margin-left:0 !important; }
+  .header-search { display:none; }
+  .widget-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .widget-grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:768px) {
+  .page { padding:var(--space-4) var(--space-3); }
+  .page-header { flex-direction:column; gap:var(--space-3); }
+  .page-actions { width:100%; }
+  .page-actions .btn { flex:1; min-height:44px; font-size:var(--text-sm); }
+  .header { padding:0 var(--space-3); }
+  .header-title { font-size:var(--text-base); }
+  .widget-grid-4, .widget-grid-3, .widget-grid-2 { grid-template-columns:1fr; }
+  .chart-container { height:200px; }
+  .quick-actions { gap:var(--space-2); }
+  .quick-action { flex:1; min-width:0; justify-content:center; min-height:44px; }
+  /* Tables: scroll wrapper */
+  .data-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .data-table { min-width:640px; }
+  .notifications-panel { width:100%; max-width:380px; }
+  /* Touch-friendly */
+  .btn, .header-btn, .sidebar-link, .quick-action { min-height:44px; }
+}
+
+@media (max-width:375px) {
+  body { font-size:14px; }
+  .page { padding:var(--space-3) var(--space-2); }
+  .page-title { font-size:var(--text-xl); }
+  .btn { padding:10px 12px; font-size:14px; min-height:44px; }
+  .header-btn { width:40px; height:40px; }
+  .card { padding:var(--space-4); }
+  .stat-value { font-size:var(--text-xl); }
+  .chart-container { height:180px; }
+  .sidebar-brand-icon { width:32px; height:32px; }
+  .quick-action { font-size:13px; padding:var(--space-2) var(--space-3); }
+}
+
+/* Card view tables on very small screens */
+@media (max-width:640px) {
+  .data-table tbody tr {
+    display:flex; flex-direction:column; padding:var(--space-3);
+    border-bottom:1px solid var(--border-color); gap:4px;
+  }
+  .data-table tbody td { padding:2px 0; white-space:normal; font-size:14px; }
+  .data-table thead { display:none; }
+  .data-table tbody td::before {
+    content: attr(data-label); font-weight:600; color:var(--text-muted);
+    font-size:12px; display:block; margin-bottom:2px;
+  }
+}
+
 </head>
 <body>
 
@@ -661,7 +718,7 @@
           <div class="funnel-bar"><div class="funnel-label" data-i18n="div_2_ziyaret">2. Ziyaret</div><div class="funnel-track"><div class="funnel-fill" style="width:78%;background:linear-gradient(90deg,var(--teal-600),var(--teal-500));"><span class="funnel-value">267</span></div></div></div>
           <div class="funnel-bar"><div class="funnel-label" data-i18n="div_3_ziyaret">3+ Ziyaret</div><div class="funnel-track"><div class="funnel-fill" style="width:65%;background:linear-gradient(90deg,var(--teal-700),var(--teal-600));"><span class="funnel-value">222</span></div></div></div>
           <div class="funnel-bar"><div class="funnel-label" data-i18n="div_sadakat_üyesi">Sadakat Üyesi</div><div class="funnel-track"><div class="funnel-fill" style="width:48%;background:linear-gradient(90deg,#7c3aed,#8b5cf6);"><span class="funnel-value">164</span></div></div></div>
-          <div class="funnel-bar"><div class="funnel-label" data-i18n="div_gold_üye">Gold+ Üye</div><div class="funnel-track"><div class="funnel-fill" style="width:22%;background:linear-gradient(90deg,#ffd700,#daa520);"><span class="funnel-value" style="color:#1e293b;">75</span></div></div></div>
+          <div class="funnel-bar"><div class="funnel-label" data-i18n="div_gold_üye">Gold+ Üye</div><div class="funnel-track"><div class="funnel-fill" style="width:22%;background:linear-gradient(90deg,#ffd700,#daa520);"><span class="funnel-value" style="color:var(--bg-tertiary);">75</span></div></div></div>
         </div>
       </div>
     </div>
@@ -1045,7 +1102,7 @@ Chart.defaults.font.family="'Inter',sans-serif";
 Chart.defaults.font.size=11;
 
 const PURPLE={main:'#8b5cf6',light:'#a78bfa',dark:'#7c3aed',fade:'rgba(139,92,246,0.15)'};
-const TEAL={main:'#14b8a6',light:'#2dd4bf',dark:'#0d9488',fade:'rgba(20,184,166,0.15)'};
+const TEAL={main:'#8b5cf6',light:'#a78bfa',dark:'#7c3aed',fade:'rgba(20,184,166,0.15)'};
 
 /* ── Overview Charts ── */
 new Chart($('#ovRevenueChart'),{type:'line',data:{labels:Array.from({length:30},(_,i)=>(i+1)+' May'),datasets:[{label:'Gelir (€)',data:[320,410,280,450,390,520,680,340,420,310,480,510,440,560,620,380,430,490,540,470,590,610,520,430,480,550,640,510,450,380],borderColor:PURPLE.main,backgroundColor:PURPLE.fade,fill:true,tension:0.4,pointRadius:2,pointBackgroundColor:PURPLE.main}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'€'+v}},x:{ticks:{maxTicksLimit:10}}}}});

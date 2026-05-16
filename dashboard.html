@@ -12,13 +12,13 @@
 <style>
 /* ── Purple Theme Overrides ── */
 :root, [data-theme="dark"] {
-  --teal-50: #f0fdfa; --teal-100: #ccfbf1; --teal-200: #99f6e4; --teal-300: #5eead4;
-  --teal-400: #2dd4bf; --teal-500: #14b8a6; --teal-600: #0d9488; --teal-700: #0f766e;
-  --teal-800: #115e59; --teal-900: #134e4a;
+  --teal-50: #f0fdfa; --teal-100: #ccfbf1; --teal-200: #c4b5fd; --teal-300: #c4b5fd;
+  --teal-400: #a78bfa; --teal-500: #8b5cf6; --teal-600: #7c3aed; --teal-700: #6d28d9;
+  --teal-800: #6d28d9; --teal-900: #6d28d9;
   --amber-500: #f59e0b; --amber-600: #d97706;
   --shadow-glow: rgba(139,92,246,0.25);
 }
-[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+[data-theme="dark"] ::selection { background:var(--purple-700,#6d28d9); color:var(--purple-100,#ede9fe); }
 
 /* Sidebar brand */
 .sidebar-brand-icon {
@@ -86,6 +86,63 @@
 /* Revenue glow on stat cards */
 .stat-revenue .stat-value { background:linear-gradient(135deg,var(--teal-400),var(--teal-500)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 </style>
+
+/* ── Mobile Responsive Overrides (Stages 5+7) ── */
+@media (max-width:1024px) {
+  .sidebar { transform:translateX(-100%); width:var(--sidebar-width); }
+  .sidebar.mobile-open { transform:translateX(0); }
+  .main { margin-left:0 !important; }
+  .header-search { display:none; }
+  .widget-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .widget-grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:768px) {
+  .page { padding:var(--space-4) var(--space-3); }
+  .page-header { flex-direction:column; gap:var(--space-3); }
+  .page-actions { width:100%; }
+  .page-actions .btn { flex:1; min-height:44px; font-size:var(--text-sm); }
+  .header { padding:0 var(--space-3); }
+  .header-title { font-size:var(--text-base); }
+  .widget-grid-4, .widget-grid-3, .widget-grid-2 { grid-template-columns:1fr; }
+  .chart-container { height:200px; }
+  .quick-actions { gap:var(--space-2); }
+  .quick-action { flex:1; min-width:0; justify-content:center; min-height:44px; }
+  /* Tables: scroll wrapper */
+  .data-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .data-table { min-width:640px; }
+  .notifications-panel { width:100%; max-width:380px; }
+  /* Touch-friendly */
+  .btn, .header-btn, .sidebar-link, .quick-action { min-height:44px; }
+}
+
+@media (max-width:375px) {
+  body { font-size:14px; }
+  .page { padding:var(--space-3) var(--space-2); }
+  .page-title { font-size:var(--text-xl); }
+  .btn { padding:10px 12px; font-size:14px; min-height:44px; }
+  .header-btn { width:40px; height:40px; }
+  .card { padding:var(--space-4); }
+  .stat-value { font-size:var(--text-xl); }
+  .chart-container { height:180px; }
+  .sidebar-brand-icon { width:32px; height:32px; }
+  .quick-action { font-size:13px; padding:var(--space-2) var(--space-3); }
+}
+
+/* Card view tables on very small screens */
+@media (max-width:640px) {
+  .data-table tbody tr {
+    display:flex; flex-direction:column; padding:var(--space-3);
+    border-bottom:1px solid var(--border-color); gap:4px;
+  }
+  .data-table tbody td { padding:2px 0; white-space:normal; font-size:14px; }
+  .data-table thead { display:none; }
+  .data-table tbody td::before {
+    content: attr(data-label); font-weight:600; color:var(--text-muted);
+    font-size:12px; display:block; margin-bottom:2px;
+  }
+}
+
 </head>
 <body>
 
@@ -442,7 +499,7 @@
         </div>
         <div style="display:flex; flex-direction:column; gap:10px;">
           <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
-            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#cd7f32,#b87333); display:flex; align-items:center; justify-content:center; font-weight:700; color:white; font-size:0.75rem;" data-i18n="div_b_1">B</div>
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#cd7f32,#b87333); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--bg-elevated); font-size:0.75rem;" data-i18n="div_b_1">B</div>
             <div style="flex:1;">
               <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);" data-i18n="div_bronze_üyeler">Bronze Üyeler</div>
               <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="div_142_üye_ort_45ay">142 üye — Ort. €45/ay</div>
@@ -450,7 +507,7 @@
             <span class="tier-badge tier-bronze" data-i18n="span_bronze">Bronze</span>
           </div>
           <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
-            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#c0c0c0,#a8a8a8); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;" data-i18n="div_s">S</div>
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#c0c0c0,#a8a8a8); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--bg-tertiary); font-size:0.75rem;" data-i18n="div_s">S</div>
             <div style="flex:1;">
               <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);" data-i18n="div_silver_üyeler">Silver Üyeler</div>
               <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="div_98_üye_ort_78ay">98 üye — Ort. €78/ay</div>
@@ -458,7 +515,7 @@
             <span class="tier-badge tier-silver" data-i18n="span_silver">Silver</span>
           </div>
           <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
-            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#ffd700,#daa520); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;" data-i18n="div_g">G</div>
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#ffd700,#daa520); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--bg-tertiary); font-size:0.75rem;" data-i18n="div_g">G</div>
             <div style="flex:1;">
               <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);" data-i18n="div_gold_üyeler">Gold Üyeler</div>
               <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="div_67_üye_ort_120ay">67 üye — Ort. €120/ay</div>
@@ -466,7 +523,7 @@
             <span class="tier-badge tier-gold" data-i18n="span_gold">Gold</span>
           </div>
           <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--bg-secondary); border-radius:var(--radius-md);">
-            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#e5e4e2,#b0b0b0); display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e293b; font-size:0.75rem;" data-i18n="div_p">P</div>
+            <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#e5e4e2,#b0b0b0); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--bg-tertiary); font-size:0.75rem;" data-i18n="div_p">P</div>
             <div style="flex:1;">
               <div style="font-size:0.875rem; font-weight:600; color:var(--text-primary);" data-i18n="div_platinum_üyeler">Platinum Üyeler</div>
               <div style="font-size:0.75rem; color:var(--text-muted);" data-i18n="div_35_üye_ort_195ay">35 üye — Ort. €195/ay</div>
@@ -877,13 +934,19 @@ function renderStaff() {
 
 // ===== CHARTS =====
 function initCharts() {
-  const commonOptions = {
+  
+  // Chart.js dark-mode defaults
+  Chart.defaults.color = 'var(--text-muted)';
+  Chart.defaults.borderColor = 'var(--border-color)';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 11;
+const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { color: 'rgba(148,163,184,0.08)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-      y: { grid: { color: 'rgba(148,163,184,0.08)' }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+      x: { grid: { color: 'var(--border-color)' }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } },
+      y: { grid: { color: 'var(--border-color)' }, ticks: { color: 'var(--text-muted)', font: { size: 10 } } }
     }
   };
 
@@ -896,10 +959,10 @@ function initCharts() {
         label: 'Randevu',
         data: [12,15,14,18,16,20,22,14,17,19,21,18,16,18],
         backgroundColor: 'rgba(139,92,246,0.6)',
-        borderColor: '#14b8a6',
+        borderColor: '#8b5cf6',
         borderWidth: 1,
         borderRadius: 4,
-        hoverBackgroundColor: '#14b8a6'
+        hoverBackgroundColor: '#8b5cf6'
       }]
     },
     options: { ...commonOptions, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.raw} randevu` } } } }
@@ -913,13 +976,13 @@ function initCharts() {
       datasets: [{
         label: 'Gelir (€)',
         data: [420,380,450,520,410,610,580,390,480,550,620,590,440,510,1245],
-        borderColor: '#2dd4bf',
+        borderColor: '#a78bfa',
         backgroundColor: 'rgba(167,139,250,0.1)',
         borderWidth: 2,
         tension: 0.4,
         fill: true,
-        pointBackgroundColor: '#14b8a6',
-        pointBorderColor: '#2dd4bf',
+        pointBackgroundColor: '#8b5cf6',
+        pointBorderColor: '#a78bfa',
         pointRadius: 3
       }]
     },
@@ -933,8 +996,8 @@ function initCharts() {
       labels: ['Saç Kesimi','Saç Boyama','Traş & Sakal','Keratin','Diğer'],
       datasets: [{
         data: [124,67,89,23,42],
-        backgroundColor: ['#14b8a6','#2dd4bf','#5eead4','#0d9488','#99f6e4'],
-        borderColor: '#111827',
+        backgroundColor: ['#8b5cf6','#a78bfa','#c4b5fd','#7c3aed','#c4b5fd'],
+        borderColor: 'var(--bg-card)',
         borderWidth: 2
       }]
     },
@@ -942,7 +1005,7 @@ function initCharts() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10 } }
+        legend: { position: 'bottom', labels: { color: 'var(--text-muted)', font: { size: 10 }, boxWidth: 10 } }
       }
     }
   });

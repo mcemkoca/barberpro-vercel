@@ -11,19 +11,19 @@
 :root, [data-theme="dark"] {
   --teal-50: #f0fdfa;
   --teal-100: #ccfbf1;
-  --teal-200: #99f6e4;
-  --teal-300: #5eead4;
-  --teal-400: #2dd4bf;
-  --teal-500: #14b8a6;
-  --teal-600: #0d9488;
-  --teal-700: #0f766e;
-  --teal-800: #115e59;
-  --teal-900: #134e4a;
+  --teal-200: #c4b5fd;
+  --teal-300: #c4b5fd;
+  --teal-400: #a78bfa;
+  --teal-500: #8b5cf6;
+  --teal-600: #7c3aed;
+  --teal-700: #6d28d9;
+  --teal-800: #6d28d9;
+  --teal-900: #6d28d9;
   --amber-500: #f59e0b;
   --amber-600: #d97706;
   --shadow-glow: rgba(139,92,246,0.25);
 }
-[data-theme="dark"] ::selection { background:var(--teal-700); color:var(--teal-100); }
+[data-theme="dark"] ::selection { background:var(--purple-700,#6d28d9); color:var(--purple-100,#ede9fe); }
 
 /* ── Layout ── */
 .dashboard { display:flex; min-height:100vh; }
@@ -246,6 +246,63 @@
   .content { padding:var(--space-4); }
 }
 </style>
+
+/* ── Mobile Responsive Overrides (Stages 5+7) ── */
+@media (max-width:1024px) {
+  .sidebar { transform:translateX(-100%); width:var(--sidebar-width); }
+  .sidebar.mobile-open { transform:translateX(0); }
+  .main { margin-left:0 !important; }
+  .header-search { display:none; }
+  .widget-grid-4 { grid-template-columns:repeat(2,1fr); }
+  .widget-grid-3 { grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:768px) {
+  .page { padding:var(--space-4) var(--space-3); }
+  .page-header { flex-direction:column; gap:var(--space-3); }
+  .page-actions { width:100%; }
+  .page-actions .btn { flex:1; min-height:44px; font-size:var(--text-sm); }
+  .header { padding:0 var(--space-3); }
+  .header-title { font-size:var(--text-base); }
+  .widget-grid-4, .widget-grid-3, .widget-grid-2 { grid-template-columns:1fr; }
+  .chart-container { height:200px; }
+  .quick-actions { gap:var(--space-2); }
+  .quick-action { flex:1; min-width:0; justify-content:center; min-height:44px; }
+  /* Tables: scroll wrapper */
+  .data-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .data-table { min-width:640px; }
+  .notifications-panel { width:100%; max-width:380px; }
+  /* Touch-friendly */
+  .btn, .header-btn, .sidebar-link, .quick-action { min-height:44px; }
+}
+
+@media (max-width:375px) {
+  body { font-size:14px; }
+  .page { padding:var(--space-3) var(--space-2); }
+  .page-title { font-size:var(--text-xl); }
+  .btn { padding:10px 12px; font-size:14px; min-height:44px; }
+  .header-btn { width:40px; height:40px; }
+  .card { padding:var(--space-4); }
+  .stat-value { font-size:var(--text-xl); }
+  .chart-container { height:180px; }
+  .sidebar-brand-icon { width:32px; height:32px; }
+  .quick-action { font-size:13px; padding:var(--space-2) var(--space-3); }
+}
+
+/* Card view tables on very small screens */
+@media (max-width:640px) {
+  .data-table tbody tr {
+    display:flex; flex-direction:column; padding:var(--space-3);
+    border-bottom:1px solid var(--border-color); gap:4px;
+  }
+  .data-table tbody td { padding:2px 0; white-space:normal; font-size:14px; }
+  .data-table thead { display:none; }
+  .data-table tbody td::before {
+    content: attr(data-label); font-weight:600; color:var(--text-muted);
+    font-size:12px; display:block; margin-bottom:2px;
+  }
+}
+
 </head>
 <body>
 
@@ -553,7 +610,7 @@
               <td><div class="action-btns"><button class="action-btn" onclick="openModal('redeemModal')" title="Puan Kullan">🎁</button><button class="action-btn" onclick="openModal('addPointsModal')" title="Puan Ekle">+</button></div></td>
             </tr>
             <tr data-name="Jan Martens" data-tier="Gold">
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_jm">JM</div><div><div style="font-weight:600;" data-i18n="div_jan_martens">Jan Martens</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 478 55 66 77</div></div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_jm">JM</div><div><div style="font-weight:600;" data-i18n="div_jan_martens">Jan Martens</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 478 55 66 77</div></div></div></td>
               <td><span class="badge badge-gold" data-i18n="span_gold_3">Gold</span></td>
               <td><strong>2,560</strong></td>
               <td>€840</td>
@@ -585,7 +642,7 @@
               <td><div class="action-btns"><button class="action-btn" onclick="openModal('redeemModal')" title="Puan Kullan">🎁</button><button class="action-btn" onclick="openModal('addPointsModal')" title="Puan Ekle">+</button></div></td>
             </tr>
             <tr data-name="Luc Vermeulen" data-tier="Silver">
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_lv">LV</div><div><div style="font-weight:600;" data-i18n="div_luc_vermeulen">Luc Vermeulen</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 472 77 88 99</div></div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_lv">LV</div><div><div style="font-weight:600;" data-i18n="div_luc_vermeulen">Luc Vermeulen</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 472 77 88 99</div></div></div></td>
               <td><span class="badge badge-silver" data-i18n="span_silver_1">Silver</span></td>
               <td><strong>720</strong></td>
               <td>€252</td>
@@ -641,7 +698,7 @@
               <td><div class="action-btns"><button class="action-btn" onclick="openModal('redeemModal')" title="Puan Kullan">🎁</button><button class="action-btn" onclick="openModal('addPointsModal')" title="Puan Ekle">+</button></div></td>
             </tr>
             <tr data-name="Michiel比利时 Belgium" data-tier="Platinum">
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_mw">MW</div><div><div style="font-weight:600;" data-i18n="div_michiel_belgium">Michiel比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 494 33 44 55</div></div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_mw">MW</div><div><div style="font-weight:600;" data-i18n="div_michiel_belgium">Michiel比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 494 33 44 55</div></div></div></td>
               <td><span class="badge badge-platinum" data-i18n="span_platinum_4">Platinum</span></td>
               <td><strong>3,760</strong></td>
               <td>€1,218</td>
@@ -649,7 +706,7 @@
               <td><div class="action-btns"><button class="action-btn" onclick="openModal('redeemModal')" title="Puan Kullan">🎁</button><button class="action-btn" onclick="openModal('addPointsModal')" title="Puan Ekle">+</button></div></td>
             </tr>
             <tr data-name="Björn比利时 Belgium" data-tier="Platinum">
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_bd">BD</div><div><div style="font-weight:600;" data-i18n="div_björn_belgium">Björn比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 488 55 66 77</div></div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_bd">BD</div><div><div style="font-weight:600;" data-i18n="div_björn_belgium">Björn比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 488 55 66 77</div></div></div></td>
               <td><span class="badge badge-platinum" data-i18n="span_platinum_5">Platinum</span></td>
               <td><strong>4,100</strong></td>
               <td>€1,386</td>
@@ -657,7 +714,7 @@
               <td><div class="action-btns"><button class="action-btn" onclick="openModal('redeemModal')" title="Puan Kullan">🎁</button><button class="action-btn" onclick="openModal('addPointsModal')" title="Puan Ekle">+</button></div></td>
             </tr>
             <tr data-name="Claire比利时 Belgium" data-tier="Gold">
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_cl">CL</div><div><div style="font-weight:600;" data-i18n="div_claire_belgium">Claire比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 483 00 11 22</div></div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_cl">CL</div><div><div style="font-weight:600;" data-i18n="div_claire_belgium">Claire比利时 Belgium</div><div style="font-size:var(--text-xs);color:var(--text-muted);">+32 483 00 11 22</div></div></div></td>
               <td><span class="badge badge-gold" data-i18n="span_gold_7">Gold</span></td>
               <td><strong>1,980</strong></td>
               <td>€646</td>
@@ -760,7 +817,7 @@
               <td data-i18n="td_gri_kapatma">Gri Kapatma</td>
             </tr>
             <tr>
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_lv_1">LV</div><div style="font-weight:600;" data-i18n="div_luc_vermeulen_1">Luc Vermeulen</div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_lv_1">LV</div><div style="font-weight:600;" data-i18n="div_luc_vermeulen_1">Luc Vermeulen</div></div></td>
               <td><span class="badge badge-warning" data-i18n="span_bonus">Bonus</span></td>
               <td style="color:var(--amber-500);font-weight:700;">+100</td>
               <td data-i18n="td_6_may_2026_1400">6 May 2026, 14:00</td>
@@ -774,7 +831,7 @@
               <td data-i18n="td_ilk_ziyaret_hoşgeldin_bonusu">İlk ziyaret — Hoşgeldin bonusu</td>
             </tr>
             <tr>
-              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#14b8a6,#0d9488);" data-i18n="div_jm_1">JM</div><div style="font-weight:600;" data-i18n="div_jan_martens_1">Jan Martens</div></div></td>
+              <td><div style="display:flex;align-items:center;gap:10px;"><div class="avatar avatar-sm" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);" data-i18n="div_jm_1">JM</div><div style="font-weight:600;" data-i18n="div_jan_martens_1">Jan Martens</div></div></td>
               <td><span class="badge badge-error" data-i18n="span_kullanılan_1">Kullanılan</span></td>
               <td style="color:var(--error-500);font-weight:700;">-750</td>
               <td data-i18n="td_4_may_2026_1600">4 May 2026, 16:00</td>
@@ -906,7 +963,7 @@ function showToast(msg,type='success',dur=3000){
   const colors={success:'var(--success-500)',error:'var(--error-500)',warning:'var(--warning-500)',info:'var(--info-500)'};
   const icons={success:'✓',error:'✕',warning:'!',info:'ℹ'};
   t.style.cssText=`pointer-events:all;background:var(--bg-card);border:1px solid ${colors[type]};border-radius:12px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow-lg);animation:toastIn 0.3s ease-out;position:relative;overflow:hidden;`;
-  t.innerHTML=`<span style="flex-shrink:0;margin-top:2px;width:20px;height:20px;border-radius:50%;background:${colors[type]};color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${icons[type]}</span><div style="flex:1;"><div style="font-weight:600;font-size:var(--text-sm);">${type==='success'?'Başarılı':type==='error'?'Hata':'Bilgi'}</div><div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:2px;">${msg}</div></div><span style="flex-shrink:0;color:var(--text-muted);cursor:pointer;font-size:14px;" onclick="this.parentElement.remove()">✕</span><div style="position:absolute;bottom:0;left:0;height:2px;background:${colors[type]};animation:progressBar ${dur}ms linear forwards;width:100%;"></div>`;
+  t.innerHTML=`<span style="flex-shrink:0;margin-top:2px;width:20px;height:20px;border-radius:50%;background:${colors[type]};color:var(--bg-elevated);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">${icons[type]}</span><div style="flex:1;"><div style="font-weight:600;font-size:var(--text-sm);">${type==='success'?'Başarılı':type==='error'?'Hata':'Bilgi'}</div><div style="font-size:var(--text-sm);color:var(--text-muted);margin-top:2px;">${msg}</div></div><span style="flex-shrink:0;color:var(--text-muted);cursor:pointer;font-size:14px;" onclick="this.parentElement.remove()">✕</span><div style="position:absolute;bottom:0;left:0;height:2px;background:${colors[type]};animation:progressBar ${dur}ms linear forwards;width:100%;"></div>`;
   c.appendChild(t);document.body.appendChild(c);
   setTimeout(()=>{t.style.animation='toastOut 0.3s ease-in forwards';setTimeout(()=>c.remove(),300);},dur);
 }
