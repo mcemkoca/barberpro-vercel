@@ -1519,8 +1519,40 @@ function updateSubmitButton() {
   btn.disabled = !(hasCustomer && hasServices && hasStaff && hasDate && hasTime);
 }
 
+function validateBookingFormGuard() {
+  const customer = document.getElementById('cbCustomer');
+  const staff = document.getElementById('cbStaff');
+  const date = document.getElementById('cbDate');
+  let valid = true;
+  if (!customer || !customer.value || customer.value === '') {
+    if (customer) customer.style.borderColor = 'var(--red-500,#ef4444)';
+    valid = false;
+  } else if (customer.value === 'new') {
+    const ncName = document.getElementById('ncName');
+    const ncPhone = document.getElementById('ncPhone');
+    if (ncName && !ncName.value.trim()) { ncName.style.borderColor = 'var(--red-500,#ef4444)'; valid = false; }
+    if (ncPhone) {
+      const digits = ncPhone.value.replace(/\D/g,'');
+      if (digits.length < 7) { ncPhone.style.borderColor = 'var(--red-500,#ef4444)'; valid = false; }
+    }
+  }
+  if (!staff || !staff.value) { if (staff) staff.style.borderColor = 'var(--red-500,#ef4444)'; valid = false; }
+  if (!date || !date.value) { if (date) date.style.borderColor = 'var(--red-500,#ef4444)'; valid = false; }
+  if (typeof selectedServices !== 'undefined' && selectedServices.length === 0) {
+    valid = false;
+    const chips = document.getElementById('serviceChips');
+    if (chips) chips.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  if (!valid) {
+    if (typeof showToast === 'function') showToast('Lütfen zorunlu alanları doğru şekilde doldurun.', 'error');
+    else alert('Lütfen zorunlu alanları doğru şekilde doldurun.');
+  }
+  return valid;
+}
+
 function submitBooking(e) {
   e.preventDefault();
+  if (!validateFormInputs('createBookingForm') && !validateBookingFormGuard()) return;
   const customer = document.getElementById('cbCustomer').value;
   const staff = document.getElementById('cbStaff').value;
   const date = document.getElementById('cbDate').value;
@@ -2198,4 +2230,85 @@ if (!document.getElementById('lang-style')) {
   document.head.appendChild(st);
 }
 switchLang(currentLang);
-</script></body></html>
+</script>
+<script>
+window.onerror = function(msg, url, line) {
+  console.error("BarberPro Error:", msg, "at", url, ":", line);
+  return false;
+};
+window.addEventListener("unhandledrejection", function(e) {
+  console.error("Unhandled Promise:", e.reason);
+});
+</script>
+
+<!-- ===== FORM VALIDATION & MODAL GUARD ===== -->
+<script>
+function validateFormInputs(container) {
+  const root = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!root) return true;
+  const inputs = root.querySelectorAll('input, select, textarea');
+  let valid = true;
+  let firstError = null;
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  inputs.forEach(function(el) {
+    const isRequired = el.hasAttribute('required') || el.dataset.required === 'true';
+    const val = el.value ? el.value.trim() : '';
+    if (isRequired && !val) {
+      el.style.borderColor = 'var(--red-500, #ef4444)';
+      valid = false;
+      if (!firstError) firstError = el;
+      return;
+    }
+    if (el.type === 'email' || el.dataset.validate === 'email') {
+      if (val && !emailRe.test(val)) {
+        el.style.borderColor = 'var(--red-500, #ef4444)';
+        valid = false;
+        if (!firstError) firstError = el;
+        return;
+      }
+    }
+    if (el.type === 'tel' || el.dataset.validate === 'phone') {
+      const digits = val.replace(/\D/g, '');
+      if (val && digits.length < 7) {
+        el.style.borderColor = 'var(--red-500, #ef4444)';
+        valid = false;
+        if (!firstError) firstError = el;
+        return;
+      }
+    }
+    el.style.borderColor = '';
+  });
+  if (!valid && firstError) {
+    firstError.focus();
+    if (typeof showToast === 'function') {
+      showToast('Lütfen zorunlu alanları doğru şekilde doldurun.', 'error');
+    } else {
+      alert('Lütfen zorunlu alanları doğru şekilde doldurun.');
+    }
+  }
+  return valid;
+}
+function guardModals() {
+  document.querySelectorAll('.modal-overlay').forEach(function(m) {
+    if (!m.classList.contains('active')) {
+      m.style.opacity = '0';
+      m.style.visibility = 'hidden';
+    }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+        m.classList.remove('active');
+        m.style.opacity = '0';
+        m.style.visibility = 'hidden';
+      });
+    }
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', guardModals);
+} else {
+  guardModals();
+}
+</script>
+</body></html>

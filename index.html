@@ -1123,5 +1123,15 @@ reveals.forEach(el => {
 });
 </script>
 
+
+<script>
+window.onerror = function(msg, url, line) {
+  console.error("BarberPro Error:", msg, "at", url, ":", line);
+  return false;
+};
+window.addEventListener("unhandledrejection", function(e) {
+  console.error("Unhandled Promise:", e.reason);
+});
+</script>
 </body>
 </html>

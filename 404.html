@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="404_title">Sayfa Bulunamadı — BarberPro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--violet-500:#7c3aed;--violet-400:#a78bfa;--violet-600:#6d28d9;--gray-900:#0f0f1a;--gray-800:#1a1a2e;--gray-700:#2d2d44;--gray-400:#a0a0b8;--gray-200:#e2e2f0;--white:#ffffff;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--gray-900);color:var(--white);min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;position:relative}
+.bg-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.7}50%{transform:translate(-50%,-50%) scale(1.15);opacity:.4}}
+.container{position:relative;z-index:2;padding:2rem;max-width:480px}
+.emoji{font-size:5rem;margin-bottom:1.5rem;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.barber-icon{font-size:2.5rem;margin:0 .3rem;display:inline-block}
+h1{font-size:2.8rem;font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,var(--violet-400),var(--violet-500));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{font-size:1.15rem;color:var(--gray-400);margin-bottom:2rem;line-height:1.6}
+.lang-row{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+.lang-pill{background:var(--gray-800);border:1px solid var(--gray-700);padding:.5rem 1rem;border-radius:9999px;font-size:.85rem;color:var(--gray-400);transition:.2s}
+.lang-pill.active{background:var(--violet-600);color:var(--white);border-color:var(--violet-500)}
+.home-btn{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--violet-500),var(--violet-600));color:var(--white);padding:.9rem 2rem;border-radius:12px;text-decoration:none;font-weight:600;font-size:1rem;transition:.25s;box-shadow:0 8px 30px rgba(124,58,237,.35)}
+.home-btn:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,58,237,.5)}
+.status-code{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-size:.75rem;color:var(--gray-700);letter-spacing:2px;text-transform:uppercase}
+@media(max-width:480px){h1{font-size:2rem}.emoji{font-size:3.5rem}.subtitle{font-size:1rem}}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="container">
+<span class="emoji">💈</span>
+<h1 data-i18n="404_heading">Sayfa Bulunamadı</h1>
+<p class="subtitle" data-i18n="404_subtitle">Aradığınız sayfa taşınmış, silinmiş ya da hiç var olmamış olabilir.</p>
+<div class="lang-row">
+<span class="lang-pill active" data-i18n="404_tr">Türkçe</span>
+<span class="lang-pill" data-i18n="404_en">English</span>
+<span class="lang-pill" data-i18n="404_nl">Nederlands</span>
+</div>
+<a href="dashboard.html" class="home-btn">
+<span class="barber-icon">✂️</span>
+<span data-i18n="404_back">Panele Dön</span>
+<span class="barber-icon">✂️</span>
+</a>
+</div>
+<div class="status-code">HTTP 404</div>
+<script>
+const i18n={
+tr:{'404_title':'Sayfa Bulunamadı — BarberPro','404_heading':'Sayfa Bulunamadı','404_subtitle':'Aradığınız sayfa taşınmış, silinmiş ya da hiç var olmamış olabilir.','404_tr':'Türkçe','404_en':'English','404_nl':'Nederlands','404_back':'Panele Dön'},
+en:{'404_title':'Page Not Found — BarberPro','404_heading':'Page Not Found','404_subtitle':'The page you are looking for may have been moved, deleted, or never existed.','404_tr':'Turkish','404_en':'English','404_nl':'Dutch','404_back':'Back to Dashboard'},
+nl:{'404_title':'Pagina Niet Gevonden — BarberPro','404_heading':'Pagina Niet Gevonden','404_subtitle':'De pagina die u zoekt is misschien verplaatst, verwijderd of heeft nooit bestaan.','404_tr':'Turks','404_en':'Engels','404_nl':'Nederlands','404_back':'Terug naar Dashboard'}
+};
+let currentLang='tr';
+function switchLang(lang){
+currentLang=lang;
+const dict=i18n[lang];
+document.querySelectorAll('[data-i18n]').forEach(el=>{
+const key=el.dataset.i18n;
+if(dict[key]!==undefined) el.textContent=dict[key];
+});
+document.querySelectorAll('.lang-pill').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.lang-pill').forEach(p=>{if(p.dataset.i18n===('404_'+lang)) p.classList.add('active');});
+}
+document.querySelectorAll('.lang-pill').forEach(p=>{
+p.addEventListener('click',()=>{
+const lang=p.dataset.i18n.replace('404_','');
+switchLang(lang);
+});
+});
+</script>
+</body>
+</html>

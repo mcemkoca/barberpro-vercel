@@ -1568,4 +1568,85 @@ if (!document.getElementById('lang-style')) {
   document.head.appendChild(st);
 }
 switchLang(currentLang);
-</script></body></html>
+</script>
+<script>
+window.onerror = function(msg, url, line) {
+  console.error("BarberPro Error:", msg, "at", url, ":", line);
+  return false;
+};
+window.addEventListener("unhandledrejection", function(e) {
+  console.error("Unhandled Promise:", e.reason);
+});
+</script>
+
+<!-- ===== FORM VALIDATION & MODAL GUARD ===== -->
+<script>
+function validateFormInputs(container) {
+  const root = typeof container === 'string' ? document.getElementById(container) : container;
+  if (!root) return true;
+  const inputs = root.querySelectorAll('input, select, textarea');
+  let valid = true;
+  let firstError = null;
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  inputs.forEach(function(el) {
+    const isRequired = el.hasAttribute('required') || el.dataset.required === 'true';
+    const val = el.value ? el.value.trim() : '';
+    if (isRequired && !val) {
+      el.style.borderColor = 'var(--red-500, #ef4444)';
+      valid = false;
+      if (!firstError) firstError = el;
+      return;
+    }
+    if (el.type === 'email' || el.dataset.validate === 'email') {
+      if (val && !emailRe.test(val)) {
+        el.style.borderColor = 'var(--red-500, #ef4444)';
+        valid = false;
+        if (!firstError) firstError = el;
+        return;
+      }
+    }
+    if (el.type === 'tel' || el.dataset.validate === 'phone') {
+      const digits = val.replace(/\D/g, '');
+      if (val && digits.length < 7) {
+        el.style.borderColor = 'var(--red-500, #ef4444)';
+        valid = false;
+        if (!firstError) firstError = el;
+        return;
+      }
+    }
+    el.style.borderColor = '';
+  });
+  if (!valid && firstError) {
+    firstError.focus();
+    if (typeof showToast === 'function') {
+      showToast('Lütfen zorunlu alanları doğru şekilde doldurun.', 'error');
+    } else {
+      alert('Lütfen zorunlu alanları doğru şekilde doldurun.');
+    }
+  }
+  return valid;
+}
+function guardModals() {
+  document.querySelectorAll('.modal-overlay').forEach(function(m) {
+    if (!m.classList.contains('active')) {
+      m.style.opacity = '0';
+      m.style.visibility = 'hidden';
+    }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+        m.classList.remove('active');
+        m.style.opacity = '0';
+        m.style.visibility = 'hidden';
+      });
+    }
+  });
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', guardModals);
+} else {
+  guardModals();
+}
+</script>
+</body></html>
