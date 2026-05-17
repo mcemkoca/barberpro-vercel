@@ -2,6 +2,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="meta_barberpro_raporlar_analitik" data-i18n-attr="content">BarberPro — Raporlar &amp; Analitik</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#a855f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BarberPro">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
@@ -386,8 +393,10 @@
         <div style="flex:1; min-width:0;">
           <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);" data-i18n="div_ahmet_yılmaz">Ahmet Yılmaz</div>
           <div style="font-size:0.6875rem; color:var(--text-muted);" data-i18n="div_sahip_le_barbier_royal">Sahip — Le Barbier Royal</div>
-        </div>
-      </div>
+        
+    <button onclick="localStorage.removeItem('kobipro_auth_token');localStorage.removeItem('kobipro_user');window.location.href='login.html';" style="margin-top:8px;width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-muted);font-size:0.75rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--teal-500)';this.style.color='var(--teal-500)';" onmouseout="this.style.borderColor='var(--border-color)';this.style.color='var(--text-muted)';">Çıkış Yap</button>
+  </div>
+</div>
     </div>
   </div>
 </aside>
@@ -599,7 +608,8 @@
       </div>
       <div class="data-table-section">
         <div class="data-table-header"><div><div class="data-table-title" data-i18n="div_son_işlemler">Son İşlemler</div><div class="data-table-subtitle" data-i18n="div_son_20_kayıt_tüm_şubeler">Son 20 kayıt — tüm şubeler</div></div><button class="btn btn-sm btn-ghost" onclick="showToast('Tüm işlemler Excel olarak indirildi','success')" data-i18n="button_tümünü_indir_">Tümünü İndir →</button></div>
-        <div class="data-table-wrap">
+        <div data-export-table="revTable" data-export-filename="barberpro_gelir_raporu" data-export-title="Gelir Raporu" style="margin-bottom:12px;display:flex;justify-content:flex-end;"></div>
+    <div class="data-table-wrap">
           <table class="data-table" id="revTable">
             <thead><tr><th class="sortable" data-i18n="th_tarih">Tarih</th><th class="sortable" data-i18n="th_müşteri">Müşteri</th><th class="sortable" data-i18n="th_hizmet">Hizmet</th><th class="sortable" data-i18n="th_personel">Personel</th><th class="sortable" data-i18n="th_tutar">Tutar</th><th class="sortable" data-i18n="th_ödeme">Ödeme</th><th data-i18n="th_durum">Durum</th></tr></thead>
             <tbody>
@@ -689,7 +699,8 @@
       </div>
       <div class="data-table-section">
         <div class="data-table-header"><div><div class="data-table-title" data-i18n="div_en_çok_harcayan_15_müşteri">En Çok Harcayan 15 Müşteri</div><div class="data-table-subtitle" data-i18n="div_bu_ay_toplam_harcama_ve_ziyaret_sayısı">Bu ay — toplam harcama ve ziyaret sayısı</div></div></div>
-        <div class="data-table-wrap">
+        <div data-export-table="custTable" data-export-filename="barberpro_musteri_raporu" data-export-title="Müşteri Raporu" style="margin-bottom:12px;display:flex;justify-content:flex-end;"></div>
+    <div class="data-table-wrap">
           <table class="data-table" id="custTable">
             <thead><tr><th>#</th><th data-i18n="th_müşteri_1">Müşteri</th><th data-i18n="th_telefon">Telefon</th><th data-i18n="th_ziyaret">Ziyaret</th><th data-i18n="th_toplam_harcama">Toplam Harcama</th><th data-i18n="th_ort_tutar">Ort. Tutar</th><th data-i18n="th_son_ziyaret">Son Ziyaret</th><th data-i18n="th_sadakat">Sadakat</th></tr></thead>
             <tbody>
@@ -3456,5 +3467,28 @@ if (document.readyState === 'loading') {
   guardModals();
 }
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/export.js"></script>
+<script src="js/pwa.js"></script>
+
+<script>
+/* ===== AUTH CHECK ===== */
+(function(){
+  function checkBPAuth(){
+    const token = localStorage.getItem('kobipro_auth_token');
+    if(!token && !window.location.pathname.includes('login.html')){
+      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', checkBPAuth);
+  } else {
+    checkBPAuth();
+  }
+})();
+</script>
 </script>
 </body></html>

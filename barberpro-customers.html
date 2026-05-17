@@ -2,6 +2,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="meta_barberpro_müşteri_yönetimi" data-i18n-attr="content">BarberPro — Müşteri Yönetimi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#a855f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BarberPro">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
@@ -404,8 +411,10 @@
         <div style="flex:1; min-width:0;">
           <div style="font-size:0.8125rem; font-weight:600; color:var(--text-primary);" data-i18n="div_ahmet_yılmaz">Ahmet Yılmaz</div>
           <div style="font-size:0.6875rem; color:var(--text-muted);" data-i18n="div_sahip_le_barbier_royal">Sahip — Le Barbier Royal</div>
-        </div>
-      </div>
+        
+    <button onclick="localStorage.removeItem('kobipro_auth_token');localStorage.removeItem('kobipro_user');window.location.href='login.html';" style="margin-top:8px;width:100%;padding:8px;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:var(--text-muted);font-size:0.75rem;cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--teal-500)';this.style.color='var(--teal-500)';" onmouseout="this.style.borderColor='var(--border-color)';this.style.color='var(--text-muted)';">Çıkış Yap</button>
+  </div>
+</div>
     </div>
   </div>
 </aside>
@@ -507,6 +516,7 @@
     </div>
 
     <!-- Table -->
+    <div data-export-table="customerTable" data-export-filename="barberpro_musteriler" data-export-title="Müşteri Yönetimi" style="margin-bottom:12px;display:flex;justify-content:flex-end;"></div>
     <div class="table-wrap">
       <table class="table" id="customerTable">
         <thead>
@@ -2178,5 +2188,28 @@ if (document.readyState === 'loading') {
   guardModals();
 }
 </style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/export.js"></script>
+<script src="js/pwa.js"></script>
+
+<script>
+/* ===== AUTH CHECK ===== */
+(function(){
+  function checkBPAuth(){
+    const token = localStorage.getItem('kobipro_auth_token');
+    if(!token && !window.location.pathname.includes('login.html')){
+      window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+    }
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', checkBPAuth);
+  } else {
+    checkBPAuth();
+  }
+})();
+</script>
 </script>
 </body></html>
